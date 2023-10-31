@@ -19,14 +19,6 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-## Features
-
-- TODO
-
-## Requirements
-
-- TODO
-
 ## Installation
 
 You can install _Heisskleber_ via [pip] from [PyPI]:
@@ -35,14 +27,21 @@ You can install _Heisskleber_ via [pip] from [PyPI]:
 $ pip install heisskleber
 ```
 
-## Usage
+## Development
 
-Please see the [Command-line Reference] for details.
-
-## Contributing
-
-Contributions are very welcome.
-To learn more, see the [Contributor Guide].
+1. Install poetry
+```
+curl -sSL https://install.python-poetry.org | python3 -
+```
+2. clone repository
+```
+git clone https://github.com/flucto-gmbh/heisskleber.git
+cd heisskleber
+```
+3. setup
+```
+make install
+```
 
 ## License
 
@@ -53,13 +52,6 @@ _Heisskleber_ is free and open source software.
 
 If you encounter any problems,
 please [file an issue] along with a detailed description.
-
-## Credits
-
-[pypi]: https://pypi.org/
-[hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
-[file an issue]: https://github.com/flucto-gmbh/heisskleber/issues
-[pip]: https://pip.pypa.io/
 
 <!-- github-only -->
 
