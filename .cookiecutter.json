@@ -1,0 +1,14 @@
+{
+    "_checkout": null,
+    "_output_dir": "/home/felix/repositories/flucto-gmbh",
+    "_repo_dir": "/home/felix/.cookiecutters/cookiecutter-pragmatic-python",
+    "_template": "gh:pacjac/cookiecutter-pragmatic-python",
+    "author": "Felix Weiler",
+    "copyright_year": "2023",
+    "email": "felix@flucto.tech",
+    "friendly_name": "Heisskleber",
+    "github_user": "flucto-gmbh",
+    "package_name": "heisskleber",
+    "project_name": "heisskleber",
+    "version": "0.1.0"
+}
