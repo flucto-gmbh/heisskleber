@@ -1,7 +1,7 @@
 """Sphinx configuration."""
 
 
-project = "glue"
+project = "Heisskleber"
 author = "Felix Weiler"
 copyright = f"2023, {author}"
 

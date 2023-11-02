@@ -5,5 +5,5 @@ Reference
 package 1
 -------------
 
-.. automodule:: glue
+.. automodule:: heisskleber
    :members:
