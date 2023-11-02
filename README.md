@@ -53,6 +53,9 @@ _Heisskleber_ is free and open source software.
 If you encounter any problems,
 please [file an issue] along with a detailed description.
 
+[pip]: https://pip.pypa.io/
+[file an issue]: https://github.com/flucto-gmbh/heisskleber/issues
+[pypi]: https://pypi.org/
 <!-- github-only -->
 
 [license]: https://github.com/flucto-gmbh/heisskleber/blob/main/LICENSE
