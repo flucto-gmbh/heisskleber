@@ -1,16 +1,11 @@
 """Sphinx configuration."""
-
-
 project = "Heisskleber"
 author = "Felix Weiler"
-copyright = f"2023, {author}"
-
+copyright = "2023, Felix Weiler"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx_autodoc_typehints",
+    "myst_parser",
 ]
-autodoc_mock_imports = ["RPi.GPIO", "picamera2", "smbus"]
-
-# html_static_path = ["_static"]
-html_theme = "sphinx_rtd_theme"
+autodoc_typehints = "description"
+html_theme = "furo"
