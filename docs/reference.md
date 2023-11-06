@@ -3,22 +3,21 @@
 ## Network
 
 ```{eval-rst}
-.. automodule:: heisskleber.network
+.. automodule:: heisskleber
    :members:
-.. automodule:: heisskleber.network.mqtt
-.. autoclass:: MqttPublisher
-.. autoclass:: MqttSubscriber
-.. automodule:: heisskleber.network.zmq
+.. automodule:: heisskleber.mqtt
    :members:
-.. autoclass:: ZmqPublisher
-.. autoclass:: ZmqSubscriber
+.. automodule:: heisskleber.zmq
+   :members:
+.. automodule:: heisskleber.serial
+   :members:
+.. automodule:: heisskleber.config
+   :members:
 ```
 
 ### Broker
 
 ```{eval-rst}
-.. automodule:: heisskleber.broker
-    :members:
 ```
 
 ## Config
@@ -34,7 +33,7 @@
 Configs are extended dataclasses, which inherit from the BaseConf class.
 ```{eval-rst}
 .. autoclass:: heisskleber.config.BaseConf
-.. autoclass:: heisskleber.network.mqtt.config.MqttConf
-.. autoclass:: heisskleber.network.zmq.config.ZmqConf
-.. autoclass:: heisskleber.network.serial.config.SerialConf
+.. autoclass:: heisskleber.mqtt.config.MqttConf
+.. autoclass:: heisskleber.zmq.config.ZmqConf
+.. autoclass:: heisskleber.serial.config.SerialConf
 ```

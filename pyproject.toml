@@ -85,9 +85,10 @@ select = [
     "TRY", # tryceratops
 ]
 ignore = [
-    "E501", # LineTooLong
-    "E731", # DoNotAssignLambda
-    "A001", #
+    "E501",   # LineTooLong
+    "E731",   # DoNotAssignLambda
+    "A001",   #
+    "PGH003", # Use specific rules when ignoring type issues
 ]
 
 [tool.ruff.per-file-ignores]
