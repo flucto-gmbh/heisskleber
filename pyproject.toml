@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "heisskleber"
-version = "0.1.0"
+version = "0.1.1"
 description = "Heisskleber"
 authors = ["Felix Weiler <felix@flucto.tech>"]
 license = "MIT"
@@ -14,9 +14,9 @@ Changelog = "https://github.com/flucto-gmbh/heisskleber/releases"
 [tool.poetry.dependencies]
 python = "^3.9"
 paho-mqtt = "^1.6.1"
-zmq = "^0.0.0"
 pyserial = "^3.5"
 pyyaml = "^6.0.1"
+pyzmq = "^25.1.1"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=21.10b0"
