@@ -1,10 +1,9 @@
 import sys
-from typing import Any
 
 import zmq
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Publisher
+from heisskleber.core.types import Publisher, Serializable
 
 from .config import ZmqConf
 
@@ -26,9 +25,9 @@ class ZmqPublisher(Publisher):
             print(f"failed to bind to zeromq socket: {e}")
             sys.exit(-1)
 
-    def send(self, topic: str, data: dict[str, Any]) -> None:
+    def send(self, data: dict[str, Serializable], topic: str) -> None:
         payload = self.pack(data)
-        self.socket.send_multipart([topic, payload.encode("utf-8")])
+        self.socket.send_multipart([topic.encode(), payload.encode()])
 
     def __del__(self):
         self.socket.close()

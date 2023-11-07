@@ -4,18 +4,21 @@ from heisskleber.config import BaseConf, load_config
 from heisskleber.core.types import Publisher, Subscriber
 from heisskleber.mqtt import MqttConf, MqttPublisher, MqttSubscriber
 from heisskleber.serial import SerialConf, SerialPublisher, SerialSubscriber
+from heisskleber.udp import UdpConf, UdpPublisher, UdpSubscriber
 from heisskleber.zmq import ZmqConf, ZmqPublisher, ZmqSubscriber
 
 _registered_publishers: dict[str, tuple[type[Publisher], type[BaseConf]]] = {
     "zmq": (ZmqPublisher, ZmqConf),
     "mqtt": (MqttPublisher, MqttConf),
     "serial": (SerialPublisher, SerialConf),
+    "udp": (UdpPublisher, UdpConf),
 }
 
 _registered_subscribers: dict[str, tuple[type[Subscriber], type[BaseConf]]] = {
     "zmq": (ZmqSubscriber, ZmqConf),
     "mqtt": (MqttSubscriber, MqttConf),
     "serial": (SerialSubscriber, SerialConf),
+    "udp": (UdpSubscriber, UdpConf),
 }
 
 
