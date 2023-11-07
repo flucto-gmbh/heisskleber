@@ -47,7 +47,7 @@ docs-test: ## Test if documentation can be built without warnings or errors
 
 .PHONY: docs
 docs: ## Build and serve the documentation
-	@poetry run mkdocs serve
+	@poetry run python3 -m sphinx docs docs/_build -b html
 
 .PHONY: help
 help:

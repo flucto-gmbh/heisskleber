@@ -8,7 +8,9 @@ import yaml
 from heisskleber.config import BaseConf
 from heisskleber.config.cmdline import get_cmdline
 
-ConfigType = TypeVar("ConfigType", bound=BaseConf)
+ConfigType = TypeVar(
+    "ConfigType", bound=BaseConf
+)  # https://stackoverflow.com/a/46227137 , https://docs.python.org/3/library/typing.html#typing.TypeVar
 
 
 def get_msb_config_filepath(config_filename: str = "heisskleber.conf") -> str:
@@ -17,10 +19,10 @@ def get_msb_config_filepath(config_filename: str = "heisskleber.conf") -> str:
         config_filepath = os.path.join(os.environ["MSB_CONFIG_DIR"], config_subpath)
     except Exception as e:
         print(f"could no get MSB_CONFIG from PATH: {e}")
-        sys.exit()  # TODO use 1 or the error str as exit value
+        sys.exit(1)
     if not os.path.isfile(config_filepath):
         print(f"not a file: {config_filepath}!")
-        sys.exit()
+        sys.exit(1)
     return config_filepath
 
 
@@ -33,27 +35,18 @@ def update_config(config: ConfigType, config_dict: dict) -> ConfigType:
     for config_key, config_value in config_dict.items():
         # get expected type of element from config_object:
         if not hasattr(config, config_key):
-            warnings.warn(
-                f"no such configuration parameter: {config_key}, skipping", stacklevel=2
-            )
+            error_msg = f"no such configuration parameter: {config_key}, skipping"
+            warnings.warn(error_msg, stacklevel=2)
             continue
         cast_func = type(config[config_key])
         try:
-            if config_key == "topic":
-                config[config_key] = config_value.encode("utf-8")
-            else:
-                config[config_key] = cast_func(config_value)
+            config[config_key] = cast_func(config_value)
         except Exception as e:
             print(
                 f"failed to cast {config_value} to {type(config[config_key])}: {e}. skipping"
             )
             continue
     return config
-
-
-ConfigType = TypeVar(
-    "ConfigType", bound=BaseConf
-)  # https://stackoverflow.com/a/46227137 , https://docs.python.org/3/library/typing.html#typing.TypeVar
 
 
 def load_config(
