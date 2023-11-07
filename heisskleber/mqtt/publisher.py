@@ -21,7 +21,7 @@ class MqttPublisher(MqttBase, Publisher):
         super().__init__(config)
         self.pack = get_packer(config.packstyle)
 
-    def send(self, topic: str, data: dict[str, Any]) -> None:
+    def send(self, data: dict[str, Any], topic: str) -> None:
         """
         Takes python dictionary, serializes it according to the packstyle
         and sends it to the broker.

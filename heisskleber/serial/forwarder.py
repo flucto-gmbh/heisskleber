@@ -17,9 +17,10 @@ class SerialForwarder:
         # for sub in self.sub:
         #     topic, data = sub.receive()
         #     collected.update(data)
-        _, collected = self.sub.receive()
+        topic, data = self.sub.receive()
 
-        self.pub.send("", collected)
+        # We send the topic and let the publisher decide what to do with it
+        self.pub.send(data, topic)
 
     """
     Enter loop and continuously forward messages

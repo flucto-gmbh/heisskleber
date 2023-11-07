@@ -3,8 +3,10 @@ import json
 import pickle
 from typing import Any, Callable
 
+from .types import Serializable
 
-def get_packer(style: str) -> Callable[[dict[str, Any]], Any]:
+
+def get_packer(style: str) -> Callable[[dict[str, Serializable]], str]:
     """Return a packer function for the given style.
 
     Packer func serializes a given dict."""
@@ -14,7 +16,7 @@ def get_packer(style: str) -> Callable[[dict[str, Any]], Any]:
         return _packstyles["default"]
 
 
-def get_unpacker(style: str) -> Callable[[str | bytes], dict[str, Any] | str | bytes]:
+def get_unpacker(style: str) -> Callable[[str], dict[str, Serializable]]:
     """Return an unpacker function for the given style.
 
     Unpacker func deserializes a string."""
@@ -28,17 +30,15 @@ def serialpacker(data: dict[str, Any]) -> str:
     return ",".join([str(v) for v in data.values()])
 
 
-_packstyles: dict[str, Callable[[dict[str, Any]], str | bytes]] = {
+_packstyles: dict[str, Callable[[dict[str, Serializable]], str]] = {
     "default": json.dumps,
     "json": json.dumps,
-    "pickle": pickle.dumps,
+    "pickle": pickle.dumps,  # type: ignore
     "serial": serialpacker,
-    "raw": lambda x: x,  # type: ignore
 }
 
-_unpackstyles: dict[str, Callable[[str | bytes], dict[str, Any] | Any]] = {
+_unpackstyles: dict[str, Callable[[str], dict[str, Serializable]]] = {
     "default": json.loads,
     "json": json.loads,
     "pickle": pickle.loads,  # type: ignore
-    "raw": lambda x: x,
 }

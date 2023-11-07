@@ -4,7 +4,7 @@ from heisskleber.config import BaseConf
 
 
 @dataclass
-class UDPConf(BaseConf):
+class UdpConf(BaseConf):
     """
     UDP configuration.
     """

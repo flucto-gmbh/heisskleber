@@ -34,7 +34,6 @@ class Influx_Subscriber(Subscriber):
     def __init__(self, config: InfluxDBConf, query: str):
         self.config = config
         self.query = query
-        self.df: pd.DataFrame = None
 
         self.client: InfluxDBClient = InfluxDBClient(
             url=self.config.url,
@@ -53,7 +52,9 @@ class Influx_Subscriber(Subscriber):
         return "influx", row
 
     def _run_query(self):
-        self.df = self.reader.query_data_frame(self.query, org=self.config.org)
+        self.df: pd.DataFrame = self.reader.query_data_frame(
+            self.query, org=self.config.org
+        )
         self.df["epoch"] = pd.to_numeric(self.df["_time"]) / 1e9
         self.df.drop(
             columns=[

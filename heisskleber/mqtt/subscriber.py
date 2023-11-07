@@ -20,7 +20,7 @@ class MqttSubscriber(MqttBase, Subscriber):
     Incoming messages are saved as a stack when not processed via the receive() function.
     """
 
-    def __init__(self, topics: str | list[str], config: MqttConf):
+    def __init__(self, config: MqttConf, topics: str | list[str]) -> None:
         super().__init__(config)
         self._message_queue: SimpleQueue[MQTTMessage] = SimpleQueue()
         self.subscribe(topics)

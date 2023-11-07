@@ -28,12 +28,13 @@ class SerialSubscriber(Subscriber):
 
     def __init__(
         self,
-        topics,
         config: SerialConf,
-        unpack_func: Optional[Callable] = None,  # noqa: UP007
+        topic: str | None = None,
+        custom_unpack: Optional[Callable] = None,  # noqa: UP007
     ):
         self.config = config
-        self.unpack = unpack_func if unpack_func else lambda x: x
+        self.topic = topic
+        self.unpack = custom_unpack if custom_unpack else lambda x: x  # types: ignore
         self._connect()
 
     def _connect(self):

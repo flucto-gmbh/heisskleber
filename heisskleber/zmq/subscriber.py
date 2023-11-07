@@ -11,7 +11,7 @@ from .config import ZmqConf
 
 
 class ZmqSubscriber(Subscriber):
-    def __init__(self, topic: bytes | str | list[bytes] | list[str], config: ZmqConf):
+    def __init__(self, config: ZmqConf, topic: str):
         self.config = config
 
         self.context = zmq.Context.instance()

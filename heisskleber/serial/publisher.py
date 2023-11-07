@@ -5,7 +5,7 @@ from typing import Callable, Optional
 import serial
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Publisher
+from heisskleber.core.types import Publisher, Serializable
 
 from .config import SerialConf
 
@@ -42,7 +42,7 @@ class SerialPublisher(Publisher):
         )
         print(f"Successfully connected to serial device at port {self.config.port}")
 
-    def send(self, topic, message: dict) -> None:
+    def send(self, message: dict[str, Serializable], topic: str) -> None:
         """
         Takes python dictionary, serializes it according to the packstyle
         and sends it to the broker.

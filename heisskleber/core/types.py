@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Union
 
-PayloadType = Union[str, int, float]
+Serializable = Union[str, int, float]
 
 
 class Publisher(ABC):
@@ -11,7 +11,7 @@ class Publisher(ABC):
     Publisher interface.
     """
 
-    pack: Callable[[dict[str, Any] | Any], str]
+    pack: Callable[[dict[str, Serializable]], str]
 
     @abstractmethod
     def __init__(self, config: Any) -> None:
@@ -21,7 +21,7 @@ class Publisher(ABC):
         pass
 
     @abstractmethod
-    def send(self, topic: str, data: dict[str, Any]) -> None:
+    def send(self, data: dict[str, Any], topic: str) -> None:
         """
         Send data via the implemented output stream.
         """
@@ -33,17 +33,17 @@ class Subscriber(ABC):
     Subscriber interface
     """
 
-    unpack: Callable[[bytes], dict[str, PayloadType] | Any]
+    unpack: Callable[[str], dict[str, Serializable]]
 
     @abstractmethod
-    def __init__(self, topic: str | list[str], config: Any) -> None:
+    def __init__(self, config: Any, topic: str | list[str]) -> None:
         """
         Initialize the subscriber with a topic and a configuration object.
         """
         pass
 
     @abstractmethod
-    def receive(self) -> tuple[str, dict[str, PayloadType]]:
+    def receive(self) -> tuple[str, dict[str, Serializable]]:
         """
         Blocking function to receive data from the implemented input stream.
 

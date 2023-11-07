@@ -12,9 +12,9 @@ class ZmqConf(BaseConf):
     packstyle: str = "json"
 
     @property
-    def publisher_address(self):
+    def publisher_address(self) -> str:
         return f"{self.protocol}://{self.interface}:{self.publisher_port}"
 
     @property
-    def subscriber_address(self):
+    def subscriber_address(self) -> str:
         return f"{self.protocol}://{self.interface}:{self.subscriber_port}"

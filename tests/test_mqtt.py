@@ -17,7 +17,7 @@ def mock_mqtt_conf() -> MqttConf:
         broker="localhost",
         port=1883,
         user="user",
-        password="passwd",  # noqa: S106
+        password="passwd",  # noqa: S106, this is a test password
         ssl=False,
         verbose=False,
         qos=1,
