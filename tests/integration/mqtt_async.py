@@ -1,4 +1,5 @@
 import asyncio
+
 from heisskleber.stream.async_sub import AsyncMQTTSubscriber, MqttConf
 
 
@@ -7,7 +8,7 @@ async def main():
     sub = AsyncMQTTSubscriber(conf, topic="#")
     # async for topic, message in sub:
     #     print(message)
-    sub1task = asyncio.create_task(sub.start_loop())
+    _ = asyncio.create_task(sub.start_loop())
     while True:
         topic, message = await sub.receive()
         print(message)

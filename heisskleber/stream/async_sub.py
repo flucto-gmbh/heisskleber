@@ -27,7 +27,7 @@ class AsyncMQTTSubscriber(AsyncSubscriber):
         try:
             return await self.receive()
         except Exception:
-            raise StopAsyncIteration
+            raise StopAsyncIteration  # noqa: B904
 
     def __aiter__(self) -> AsyncSubscriber:
         return self

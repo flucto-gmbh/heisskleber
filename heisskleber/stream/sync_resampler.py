@@ -1,9 +1,10 @@
-import asyncio
 import math
 from datetime import datetime, timedelta
+from queue import Queue
 
 import numpy as np
-from async_sub import AsyncMQTTSubscriber
+
+from heisskleber.mqtt import MqttSubscriber
 
 
 def round_dt(dt, delta):
@@ -32,63 +33,62 @@ def interpolate(t1, y1, t2, y2, t_target):
 
 class Resampler:
     """
-    Async resample data based on a fixed rate. Can handle upsampling and downsampling.
+    Synchronously resample data based on a fixed rate. Can handle upsampling and downsampling.
 
     Parameters:
     ----------
     config : namedtuple
         Configuration for the resampler.
-    subscriber : AsyncMQTTSubscriber
-        Asynchronous Subscriber
+    subscriber : MqttSubscriber
+        Synchronous Subscriber
     """
 
-    def __init__(self, config, subscriber: AsyncMQTTSubscriber):
+    def __init__(self, config, subscriber: MqttSubscriber):
         self.config = config
         self.subscriber = subscriber
-        # TODO: remove buffer
-        self.buffer = asyncio.Queue()
+        self.buffer = Queue()
         self.resample_rate = self.config.resample_rate
         self.delta_t = round(self.resample_rate / 1_000, 3)
 
-    async def run(self):
-        topic, message = await self.subscriber.receive()
-        await self.buffer.put(self._pack_data(message))
+    def run(self):
+        topic, message = self.subscriber.receive()
+        self.buffer.put(self._pack_data(message))
         self.data_keys = message.keys()
 
         while True:
-            topic, message = await self.subscriber.receive()
-            await self.buffer.put(self._pack_data(message))
+            topic, message = self.subscriber.receive()
+            self.buffer.put(self._pack_data(message))
 
-    async def resample(self):
+    def resample(self):
         aggregated_data = []
         aggregated_timestamps = []
         # Get first element to determine timestamp
-        timestamp, message = await self.buffer.get()
+        timestamp, message = self.buffer.get()
         timestamps = timestamp_generator(timestamp, self.resample_rate)
 
         # step through interpolation timestamps
         for next_timestamp in timestamps:
             # last_timestamp, last_message = timestamp, message
 
-            # await new data and append to buffer until the most recent data
+            # append new data to buffer until the most recent data
             # is newer than the next interplation timestamp
             while timestamp < next_timestamp:
                 aggregated_timestamps.append(timestamp)
                 aggregated_data.append(message)
-                timestamp, message = await self.buffer.get()
-                # topic, message = await self.subscriber.receive()
-                # timestamp, message = self._pack_data(message)
+                timestamp, message = self.buffer.get()
 
             return_timestamp = round(next_timestamp - self.delta_t / 2, 3)
 
-            # Only one new data point was received
+            # Case 1: Only one new data point was received
             if len(aggregated_data) == 1:
                 last_timestamp, last_message = (
                     aggregated_timestamps[0],
                     aggregated_data[0],
                 )
 
-                # Case 2 Upsampling:
+                # Case 1a Upsampling:
+                # The data point is not within our time interval
+                # We step through time intervals, yielding interpolated data points
                 while timestamp - next_timestamp > self.delta_t:
                     last_message = interpolate(
                         last_timestamp,
@@ -102,6 +102,9 @@ class Resampler:
                     next_timestamp = next(timestamps)
                     yield self._unpack_data(last_timestamp, last_message)
 
+                # Case 1b: The data point is within our time interval
+                # We simply yield the data point
+                # Note, this will also be the case once we have advanced the time interval by upsampling
                 last_message = interpolate(
                     last_timestamp,
                     last_message,
@@ -113,16 +116,16 @@ class Resampler:
                 return_timestamp += self.delta_t
                 yield self._unpack_data(last_timestamp, last_message)
 
+            # Case 2 - downsampling: Multiple data points were during the resampling timeframe
+            # We simply yield the mean of the data points, which is more robust and performant than interpolation
             if len(aggregated_data) > 1:
-                # Case 4 - downsampling: Multiple data points were during the resampling timeframe
-                yield self._handle_downsampling(return_timestamp, aggregated_data)
+                # yield self._handle_downsampling(return_timestamp, aggregated_data)
+                mean_message = np.mean(np.array(aggregated_data), axis=0)
+                yield self._unpack_data(return_timestamp, mean_message)
 
             # reset the aggregator
             aggregated_data.clear()
             aggregated_timestamps.clear()
-
-    def _handle_upsampling(self):
-        pass
 
     def _handle_downsampling(self, return_timestamp, aggregated_data) -> dict:
         """Handle the downsampling case."""

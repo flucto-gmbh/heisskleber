@@ -1,6 +1,7 @@
-from heisskleber.mqtt import MqttConf, MqttPublisher
 import time
 from random import random
+
+from heisskleber.mqtt import MqttConf, MqttPublisher
 
 
 def main():
@@ -14,7 +15,7 @@ def main():
     t1 = 0
     t2 = 5
     while True:
-        dt = random()
+        dt = random()  # noqa: S311
         timestamp += dt
         print(f"timestamp at {timestamp} s")
 
