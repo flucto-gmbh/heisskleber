@@ -50,3 +50,40 @@ class Subscriber(ABC):
         Data is returned as a tuple of (topic, data).
         """
         pass
+
+
+class AsyncSubscriber(ABC):
+    """
+    AsyncSubscriber interface
+    """
+
+    @abstractmethod
+    def __init__(self, config: Any, topic: str | list[str]) -> None:
+        """
+        Initialize the subscriber with a topic and a configuration object.
+        """
+        pass
+
+    @abstractmethod
+    async def receive(self) -> tuple[str, dict[str, Serializable]]:
+        """
+        Blocking function to receive data from the implemented input stream.
+
+        Data is returned as a tuple of (topic, data).
+        """
+        pass
+
+    #
+    # @abstractmethod
+    # def __aiter__(self) -> AsyncSubscriber:
+    #     """
+    #     Async iterator interface.
+    #     """
+    #     pass
+    #
+    # @abstractmethod
+    # async def __anext__(self) -> tuple[str, dict[str, Serializable]] | None:
+    #     """
+    #     Async iterator interface.
+    #     """
+    #     pass
