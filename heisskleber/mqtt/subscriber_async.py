@@ -7,7 +7,7 @@ from heisskleber.core.types import AsyncSubscriber, Serializable
 from heisskleber.mqtt import MqttConf
 
 
-class AsyncMQTTSubscriber(AsyncSubscriber):
+class AsyncMqttSubscriber(AsyncSubscriber):
     def __init__(self, config: MqttConf, topic: str | list[str]) -> None:
         self.config: MqttConf = config
         self.client = Client(

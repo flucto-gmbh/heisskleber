@@ -3,7 +3,7 @@ from collections import namedtuple
 
 import numpy as np
 
-from heisskleber.stream.async_sub import AsyncMQTTSubscriber, MqttConf
+from heisskleber.stream.async_sub import AsyncMqttSubscriber, MqttConf
 from heisskleber.stream.resampler import Resampler
 
 
@@ -17,8 +17,8 @@ async def main():
     config = MqttConf(
         broker="localhost", port=1883, user="", password=""
     )  # , not a real password=1883, user="", password="")
-    sub1 = AsyncMQTTSubscriber(config, topic1)
-    sub2 = AsyncMQTTSubscriber(config, topic2)
+    sub1 = AsyncMqttSubscriber(config, topic1)
+    sub2 = AsyncMqttSubscriber(config, topic2)
 
     resampler_config = namedtuple("config", "resample_rate")(1000)
 

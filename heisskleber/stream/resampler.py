@@ -3,7 +3,8 @@ import math
 from datetime import datetime, timedelta
 
 import numpy as np
-from async_sub import AsyncMQTTSubscriber
+
+from heisskleber.mqtt import AsyncMqttSubscriber
 
 
 def round_dt(dt, delta):
@@ -42,7 +43,7 @@ class Resampler:
         Asynchronous Subscriber
     """
 
-    def __init__(self, config, subscriber: AsyncMQTTSubscriber):
+    def __init__(self, config, subscriber: AsyncMqttSubscriber):
         self.config = config
         self.subscriber = subscriber
         # TODO: remove buffer
