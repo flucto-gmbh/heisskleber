@@ -28,19 +28,6 @@ def mock_subscriber():
     return mock
 
 
-# @pytest.fixture
-# def mock_subscriber():
-#     mock = MagicMock(spec=AsyncMqttSubscriber)
-#     async def side_effects():
-#         yield ("topic1", {"epoch": 1609459200, "data": 1})
-#         yield ("topic1", {"epoch": 1609459201, "data": 2})
-#         yield ("topic1", {"epoch": 1609459202, "data": 3})
-#         # Other messages
-#         raise EndofData
-#     mock.receive = AsyncMock(side_effect=side_effects())
-#     return mock
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "resample_rate,expected_length", [(1_000, 5), (2_000, 3), (500, 10)]
@@ -64,7 +51,7 @@ async def test_resampler(mock_subscriber, resample_rate, expected_length):
     async for data in resampler.resample():
         print(f"resampled data: {data}")
         resampled_data.append(data)
-        if len(resampled_data) == expected_length:
+        if resampler.buffer.qsize() == 0:
             break
     print("=======================================================================")
     print("\n")
