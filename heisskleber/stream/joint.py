@@ -1,18 +1,31 @@
 import asyncio
 
-from heisskleber.stream.resampler import Resampler
+from heisskleber.core.types import AsyncSubscriber
+from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
 class Joint:
-    """Joint that takes multiple async streams and synchronizes them based on their timestamps."""
+    """Joint that takes multiple async streams and synchronizes them based on their timestamps.
 
-    def __init__(self, conf, subscribers):
+    Note that you need to run the setup() function first to initialize the
+
+    Parameters:
+    ----------
+    conf : ResamplerConf
+        Configuration for the joint.
+    subscribers : list[AsyncSubscriber]
+        List of asynchronous subscribers.
+
+    """
+
+    def __init__(self, conf: ResamplerConf, subscribers: list[AsyncSubscriber]):
         self.conf = conf
         self.subscribers = subscribers
         self.generators = []
         self.resampler_timestamps = []
         self.latest_timestamp = 0
         self.latest_data = {}
+        self.tasks = []
 
     async def receive(self):
         old_value = self.latest_data.copy()
@@ -27,11 +40,11 @@ class Joint:
     """Set up the streamer joint, which will activate all subscribers."""
 
     async def setup(self):
-        async with asyncio.TaskGroup() as tg:
-            for sub in self.subscribers:
-                # Start an async task to run the subscriber loop
-                tg.create_task(sub.run())
-                self.generators.append(Resampler(self.conf, sub).resample())
+        for sub in self.subscribers:
+            # Start an async task to run the subscriber loop
+            task = asyncio.create_task(sub.run())
+            self.tasks.append(task)
+            self.generators.append(Resampler(self.conf, sub).resample())
 
         await self._synchronize()
 

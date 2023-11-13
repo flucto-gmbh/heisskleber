@@ -1,10 +1,9 @@
 import asyncio
-from collections import namedtuple
 
 import numpy as np
 
-from heisskleber.stream.async_sub import AsyncMqttSubscriber, MqttConf
-from heisskleber.stream.resampler import Resampler
+from heisskleber.mqtt import AsyncMqttSubscriber, MqttConf
+from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
 async def main():
@@ -16,19 +15,17 @@ async def main():
 
     config = MqttConf(
         broker="localhost", port=1883, user="", password=""
-    )  # , not a real password=1883, user="", password="")
+    )  # not a real password
     sub1 = AsyncMqttSubscriber(config, topic1)
     sub2 = AsyncMqttSubscriber(config, topic2)
 
-    resampler_config = namedtuple("config", "resample_rate")(1000)
+    resampler_config = ResamplerConf(resample_rate=250)
 
     resampler1 = Resampler(resampler_config, sub1)
     resampler2 = Resampler(resampler_config, sub2)
 
-    _ = asyncio.create_task(sub1.start_loop())
-    _ = asyncio.create_task(sub2.start_loop())
-    _ = asyncio.create_task(resampler1.run())
-    _ = asyncio.create_task(resampler2.run())
+    _ = asyncio.create_task(sub1.run())
+    _ = asyncio.create_task(sub2.run())
 
     # async for resampled_dict in resampler2.resample():
     #     print(resampled_dict)

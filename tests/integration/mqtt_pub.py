@@ -21,11 +21,11 @@ def main():
 
         while timestamp - t1 > dt1:
             t1 = timestamp + dt1
-            pub.send({"value": 1 + dt, "epoch": timestamp}, "topic1")
+            pub.send({"value1": 1 + dt, "epoch": timestamp}, "topic1")
             print("Pub1 sending")
         while timestamp - t2 > dt2:
             t2 = timestamp + dt2
-            pub2.send({"value": 2 - dt, "epoch": timestamp}, "topic2")
+            pub2.send({"value2": 2 - dt, "epoch": timestamp}, "topic2")
             print("Pub2 sending")
         time.sleep(dt)
 

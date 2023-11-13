@@ -72,3 +72,10 @@ class AsyncSubscriber(ABC):
         Data is returned as a tuple of (topic, data).
         """
         pass
+
+    @abstractmethod
+    def run(self) -> None:
+        """
+        Run the subscriber loop.
+        """
+        pass
