@@ -72,18 +72,3 @@ class AsyncSubscriber(ABC):
         Data is returned as a tuple of (topic, data).
         """
         pass
-
-    #
-    # @abstractmethod
-    # def __aiter__(self) -> AsyncSubscriber:
-    #     """
-    #     Async iterator interface.
-    #     """
-    #     pass
-    #
-    # @abstractmethod
-    # async def __anext__(self) -> tuple[str, dict[str, Serializable]] | None:
-    #     """
-    #     Async iterator interface.
-    #     """
-    #     pass
