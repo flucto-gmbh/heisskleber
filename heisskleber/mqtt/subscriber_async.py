@@ -24,10 +24,7 @@ class AsyncMqttSubscriber(AsyncSubscriber):
         self,
     ) -> tuple[str, dict[str, Serializable]] | None:  # Do I really need to return None?
         # Context manager that buffers mqtt messages
-        try:
-            return await self.receive()
-        except Exception:
-            raise StopAsyncIteration  # noqa: B904
+        return await self.receive()
 
     def __aiter__(self) -> AsyncSubscriber:
         return self
