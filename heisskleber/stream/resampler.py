@@ -83,7 +83,10 @@ class Resampler:
                 aggregated_timestamps.append(timestamp)
                 aggregated_data.append(message)
                 # timestamp, message = await self.buffer.get()
-                topic, data = await self.subscriber.receive()
+                try:
+                    topic, data = await self.subscriber.receive()
+                except Exception as e:
+                    raise StopAsyncIteration from e
                 timestamp, message = self._pack_data(data)
                 # timestamp, message = self._pack_data(message)
 
