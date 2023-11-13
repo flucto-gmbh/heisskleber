@@ -67,8 +67,11 @@ class Resampler:
         timestamp, message = await self.buffer.get()
         timestamps = timestamp_generator(timestamp, self.resample_rate)
 
+        # print(f"Starting resampling got timestamp {timestamp}")
+
         # step through interpolation timestamps
         for next_timestamp in timestamps:
+            # print(f"Using timestamp: {next_timestamp}")
             # last_timestamp, last_message = timestamp, message
 
             # await new data and append to buffer until the most recent data
@@ -84,6 +87,8 @@ class Resampler:
 
             # Only one new data point was received
             if len(aggregated_data) == 1:
+                self._is_upsampling = False
+                # print("Only one data point")
                 last_timestamp, last_message = (
                     aggregated_timestamps[0],
                     aggregated_data[0],
@@ -91,6 +96,8 @@ class Resampler:
 
                 # Case 2 Upsampling:
                 while timestamp - next_timestamp > self.delta_t:
+                    self._is_upsampling = True
+                    # print("Upsampling")
                     last_message = interpolate(
                         last_timestamp,
                         last_message,
@@ -103,18 +110,22 @@ class Resampler:
                     next_timestamp = next(timestamps)
                     yield self._unpack_data(last_timestamp, last_message)
 
-                last_message = interpolate(
-                    last_timestamp,
-                    last_message,
-                    timestamp,
-                    message,
-                    return_timestamp,
-                )
+                if self._is_upsampling:
+                    last_message = interpolate(
+                        last_timestamp,
+                        last_message,
+                        timestamp,
+                        message,
+                        return_timestamp,
+                    )
                 last_timestamp = return_timestamp
-                return_timestamp += self.delta_t
+                # else:
+                #     return_timestamp += self.delta_t
+
                 yield self._unpack_data(last_timestamp, last_message)
 
             if len(aggregated_data) > 1:
+                # print(f"Downsampling: {len(aggregated_data)} points")
                 # Case 4 - downsampling: Multiple data points were during the resampling timeframe
                 yield self._handle_downsampling(return_timestamp, aggregated_data)
 
