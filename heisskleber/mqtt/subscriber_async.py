@@ -87,8 +87,6 @@ class AsyncMqttSubscriber(AsyncSubscriber):
     async def _subscribe_topics(self) -> None:
         print(f"subscribing to {self.topics}")
         if isinstance(self.topics, list):
-            await self.client.subscribe(
-                [(topic, self.config.qos) for topic in self.topics]
-            )
+            await self.client.subscribe([(topic, self.config.qos) for topic in self.topics])
         else:
             await self.client.subscribe(self.topics, self.config.qos)

@@ -52,9 +52,7 @@ class Influx_Subscriber(Source):
         return "influx", row
 
     def _run_query(self):
-        self.df: pd.DataFrame = self.reader.query_data_frame(
-            self.query, org=self.config.org
-        )
+        self.df: pd.DataFrame = self.reader.query_data_frame(self.query, org=self.config.org)
         self.df["epoch"] = pd.to_numeric(self.df["_time"]) / 1e9
         self.df.drop(
             columns=[

@@ -31,6 +31,4 @@ class MqttPublisher(MqttBase, Sink):
         self._raise_if_thread_died()
 
         payload = self.pack(data)
-        self.client.publish(
-            topic, payload, qos=self.config.qos, retain=self.config.retain
-        )
+        self.client.publish(topic, payload, qos=self.config.qos, retain=self.config.retain)

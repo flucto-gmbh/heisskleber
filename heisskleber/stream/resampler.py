@@ -14,9 +14,7 @@ def floor_dt(dt: datetime, delta: timedelta) -> datetime:
     return datetime.min + math.floor((dt - datetime.min) / delta) * delta
 
 
-def timestamp_generator(
-    start_epoch: float, timedelta_in_ms: int
-) -> Generator[float, None, None]:
+def timestamp_generator(start_epoch: float, timedelta_in_ms: int) -> Generator[float, None, None]:
     """Generate increasing timestamps based on a start epoch and a delta in ms.
     The timestamps are meant to be used with the resampler and generator half delta offsets of the returned timetsamps.
     """

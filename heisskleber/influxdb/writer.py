@@ -17,9 +17,7 @@ class Influx_Writer:
             max_retry_delay=30_000,
             exponential_base=2,
         )
-        self.client = InfluxDBClient(
-            url=self.config.url, token=self.config.token, org=self.config.org
-        )
+        self.client = InfluxDBClient(url=self.config.url, token=self.config.token, org=self.config.org)
         self.writer = self.client.write_api(
             write_options=self.write_options,
         )

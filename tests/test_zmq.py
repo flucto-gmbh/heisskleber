@@ -2,9 +2,7 @@ from heisskleber.zmq.config import ZmqConf
 
 
 def test_config_parses_correctly():
-    conf = ZmqConf(
-        protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556
-    )
+    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
     assert conf.protocol == "tcp"
     assert conf.interface == "localhost"
     assert conf.publisher_port == 5555

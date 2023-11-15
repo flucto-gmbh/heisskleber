@@ -50,9 +50,7 @@ class MqttSubscriber(MqttBase, Source):
             tuple(topic: bytes, message: dict): the message received
         """
         self._raise_if_thread_died()
-        mqtt_message = self._message_queue.get(
-            block=True, timeout=self.config.timeout_s
-        )
+        mqtt_message = self._message_queue.get(block=True, timeout=self.config.timeout_s)
 
         message_returned = self.unpack(mqtt_message.payload.decode())
         return (mqtt_message.topic, message_returned)

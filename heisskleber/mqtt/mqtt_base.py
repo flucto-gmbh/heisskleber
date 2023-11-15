@@ -81,9 +81,7 @@ class MqttBase:
 
     def _on_message(self, client, userdata, message) -> None:
         if self.config.verbose:
-            print(
-                f"Received message: {message.payload!s}, topic: {message.topic}, qos: {message.qos}"
-            )
+            print(f"Received message: {message.payload!s}, topic: {message.topic}, qos: {message.qos}")
 
     def __del__(self) -> None:
         self.client.loop_stop()

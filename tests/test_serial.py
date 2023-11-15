@@ -68,9 +68,7 @@ def test_serial_subscriber_receive(mock_serial_device_subscriber, serial_conf):
 def test_serial_subscriber_converts_bytes_to_str():
     """Test that the SerialSubscriber class converts bytes to str as expected."""
     with patch("heisskleber.serial.subscriber.serial.Serial") as mock_serial:
-        subscriber = SerialSubscriber(
-            config=SerialConf(), topic="", custom_unpack=lambda x: x
-        )
+        subscriber = SerialSubscriber(config=SerialConf(), topic="", custom_unpack=lambda x: x)
 
         # Set the readline method to raise UnicodeError
         mock_serial_instance = mock_serial.return_value
