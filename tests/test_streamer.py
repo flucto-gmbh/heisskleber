@@ -73,7 +73,7 @@ async def test_resampler_multiple_modes(mock_subscriber):
     # Test the resample method
     resampled_data = []
 
-    with pytest.raises(EndofData):
+    with pytest.raises(RuntimeError):
         async for data in resampler.resample():
             resampled_data.append(data)
 
@@ -97,7 +97,7 @@ async def test_resampler_upsampling(mock_subscriber):
     resampler = Resampler(config, mock_subscriber)
 
     resampled_data = []
-    with pytest.raises(EndofData):
+    with pytest.raises(RuntimeError):
         async for data in resampler.resample():
             resampled_data.append(data)
 

@@ -53,4 +53,12 @@ def get_subscriber(name: str, topic: str | list[str]) -> Subscriber:
         print(f"using default {name} config")
         config = conf_cls()
 
-    return sub_cls(topic, config)
+    return sub_cls(config, topic)
+
+
+def get_source(name: str, topic: str | list[str]) -> Subscriber:
+    return get_subscriber(name, topic)
+
+
+def get_sink(name: str) -> Publisher:
+    return get_publisher(name)
