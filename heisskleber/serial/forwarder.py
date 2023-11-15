@@ -1,10 +1,10 @@
-from heisskleber.core.types import Subscriber
+from heisskleber.core.types import Source
 
 from .publisher import SerialPublisher
 
 
 class SerialForwarder:
-    def __init__(self, subscriber: Subscriber, publisher: SerialPublisher) -> None:
+    def __init__(self, subscriber: Source, publisher: SerialPublisher) -> None:
         self.sub = subscriber
         self.pub = publisher
 

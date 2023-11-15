@@ -1,7 +1,7 @@
 import pandas as pd
 from influxdb_client import InfluxDBClient
 
-from heisskleber.core.types import Subscriber
+from heisskleber.core.types import Source
 
 from .config import InfluxDBConf
 
@@ -30,7 +30,7 @@ def build_query(options: dict) -> str:
     return query
 
 
-class Influx_Subscriber(Subscriber):
+class Influx_Subscriber(Source):
     def __init__(self, config: InfluxDBConf, query: str):
         self.config = config
         self.query = query

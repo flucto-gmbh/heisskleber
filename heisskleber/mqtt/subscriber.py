@@ -6,13 +6,13 @@ from typing import Any
 from paho.mqtt.client import MQTTMessage
 
 from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import Subscriber
+from heisskleber.core.types import Source
 
 from .config import MqttConf
 from .mqtt_base import MqttBase
 
 
-class MqttSubscriber(MqttBase, Subscriber):
+class MqttSubscriber(MqttBase, Source):
     """
     MQTT subscriber, wraps around ecplipse's paho mqtt client.
     Network message loop is handled in a separated thread.

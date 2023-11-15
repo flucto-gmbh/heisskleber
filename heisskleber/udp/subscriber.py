@@ -3,11 +3,11 @@ import threading
 from queue import SimpleQueue
 
 from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import Serializable, Subscriber
+from heisskleber.core.types import Serializable, Source
 from heisskleber.udp.config import UdpConf
 
 
-class UdpSubscriber(Subscriber):
+class UdpSubscriber(Source):
     def __init__(self, config: UdpConf, topic: str | None = None):
         self.config = config
         self.topic = topic

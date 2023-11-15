@@ -5,12 +5,12 @@ from typing import Callable, Optional
 import serial
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Publisher, Serializable
+from heisskleber.core.types import Serializable, Sink
 
 from .config import SerialConf
 
 
-class SerialPublisher(Publisher):
+class SerialPublisher(Sink):
     """
     Publisher for serial devices.
     Can be used everywhere that a flucto style publishing connection is required.

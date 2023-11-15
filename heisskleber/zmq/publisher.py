@@ -3,12 +3,12 @@ import sys
 import zmq
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Publisher, Serializable
+from heisskleber.core.types import Serializable, Sink
 
 from .config import ZmqConf
 
 
-class ZmqPublisher(Publisher):
+class ZmqPublisher(Sink):
     def __init__(self, config: ZmqConf):
         self.config = config
 

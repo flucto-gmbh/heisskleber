@@ -1,11 +1,11 @@
 import socket
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Publisher, Serializable
+from heisskleber.core.types import Serializable, Sink
 from heisskleber.udp.config import UdpConf
 
 
-class UdpPublisher(Publisher):
+class UdpPublisher(Sink):
     def __init__(self, config: UdpConf) -> None:
         self.config = config
         self.ip = self.config.ip
