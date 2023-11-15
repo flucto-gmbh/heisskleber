@@ -6,13 +6,13 @@ from typing import Any
 from paho.mqtt.client import MQTTMessage
 
 from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import Subscriber
+from heisskleber.core.types import Source
 
 from .config import MqttConf
 from .mqtt_base import MqttBase
 
 
-class MqttSubscriber(MqttBase, Subscriber):
+class MqttSubscriber(MqttBase, Source):
     """
     MQTT subscriber, wraps around ecplipse's paho mqtt client.
     Network message loop is handled in a separated thread.
@@ -50,9 +50,7 @@ class MqttSubscriber(MqttBase, Subscriber):
             tuple(topic: bytes, message: dict): the message received
         """
         self._raise_if_thread_died()
-        mqtt_message = self._message_queue.get(
-            block=True, timeout=self.config.timeout_s
-        )
+        mqtt_message = self._message_queue.get(block=True, timeout=self.config.timeout_s)
 
         message_returned = self.unpack(mqtt_message.payload.decode())
         return (mqtt_message.topic, message_returned)

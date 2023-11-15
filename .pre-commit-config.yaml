@@ -15,12 +15,5 @@ repos:
     hooks:
       # Run the linter.
       - id: ruff
-        args: [ --fix ]
       # Run the formatter.
-      # Disabled for now, we use black
-      # - id: ruff-format
-
-  - repo: https://github.com/psf/black
-    rev: "22.8.0"
-    hooks:
-      - id: black
+      - id: ruff-format

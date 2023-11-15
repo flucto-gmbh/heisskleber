@@ -5,12 +5,12 @@ from typing import Callable, Optional
 
 import serial
 
-from heisskleber.core.types import Subscriber
+from heisskleber.core.types import Source
 
 from .config import SerialConf
 
 
-class SerialSubscriber(Subscriber):
+class SerialSubscriber(Source):
     """
     Subscriber for serial devices. Connects to a serial port and reads from it.
 

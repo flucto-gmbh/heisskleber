@@ -5,12 +5,12 @@ import sys
 import zmq
 
 from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import Subscriber
+from heisskleber.core.types import Source
 
 from .config import ZmqConf
 
 
-class ZmqSubscriber(Subscriber):
+class ZmqSubscriber(Source):
     def __init__(self, config: ZmqConf, topic: str):
         self.config = config
 

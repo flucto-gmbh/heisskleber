@@ -42,16 +42,12 @@ def update_config(config: ConfigType, config_dict: dict) -> ConfigType:
         try:
             config[config_key] = cast_func(config_value)
         except Exception as e:
-            print(
-                f"failed to cast {config_value} to {type(config[config_key])}: {e}. skipping"
-            )
+            print(f"failed to cast {config_value} to {type(config[config_key])}: {e}. skipping")
             continue
     return config
 
 
-def load_config(
-    config: ConfigType, config_filename: str, read_commandline: bool = True
-) -> ConfigType:
+def load_config(config: ConfigType, config_filename: str, read_commandline: bool = True) -> ConfigType:
     """Load the config file and update the config object.
 
     Parameters
@@ -64,9 +60,7 @@ def load_config(
     read_commandline : bool
         Whether to read arguments from the command line. Optional. Defaults to True.
     """
-    config_filename = (
-        config_filename if "." in config_filename else config_filename + ".yaml"
-    )
+    config_filename = config_filename if "." in config_filename else config_filename + ".yaml"
     config_filepath = get_msb_config_filepath(config_filename)
     config_dict = read_yaml_config_file(config_filepath)
     config = update_config(config, config_dict)

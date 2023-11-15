@@ -3,18 +3,21 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Union
 
+from heisskleber.config.config import BaseConf
+
 Serializable = Union[str, int, float]
 
 
-class Publisher(ABC):
+class Sink(ABC):
     """
-    Publisher interface.
+    Sink interface to send() data to.
     """
 
     pack: Callable[[dict[str, Serializable]], str]
+    config: BaseConf
 
     @abstractmethod
-    def __init__(self, config: Any) -> None:
+    def __init__(self, config: BaseConf) -> None:
         """
         Initialize the publisher with a configuration object.
         """
@@ -28,15 +31,16 @@ class Publisher(ABC):
         pass
 
 
-class Subscriber(ABC):
+class Source(ABC):
     """
-    Subscriber interface
+    Source interface that emits data via the receive() method.
     """
 
     unpack: Callable[[str], dict[str, Serializable]]
+    config: BaseConf
 
     @abstractmethod
-    def __init__(self, config: Any, topic: str | list[str]) -> None:
+    def __init__(self, config: BaseConf, topic: str | list[str]) -> None:
         """
         Initialize the subscriber with a topic and a configuration object.
         """
@@ -48,5 +52,34 @@ class Subscriber(ABC):
         Blocking function to receive data from the implemented input stream.
 
         Data is returned as a tuple of (topic, data).
+        """
+        pass
+
+
+class AsyncSubscriber(ABC):
+    """
+    AsyncSubscriber interface
+    """
+
+    @abstractmethod
+    def __init__(self, config: Any, topic: str | list[str]) -> None:
+        """
+        Initialize the subscriber with a topic and a configuration object.
+        """
+        pass
+
+    @abstractmethod
+    async def receive(self) -> tuple[str, dict[str, Serializable]]:
+        """
+        Blocking function to receive data from the implemented input stream.
+
+        Data is returned as a tuple of (topic, data).
+        """
+        pass
+
+    @abstractmethod
+    def run(self) -> None:
+        """
+        Run the subscriber loop.
         """
         pass

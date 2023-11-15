@@ -1,20 +1,20 @@
 import os
 
 from heisskleber.config import BaseConf, load_config
-from heisskleber.core.types import Publisher, Subscriber
+from heisskleber.core.types import Sink, Source
 from heisskleber.mqtt import MqttConf, MqttPublisher, MqttSubscriber
 from heisskleber.serial import SerialConf, SerialPublisher, SerialSubscriber
 from heisskleber.udp import UdpConf, UdpPublisher, UdpSubscriber
 from heisskleber.zmq import ZmqConf, ZmqPublisher, ZmqSubscriber
 
-_registered_publishers: dict[str, tuple[type[Publisher], type[BaseConf]]] = {
+_registered_sinks: dict[str, tuple[type[Sink], type[BaseConf]]] = {
     "zmq": (ZmqPublisher, ZmqConf),
     "mqtt": (MqttPublisher, MqttConf),
     "serial": (SerialPublisher, SerialConf),
     "udp": (UdpPublisher, UdpConf),
 }
 
-_registered_subscribers: dict[str, tuple[type[Subscriber], type[BaseConf]]] = {
+_registered_sources: dict[str, tuple[type[Source], type[BaseConf]]] = {
     "zmq": (ZmqSubscriber, ZmqConf),
     "mqtt": (MqttSubscriber, MqttConf),
     "serial": (SerialSubscriber, SerialConf),
@@ -22,12 +22,20 @@ _registered_subscribers: dict[str, tuple[type[Subscriber], type[BaseConf]]] = {
 }
 
 
-def get_publisher(name: str) -> Publisher:
-    if name not in _registered_publishers:
-        error_message = f"{name} is not a registered Publisher."
+def get_sink(name: str) -> Sink:
+    """
+    Factory function to create a sink object.
+
+    Parameters:
+        name: Name of the sink to create.
+        config: Configuration object to use for the sink.
+    """
+
+    if name not in _registered_sinks:
+        error_message = f"{name} is not a registered Sink."
         raise KeyError(error_message)
 
-    pub_cls, conf_cls = _registered_publishers[name]
+    pub_cls, conf_cls = _registered_sinks[name]
 
     if "MSB_CONFIG_DIR" in os.environ:
         print(f"loading {name} config")
@@ -39,12 +47,21 @@ def get_publisher(name: str) -> Publisher:
     return pub_cls(config)
 
 
-def get_subscriber(name: str, topic: str | list[str]) -> Subscriber:
-    if name not in _registered_publishers:
-        error_message = f"{name} is not a registered Subscriber."
+def get_source(name: str, topic: str | list[str]) -> Source:
+    """
+    Factory function to create a source object.
+
+    Parameters:
+        name: Name of the source to create.
+        config: Configuration object to use for the source.
+        topic: Topic to subscribe to.
+    """
+
+    if name not in _registered_sinks:
+        error_message = f"{name} is not a registered Source."
         raise KeyError(error_message)
 
-    sub_cls, conf_cls = _registered_subscribers[name]
+    sub_cls, conf_cls = _registered_sources[name]
 
     if "MSB_CONFIG_DIR" in os.environ:
         print(f"loading {name} config")
@@ -53,4 +70,31 @@ def get_subscriber(name: str, topic: str | list[str]) -> Subscriber:
         print(f"using default {name} config")
         config = conf_cls()
 
-    return sub_cls(topic, config)
+    return sub_cls(config, topic)
+
+
+def get_subscriber(name: str, topic: str | list[str]) -> Source:
+    """
+    Deprecated: Factory function to create a source object (formerly known as subscriber).
+
+    Parameters:
+        name: Name of the source to create.
+        config: Configuration object to use for the source.
+        topic: Topic to subscribe to.
+    """
+
+    print("Deprecated: use get_source instead.")
+    return get_source(name, topic)
+
+
+def get_publisher(name: str) -> Sink:
+    """
+    Deprecated: Factory function to create a sink object (formerly known as publisher).
+
+    Parameters:
+        name: Name of the sink to create.
+        config: Configuration object to use for the sink.
+    """
+
+    print("Deprecated: use get_sink instead.")
+    return get_sink(name)

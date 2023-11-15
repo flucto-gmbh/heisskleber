@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import Any
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Publisher
+from heisskleber.core.types import Sink
 
 from .config import MqttConf
 from .mqtt_base import MqttBase
 
 
-class MqttPublisher(MqttBase, Publisher):
+class MqttPublisher(MqttBase, Sink):
     """
     MQTT publisher class.
     Can be used everywhere that a flucto style publishing connection is required.
@@ -31,6 +31,4 @@ class MqttPublisher(MqttBase, Publisher):
         self._raise_if_thread_died()
 
         payload = self.pack(data)
-        self.client.publish(
-            topic, payload, qos=self.config.qos, retain=self.config.retain
-        )
+        self.client.publish(topic, payload, qos=self.config.qos, retain=self.config.retain)
