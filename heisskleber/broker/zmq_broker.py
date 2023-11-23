@@ -1,4 +1,3 @@
-import signal
 import sys
 
 import zmq
@@ -6,11 +5,6 @@ from zmq import Socket
 
 from heisskleber.config import load_config
 from heisskleber.zmq.config import ZmqConf as BrokerConf
-
-
-def signal_handler(sig, frame):
-    print("msb_broker.py exit")
-    sys.exit(0)
 
 
 class BrokerBindingError(Exception):
@@ -61,6 +55,5 @@ def zmq_broker(config: BrokerConf) -> None:
 
 def main() -> None:
     """Start a zmq broker, with a user specified configuration."""
-    signal.signal(signal.SIGINT, signal_handler)
     broker_config = load_config(BrokerConf(), "zmq")
     zmq_broker(broker_config)
