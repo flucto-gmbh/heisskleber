@@ -27,18 +27,26 @@ You can install _Heisskleber_ via [pip] from [PyPI]:
 $ pip install heisskleber
 ```
 
+Configuration files for zmq, mqtt and other heisskleber related settings should be placed in the user's config directory, usually `$HOME/.config`. Config file templates can be found in the `config`
+directory of the package.
+
 ## Development
 
 1. Install poetry
+
 ```
 curl -sSL https://install.python-poetry.org | python3 -
 ```
+
 2. clone repository
+
 ```
 git clone https://github.com/flucto-gmbh/heisskleber.git
 cd heisskleber
 ```
+
 3. setup
+
 ```
 make install
 ```
@@ -56,6 +64,7 @@ please [file an issue] along with a detailed description.
 [pip]: https://pip.pypa.io/
 [file an issue]: https://github.com/flucto-gmbh/heisskleber/issues
 [pypi]: https://pypi.org/
+
 <!-- github-only -->
 
 [license]: https://github.com/flucto-gmbh/heisskleber/blob/main/LICENSE

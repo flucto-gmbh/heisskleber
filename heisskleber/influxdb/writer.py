@@ -1,6 +1,6 @@
-from config import InfluxDBConf
 from influxdb_client import InfluxDBClient, WriteOptions
 
+from config import InfluxDBConf
 from heisskleber.config import load_config
 
 
