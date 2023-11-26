@@ -35,6 +35,7 @@ def create_proxy(xpub: Socket, xsub: Socket, verbose=False) -> None:
         raise BrokerBindingError(error_message) from err
 
 
+# TODO reimplement as object?
 def zmq_broker(config: BrokerConf) -> None:
     """Start a zmq broker.
 
