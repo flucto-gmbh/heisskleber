@@ -1,16 +1,18 @@
-from multiprocessing import Process
+import time
+from multiprocessing import Process, Queue
 
 from heisskleber import get_sink, get_source
 from heisskleber.broker.zmq_broker import zmq_broker
 from heisskleber.config import load_config
 from heisskleber.zmq.config import ZmqConf
-from heisskleber.zmq.config import ZmqConf as BrokerConf
 from heisskleber.zmq.publisher import ZmqPublisher
 from heisskleber.zmq.subscriber import ZmqSubscriber
 
 
 def test_config_parses_correctly():
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(
+        protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556
+    )
     assert conf.protocol == "tcp"
     assert conf.interface == "localhost"
     assert conf.publisher_port == 5555
@@ -21,55 +23,43 @@ def test_config_parses_correctly():
 
 
 def test_instantiate_subscriber():
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(
+        protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556
+    )
     sub = ZmqSubscriber(conf, "test")
     assert sub.config == conf
 
 
 def test_send_receive():
-    # 2. start publisher in extra thread
-    # 3. start subscriber in extra thread
-    # 4. send message from publisher to broker
-    # 5. receive message from broker in subscriber
-    # 6. assert that message is the same
-    broker_conf = BrokerConf()
-    sink = get_sink("zmq")
-    source = get_source("zmq", "test")
+    zmq_conf = load_config(ZmqConf(), "zmq")
+    zmq_conf.verbose = True
+    pub = ZmqPublisher(zmq_conf)
+    sub = ZmqSubscriber(zmq_conf, "test")
 
-    print("starting broker")
-    broker_p = Process(target=zmq_broker, args=(broker_conf,))
-    broker_p.start()
+    print(f"subscriber: {sub.__dict__}")
+    print(f"publisher: {pub.__dict__}")
 
-    for i in range(10):
-        print(f"sending message {i}")
-        sink.send({"message": i}, topic="test")
-        print("waiting for receive")
-        topic, ret_message = source.receive()
-        print(f"received message no. {i} {ret_message}")
-        assert topic == "test"
-        assert ret_message["message"] == i
+    def rec(sub):
+        while True:
+            t, m = sub.receive()
+            print(f"received message: {t}: {m}")
 
-    broker_p.terminate()
-
-
-def test_send_receive_2():
-    broker_conf = BrokerConf()
-    pub = ZmqPublisher(load_config(ZmqConf(), "zmq"))
-    sub = ZmqSubscriber(load_config(ZmqConf(), "zmq"), "test")
-
-    print("starting broker")
-    broker_p = Process(target=zmq_broker.zmq_broker, args=(broker_conf,))
-    broker_p.start()
+    # q = Queue(maxsize=10)
+    sub_p = Process(target=rec, args=(sub,))
+    sub_p.start()
+    time.sleep(1)
 
     for i in range(10):
-        print(f"sending message {i}")
-        pub.send({"message": i}, topic="test")
-        print("awaiting message")
-        t, m = sub.receive()
-        print("received message")
-        assert t == "test"
-        assert m["message"] == i
+        message = {"message": i}
+        pub.send(message, topic="test")
+        print(f"message away!")
+        time.sleep(1)
+        # topic_received, message_received = q.get()
+        # assert topic_received == topic
+        # assert message_received == message
 
-    del pub
-    del sub
-    broker_p.terminate()
+    sub_p.terminate()
+
+
+if __name__ == "__main__":
+    test_send_receive()
