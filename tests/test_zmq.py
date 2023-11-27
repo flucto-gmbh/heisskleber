@@ -1,5 +1,7 @@
 import time
-from multiprocessing import Process, Queue
+from multiprocessing import Process
+
+import pytest
 
 from heisskleber import get_sink, get_source
 from heisskleber.broker.zmq_broker import zmq_broker
@@ -9,10 +11,24 @@ from heisskleber.zmq.publisher import ZmqPublisher
 from heisskleber.zmq.subscriber import ZmqSubscriber
 
 
-def test_config_parses_correctly():
-    conf = ZmqConf(
-        protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556
+@pytest.fixture
+def start_broker():
+    # setup broker
+    broker_config = load_config(ZmqConf(), "zmq", read_commandline=False)
+    broker_process = Process(
+        target=zmq_broker,
+        args=(broker_config,),
     )
+    # start broker
+    broker_process.start()
+
+    yield broker_process
+
+    broker_process.terminate()
+
+
+def test_config_parses_correctly():
+    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
     assert conf.protocol == "tcp"
     assert conf.interface == "localhost"
     assert conf.publisher_port == 5555
@@ -23,43 +39,28 @@ def test_config_parses_correctly():
 
 
 def test_instantiate_subscriber():
-    conf = ZmqConf(
-        protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556
-    )
+    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
     sub = ZmqSubscriber(conf, "test")
     assert sub.config == conf
 
 
-def test_send_receive():
-    zmq_conf = load_config(ZmqConf(), "zmq")
-    zmq_conf.verbose = True
-    pub = ZmqPublisher(zmq_conf)
-    sub = ZmqSubscriber(zmq_conf, "test")
+def test_instantiate_publisher():
+    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    pub = ZmqPublisher(conf)
+    assert pub.config == conf
 
-    print(f"subscriber: {sub.__dict__}")
-    print(f"publisher: {pub.__dict__}")
 
-    def rec(sub):
-        while True:
-            t, m = sub.receive()
-            print(f"received message: {t}: {m}")
-
-    # q = Queue(maxsize=10)
-    sub_p = Process(target=rec, args=(sub,))
-    sub_p.start()
-    time.sleep(1)
-
+def test_send_receive(start_broker):
+    print("test_send_receive")
+    topic = "test"
+    source = get_source("zmq", topic)
+    sink = get_sink("zmq")
+    time.sleep(0.1)  # this is crucial, otherwise the source might hang
     for i in range(10):
-        message = {"message": i}
-        pub.send(message, topic="test")
-        print(f"message away!")
-        time.sleep(1)
-        # topic_received, message_received = q.get()
-        # assert topic_received == topic
-        # assert message_received == message
-
-    sub_p.terminate()
-
-
-if __name__ == "__main__":
-    test_send_receive()
+        message = {"m": i}
+        sink.send(message, topic)
+        print(f"sent {topic} {message}")
+        t, m = source.receive()
+        print(f"received {t} {m}")
+        assert t == topic
+        assert m == {"m": i}
