@@ -1,4 +1,11 @@
+from multiprocessing import Process
+
+from heisskleber import get_sink, get_source
+from heisskleber.broker.zmq_broker import zmq_broker
+from heisskleber.config import load_config
 from heisskleber.zmq.config import ZmqConf
+from heisskleber.zmq.config import ZmqConf as BrokerConf
+from heisskleber.zmq.publisher import ZmqPublisher
 from heisskleber.zmq.subscriber import ZmqSubscriber
 
 
@@ -19,7 +26,6 @@ def test_instantiate_subscriber():
     assert sub.config == conf
 
 
-"""
 def test_send_receive():
     # 2. start publisher in extra thread
     # 3. start subscriber in extra thread
@@ -31,17 +37,17 @@ def test_send_receive():
     source = get_source("zmq", "test")
 
     print("starting broker")
-    broker_p = Process(target=zmq_broker.zmq_broker, args=(broker_conf,))
+    broker_p = Process(target=zmq_broker, args=(broker_conf,))
     broker_p.start()
 
     for i in range(10):
         print(f"sending message {i}")
-        sink.send({"message" : i}, topic="test")
+        sink.send({"message": i}, topic="test")
         print("waiting for receive")
         topic, ret_message = source.receive()
         print(f"received message no. {i} {ret_message}")
         assert topic == "test"
-        assert ret_message['message'] == i
+        assert ret_message["message"] == i
 
     broker_p.terminate()
 
@@ -57,18 +63,13 @@ def test_send_receive_2():
 
     for i in range(10):
         print(f"sending message {i}")
-        pub.send({"message" : i}, topic="test")
-        print('awaiting message')
+        pub.send({"message": i}, topic="test")
+        print("awaiting message")
         t, m = sub.receive()
-        print(f"received message")
+        print("received message")
         assert t == "test"
-        assert m['message'] == i
+        assert m["message"] == i
 
-    del(pub)
-    del(sub)
+    del pub
+    del sub
     broker_p.terminate()
-
-
-
-
-"""
