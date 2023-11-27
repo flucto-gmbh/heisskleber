@@ -46,8 +46,8 @@ def zmq_broker(config: BrokerConf) -> None:
     xsub = ctx.socket(zmq.XSUB)
 
     try:
-        bind_socket(xpub, config.publisher_address, "publisher", config.verbose)
-        bind_socket(xsub, config.subscriber_address, "subscriber", config.verbose)
+        bind_socket(xpub, config.subscriber_address, "publisher", config.verbose)
+        bind_socket(xsub, config.publisher_address, "subscriber", config.verbose)
         create_proxy(xpub, xsub, config.verbose)
     except BrokerBindingError as e:
         print(e)
