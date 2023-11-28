@@ -1,4 +1,3 @@
-import signal
 import sys
 
 import zmq
@@ -6,11 +5,6 @@ from zmq import Socket
 
 from heisskleber.config import load_config
 from heisskleber.zmq.config import ZmqConf as BrokerConf
-
-
-def signal_handler(sig, frame):
-    print("msb_broker.py exit")
-    sys.exit(0)
 
 
 class BrokerBindingError(Exception):
@@ -41,6 +35,7 @@ def create_proxy(xpub: Socket, xsub: Socket, verbose=False) -> None:
         raise BrokerBindingError(error_message) from err
 
 
+# TODO reimplement as object?
 def zmq_broker(config: BrokerConf) -> None:
     """Start a zmq broker.
 
@@ -51,8 +46,8 @@ def zmq_broker(config: BrokerConf) -> None:
     xsub = ctx.socket(zmq.XSUB)
 
     try:
-        bind_socket(xpub, config.publisher_address, "publisher", config.verbose)
-        bind_socket(xsub, config.subscriber_address, "subscriber", config.verbose)
+        bind_socket(xpub, config.subscriber_address, "publisher", config.verbose)
+        bind_socket(xsub, config.publisher_address, "subscriber", config.verbose)
         create_proxy(xpub, xsub, config.verbose)
     except BrokerBindingError as e:
         print(e)
@@ -61,6 +56,5 @@ def zmq_broker(config: BrokerConf) -> None:
 
 def main() -> None:
     """Start a zmq broker, with a user specified configuration."""
-    signal.signal(signal.SIGINT, signal_handler)
     broker_config = load_config(BrokerConf(), "zmq")
     zmq_broker(broker_config)
