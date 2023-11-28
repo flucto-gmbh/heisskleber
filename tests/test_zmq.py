@@ -1,5 +1,6 @@
 import time
 from multiprocessing import Process
+from unittest.mock import patch
 
 import pytest
 
@@ -14,17 +15,21 @@ from heisskleber.zmq.subscriber import ZmqSubscriber
 @pytest.fixture
 def start_broker():
     # setup broker
-    broker_config = load_config(ZmqConf(), "zmq", read_commandline=False)
-    broker_process = Process(
-        target=zmq_broker,
-        args=(broker_config,),
-    )
-    # start broker
-    broker_process.start()
+    with patch(
+        "heisskleber.config.parse.get_config_filepath",
+        return_value="tests/resources/zmq.yaml",
+    ):
+        broker_config = load_config(ZmqConf(), "zmq", read_commandline=False)
+        broker_process = Process(
+            target=zmq_broker,
+            args=(broker_config,),
+        )
+        # start broker
+        broker_process.start()
 
-    yield broker_process
+        yield broker_process
 
-    broker_process.terminate()
+        broker_process.terminate()
 
 
 def test_config_parses_correctly():
@@ -55,7 +60,7 @@ def test_send_receive(start_broker):
     topic = "test"
     source = get_source("zmq", topic)
     sink = get_sink("zmq")
-    time.sleep(0.1)  # this is crucial, otherwise the source might hang
+    time.sleep(1)  # this is crucial, otherwise the source might hang
     for i in range(10):
         message = {"m": i}
         sink.send(message, topic)
