@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from heisskleber.core.types import AsyncSubscriber, Serializable
+from heisskleber.core.types import AsyncSource, Serializable
 
 from .config import ResamplerConf
 
@@ -27,7 +27,7 @@ def timestamp_generator(start_epoch: float, timedelta_in_ms: int) -> Generator[f
         next_timestamp += delta
 
 
-def interpolate(t1, y1, t2, y2, t_target):
+def interpolate(t1, y1, t2, y2, t_target) -> list[float]:
     """Perform linear interpolation between two data points."""
     y1, y2 = np.array(y1), np.array(y2)
     fraction = (t_target - t1) / (t2 - t1)
@@ -47,7 +47,7 @@ class Resampler:
         Asynchronous Subscriber
     """
 
-    def __init__(self, config: ResamplerConf, subscriber: AsyncSubscriber) -> None:
+    def __init__(self, config: ResamplerConf, subscriber: AsyncSource) -> None:
         self.config = config
         self.subscriber = subscriber
         self.resample_rate = self.config.resample_rate

@@ -1,6 +1,7 @@
 import asyncio
+from collections.abc import AsyncGenerator
 
-from heisskleber.core.types import AsyncSubscriber
+from heisskleber.core.types import AsyncSource, AsyncSubscriber
 from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
@@ -18,7 +19,7 @@ class Joint:
 
     """
 
-    def __init__(self, conf: ResamplerConf, subscribers: list[AsyncSubscriber]):
+    def __init__(self, conf: ResamplerConf, subscribers: list[AsyncSubscriber] | list[AsyncSource]):
         self.conf = conf
         self.subscribers = subscribers
         self.generators = []
@@ -27,19 +28,19 @@ class Joint:
         self.latest_data = {}
         self.tasks = []
 
-    async def receive(self):
+    async def receive(self) -> dict:
         old_value = self.latest_data.copy()
         await self._update()
         return old_value
 
-    async def generate(self):
+    async def generate(self) -> AsyncGenerator[dict, None]:
         while True:
             yield self.latest_data
             await self._update()
 
     """Set up the streamer joint, which will activate all subscribers."""
 
-    async def setup(self):
+    async def setup(self) -> None:
         for sub in self.subscribers:
             # Start an async task to run the subscriber loop
             task = asyncio.create_task(sub.run())
@@ -48,7 +49,7 @@ class Joint:
 
         await self._synchronize()
 
-    async def _synchronize(self):
+    async def _synchronize(self) -> None:
         data = {}
         # first pass to initialize resamplers
         for resampler in self.generators:
