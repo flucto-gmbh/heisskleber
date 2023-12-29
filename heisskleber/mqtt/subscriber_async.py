@@ -1,18 +1,16 @@
-from asyncio import Queue, sleep
+from asyncio import Queue, Task, create_task, sleep
 
 from aiomqtt import Client, Message, MqttError
 
 from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import AsyncSubscriber, Serializable
+from heisskleber.core.types import AsyncSource, Serializable
 from heisskleber.mqtt import MqttConf
 
 
-class AsyncMqttSubscriber(AsyncSubscriber):
+class AsyncMqttSubscriber(AsyncSource):
     """Asynchronous MQTT susbsciber based on aiomqtt.
 
-    Data is received by one of two methods:
-    1. The `receive` method returns the newest message in the queue. For this to work, the `run` method must be called in a separae task.
-    2. The `generator` method is a generator function that yields a topic and dict payload.
+    Data is received by the `receive` method returns the newest message in the queue.
     """
 
     def __init__(self, config: MqttConf, topic: str | list[str]) -> None:
@@ -26,6 +24,7 @@ class AsyncMqttSubscriber(AsyncSubscriber):
         self.topics = topic
         self.unpack = get_unpacker(self.config.packstyle)
         self.message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
+        self._listener_task: Task = create_task(self.create_listener())
 
     """
     Await the newest message in the queue and return Tuple
@@ -35,40 +34,20 @@ class AsyncMqttSubscriber(AsyncSubscriber):
         mqtt_message: Message = await self.message_queue.get()
         return self._handle_message(mqtt_message)
 
-    """
-    Listen to incoming messages asynchronously and put them into a queue
-    """
-
-    async def run(self) -> None:
-        """
-        Run the async mqtt listening loop.
-        Includes reconnecting to mqtt broker.
-        """
-        # Manage connection to mqtt
+    async def create_listener(self):
         while True:
             try:
                 async with self.client:
                     await self._subscribe_topics()
                     await self._listen_mqtt_loop()
-            except MqttError:
+            except MqttError as e:
+                print(f"MqttError: {e}")
                 print("Connection to MQTT failed. Retrying...")
                 await sleep(1)
 
     """
-    Generator function that yields topic and dict payload.
+    Listen to incoming messages asynchronously and put them into a queue
     """
-
-    async def generator(self):
-        while True:
-            try:
-                async with self.client:
-                    await self._subscribe_topics()
-                    async with self.client.messages() as messages:
-                        async for message in messages:
-                            yield self._handle_message(message)
-            except MqttError:
-                print("Connection to MQTT failed. Retrying...")
-                await sleep(1)
 
     async def _listen_mqtt_loop(self) -> None:
         async with self.client.messages() as messages:
@@ -77,10 +56,11 @@ class AsyncMqttSubscriber(AsyncSubscriber):
                 await self.message_queue.put(message)
 
     def _handle_message(self, message: Message) -> tuple[str, dict[str, Serializable]]:
-        topic = str(message.topic)
         if not isinstance(message.payload, bytes):
             error_msg = "Payload is not of type bytes."
             raise TypeError(error_msg)
+
+        topic = str(message.topic)
         message_returned = self.unpack(message.payload.decode())
         return (topic, message_returned)
 

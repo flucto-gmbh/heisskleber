@@ -77,13 +77,6 @@ class AsyncSubscriber(ABC):
         """
         pass
 
-    @abstractmethod
-    def run(self) -> None:
-        """
-        Run the subscriber loop.
-        """
-        pass
-
 
 class AsyncSource(ABC):
     """
@@ -103,13 +96,6 @@ class AsyncSource(ABC):
         Blocking function to receive data from the implemented input stream.
 
         Data is returned as a tuple of (topic, data).
-        """
-        pass
-
-    @abstractmethod
-    def run(self) -> None:
-        """
-        Run the subscriber loop.
         """
         pass
 

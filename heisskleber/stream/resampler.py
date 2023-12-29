@@ -1,5 +1,6 @@
 import math
-from collections.abc import AsyncGenerator, Generator
+from asyncio import Queue, Task, create_task
+from collections.abc import Generator
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -52,8 +53,13 @@ class Resampler:
         self.subscriber = subscriber
         self.resample_rate = self.config.resample_rate
         self.delta_t = round(self.resample_rate / 1_000, 3)
+        self.message_queue: Queue[dict[str, Serializable]] = Queue(maxsize=50)
+        self.resample_task: Task = create_task(self.resample())
 
-    async def resample(self) -> AsyncGenerator[dict[str, Serializable], None]:
+    async def receive(self) -> dict[str, Serializable]:
+        return await self.message_queue.get()
+
+    async def resample(self) -> None:
         """
         Resample data based on a fixed rate.
 
@@ -113,7 +119,7 @@ class Resampler:
                     last_timestamp = return_timestamp
                     return_timestamp += self.delta_t
                     next_timestamp = next(timestamps)
-                    yield self._unpack_data(last_timestamp, last_message)
+                    await self.message_queue.put(self._unpack_data(last_timestamp, last_message))
 
                 if self._is_upsampling:
                     last_message = interpolate(
@@ -127,12 +133,12 @@ class Resampler:
                 # else:
                 #     return_timestamp += self.delta_t
 
-                yield self._unpack_data(last_timestamp, last_message)
+                await self.message_queue.put(self._unpack_data(last_timestamp, last_message))
 
             if len(aggregated_data) > 1:
                 # Case 4 - downsampling: Multiple data points were during the resampling timeframe
                 mean_message = np.mean(np.array(aggregated_data), axis=0)
-                yield self._unpack_data(return_timestamp, mean_message)
+                await self.message_queue.put(self._unpack_data(return_timestamp, mean_message))
 
             # reset the aggregator
             aggregated_data.clear()

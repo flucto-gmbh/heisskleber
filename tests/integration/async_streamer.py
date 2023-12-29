@@ -7,9 +7,6 @@ from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
 async def main():
-    # topic1 = "/msb-fwd-body/imu"
-    # topic2 = "/msb-102-a/imu"
-    # topic2 = "/msb-102-a/rpy"
     topic1 = "topic1"
     topic2 = "topic2"
 
@@ -22,18 +19,8 @@ async def main():
     resampler1 = Resampler(resampler_config, sub1)
     resampler2 = Resampler(resampler_config, sub2)
 
-    _ = asyncio.create_task(sub1.run())
-    _ = asyncio.create_task(sub2.run())
-
-    # async for resampled_dict in resampler2.resample():
-    #     print(resampled_dict)
-
-    gen1 = resampler1.resample()
-    gen2 = resampler2.resample()
-
     while True:
-        m1 = await anext(gen1)
-        m2 = await anext(gen2)
+        m1, m2 = await asyncio.gather(resampler1.receive(), resampler2.receive())
 
         print(f"epoch: {m1['epoch']}")
         print(f"diff: {diff(m1, m2)}")
