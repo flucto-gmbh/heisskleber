@@ -14,7 +14,6 @@ class Sink(ABC):
     """
 
     pack: Callable[[dict[str, Serializable]], str]
-    config: BaseConf
 
     @abstractmethod
     def __init__(self, config: BaseConf) -> None:
@@ -37,7 +36,6 @@ class Source(ABC):
     """
 
     unpack: Callable[[str], dict[str, Serializable]]
-    config: BaseConf
 
     @abstractmethod
     def __init__(self, config: BaseConf, topic: str | list[str]) -> None:
@@ -106,7 +104,6 @@ class AsyncSink(ABC):
     """
 
     pack: Callable[[dict[str, Serializable]], str]
-    config: BaseConf
 
     @abstractmethod
     def __init__(self, config: BaseConf) -> None:

@@ -20,13 +20,9 @@ class Joint:
     def __init__(self, conf: ResamplerConf, resamplers: list[Resampler]):
         self.conf = conf
         self.resamplers = resamplers
-        self.input_queues = [asyncio.Queue() for _ in self.resamplers]
         self.output_queue = asyncio.Queue()
-
         self.initialized = asyncio.Event()
         self.initalize_task = asyncio.create_task(self.sync())
-
-        self.listener_tasks: list[asyncio.Task] = self.create_listeners()
         self.output_task = asyncio.create_task(self.output_work())
 
         self.output = {}
@@ -40,7 +36,7 @@ class Joint:
 
     async def sync(self) -> None:
         print("Starting sync")
-        datas = await asyncio.gather(*[queue.get() for queue in self.input_queues])
+        datas = await asyncio.gather(*[source.receive() for source in self.resamplers])
         output_data = {}
         data = {}
 
@@ -49,6 +45,10 @@ class Joint:
 
         print("Syncing...")
         for data in datas:
+            if not isinstance(data["epoch"], float):
+                error = "Timestamps must be floats"
+                raise TypeError(error)
+
             timestamps.append(data["epoch"])
             if data["epoch"] > latest_timestamp:
                 latest_timestamp = data["epoch"]
@@ -70,9 +70,9 @@ class Joint:
     Coroutine that waits for new queue data and updates dict.
     """
 
-    async def update_dict_from_queue(self, queue):
+    async def update_dict_from_source(self, resampler):
         # queue is passed by reference, python y u so weird!
-        data = await queue.get()
+        data = await resampler.receive()
         if self.output and self.output["epoch"] != data["epoch"]:
             print("Oh shit, this is bad!")
         self.output.update(data)
@@ -88,32 +88,6 @@ class Joint:
 
         while True:
             self.output = {}
-            tasks = [asyncio.create_task(self.update_dict_from_queue(qu)) for qu in self.input_queues]
+            tasks = [asyncio.create_task(self.update_dict_from_source(res)) for res in self.resamplers]
             await asyncio.gather(*tasks)
-            # for queue in self.input_queues:
-            #     data = await queue.get()
-            #     if self.output and self.output["epoch"] != data["epoch"]:
-            #         print("Oh shit, this is bad!")
-            #     self.output.update(data)
             await self.output_queue.put(self.output)
-
-    """
-    Worker: wait for new resampled data and put into assigned queue.
-    """
-
-    async def listener_task(self, resampler, queue):
-        while True:
-            data = await resampler.receive()
-            await queue.put(data)
-
-    """
-    Link resamplers and Queues together in tasks.
-    """
-
-    def create_listeners(self) -> list[asyncio.Task]:
-        tasks: list[asyncio.Task] = []
-        for res, queue in zip(self.resamplers, self.input_queues):
-            task = asyncio.create_task(self.listener_task(res, queue))
-            tasks.append(task)
-
-        return tasks
