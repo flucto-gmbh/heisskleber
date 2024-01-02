@@ -74,7 +74,7 @@ async def test_resampler_multiple_modes(mock_subscriber):
     resampled_data = []
 
     with pytest.raises(RuntimeError):
-        async for data in resampler.resample():
+        async for data in resampler.resample_to_queue():
             resampled_data.append(data)
 
     assert resampled_data[0] == {"epoch": 0.0, "data": 1.5}
@@ -98,7 +98,7 @@ async def test_resampler_upsampling(mock_subscriber):
 
     resampled_data = []
     with pytest.raises(RuntimeError):
-        async for data in resampler.resample():
+        async for data in resampler.resample_to_queue():
             resampled_data.append(data)
 
     assert resampled_data[0] == {"epoch": 0.0, "data": 1.0}
