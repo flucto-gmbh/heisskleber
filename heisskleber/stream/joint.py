@@ -25,7 +25,7 @@ class Joint:
         self.initalize_task = asyncio.create_task(self.sync())
         self.output_task = asyncio.create_task(self.output_work())
 
-        self.output = {}
+        self.combined_dict = {}
 
     """
     Main interaction coroutine: Get next value out of the queue.
@@ -63,6 +63,8 @@ class Joint:
 
             output_data.update(data)
 
+        await self.output_queue.put(output_data)
+
         print("Finished initalization")
         self.initialized.set()
 
@@ -70,12 +72,12 @@ class Joint:
     Coroutine that waits for new queue data and updates dict.
     """
 
-    async def update_dict_from_source(self, resampler):
+    async def update_dict(self, resampler):
         # queue is passed by reference, python y u so weird!
         data = await resampler.receive()
-        if self.output and self.output["epoch"] != data["epoch"]:
+        if self.combined_dict and self.combined_dict["epoch"] != data["epoch"]:
             print("Oh shit, this is bad!")
-        self.output.update(data)
+        self.combined_dict.update(data)
 
     """
     Output worker: iterate through queues, read data and join into output queue.
@@ -87,7 +89,7 @@ class Joint:
         print("Output worker resuming")
 
         while True:
-            self.output = {}
-            tasks = [asyncio.create_task(self.update_dict_from_source(res)) for res in self.resamplers]
+            self.combined_dict = {}
+            tasks = [asyncio.create_task(self.update_dict(res)) for res in self.resamplers]
             await asyncio.gather(*tasks)
-            await self.output_queue.put(self.output)
+            await self.output_queue.put(self.combined_dict)
