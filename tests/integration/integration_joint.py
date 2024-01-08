@@ -5,7 +5,7 @@ from heisskleber.stream import Joint, Resampler, ResamplerConf
 
 
 async def main():
-    topics = ["topic1", "topic2", "topic3"]
+    topics = ["topic0", "topic1", "topic2", "topic3"]
 
     config = MqttConf(broker="localhost", port=1883, user="", password="")  # not a real password
     subs = [AsyncMqttSubscriber(config, topic=topic) for topic in topics]

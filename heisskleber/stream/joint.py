@@ -49,9 +49,13 @@ class Joint:
                 error = "Timestamps must be floats"
                 raise TypeError(error)
 
-            timestamps.append(data["epoch"])
-            if data["epoch"] > latest_timestamp:
-                latest_timestamp = data["epoch"]
+            ts = float(data["epoch"])
+
+            print(f"Syncing..., got {ts}")
+
+            timestamps.append(ts)
+            if ts > latest_timestamp:
+                latest_timestamp = ts
 
                 # only take the piece of the latest data
                 output_data = data
