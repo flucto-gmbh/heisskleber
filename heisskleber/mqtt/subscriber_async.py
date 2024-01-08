@@ -30,9 +30,6 @@ class AsyncMqttSubscriber(AsyncSource):
     Await the newest message in the queue and return Tuple
     """
 
-    def __del__(self):
-        self._listener_task.cancel()
-
     async def receive(self) -> tuple[str, dict[str, Serializable]]:
         mqtt_message: Message = await self.message_queue.get()
         return self._handle_message(mqtt_message)
