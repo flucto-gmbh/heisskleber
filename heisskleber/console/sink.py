@@ -16,9 +16,8 @@ class ConsoleSink(Sink):
         self.print = pretty_print if pretty else json.dumps
 
     def send(self, data: dict[str, Serializable], topic: str) -> None:
-        self.stream.write(self.print(data))
+        self.stream.write(self.print(data))  # type: ignore[operator]
         self.stream.write("\n")
-        self.stream.flush()
 
 
 class AsyncConsoleSink(AsyncSink):
@@ -27,9 +26,8 @@ class AsyncConsoleSink(AsyncSink):
         self.print = pretty_print if pretty else json.dumps
 
     async def send(self, data: dict[str, Serializable], topic: str) -> None:
-        self.stream.write(self.print(data))
+        self.stream.write(self.print(data))  # type: ignore[operator]
         self.stream.write("\n")
-        self.stream.flush()
 
 
 if __name__ == "__main__":

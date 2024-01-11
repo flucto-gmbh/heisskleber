@@ -32,12 +32,8 @@ def get_async_sink(name: str) -> AsyncSink:
 
     pub_cls, conf_cls = _registered_async_sinks[name]
 
-    if "MSB_CONFIG_DIR" in os.environ:
-        print(f"loading {name} config")
-        config = load_config(conf_cls(), name, read_commandline=False)
-    else:
-        print(f"using default {name} config")
-        config = conf_cls()
+    print(f"loading {name} config")
+    config = load_config(conf_cls(), name, read_commandline=False)
 
     return pub_cls(config)
 

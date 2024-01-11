@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "heisskleber"
-version = "0.3.1"
+version = "0.4.0"
 description = "Heisskleber"
 authors = ["Felix Weiler <felix@flucto.tech>"]
 license = "MIT"
@@ -49,7 +49,7 @@ types-pyyaml = "^6.0.12.12"
 types-paho-mqtt = "^1.6.0.7"
 
 [tool.poetry.scripts]
-heisskleber = "heisskleber.__main__:main"
+hkcli = "run.cli:main"
 
 [tool.coverage.paths]
 source = ["heisskleber", "*/site-packages"]
