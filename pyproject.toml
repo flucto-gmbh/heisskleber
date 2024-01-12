@@ -12,7 +12,7 @@ documentation = "https://heisskleber.readthedocs.io"
 Changelog = "https://github.com/flucto-gmbh/heisskleber/releases"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "~3.10"
 paho-mqtt = "^1.6.1"
 pyserial = "^3.5"
 pyyaml = "^6.0.1"
