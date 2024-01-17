@@ -1,0 +1,17 @@
+[Unit]
+Description=heisskleber zmq broker service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+SyslogIdentifier=hk-broker
+Type=simple
+Restart=always
+RestartSec=1
+# Environment="MSB_CONFIG_DIR=/home/msb/.config"
+# Environment="PYTHONPATH=/usr/local/lib/python3/dist-packages/"
+User=asa
+ExecStart=/home/asa/git/heisskleber/.venv/bin/python /home/asa/git/heisskleber/run/broker.py
+
+[Install]
+WantedBy=multi-user.target
