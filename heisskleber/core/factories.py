@@ -1,5 +1,3 @@
-import os
-
 from heisskleber.config import BaseConf, load_config
 from heisskleber.core.types import Sink, Source
 from heisskleber.mqtt import MqttConf, MqttPublisher, MqttSubscriber
@@ -37,12 +35,8 @@ def get_sink(name: str) -> Sink:
 
     pub_cls, conf_cls = _registered_sinks[name]
 
-    if "MSB_CONFIG_DIR" in os.environ:
-        print(f"loading {name} config")
-        config = load_config(conf_cls(), name, read_commandline=False)
-    else:
-        print(f"using default {name} config")
-        config = conf_cls()
+    print(f"loading {name} config")
+    config = load_config(conf_cls(), name, read_commandline=False)
 
     return pub_cls(config)
 
@@ -63,12 +57,8 @@ def get_source(name: str, topic: str | list[str]) -> Source:
 
     sub_cls, conf_cls = _registered_sources[name]
 
-    if "MSB_CONFIG_DIR" in os.environ:
-        print(f"loading {name} config")
-        config = load_config(conf_cls(), name, read_commandline=False)
-    else:
-        print(f"using default {name} config")
-        config = conf_cls()
+    print(f"loading {name} config")
+    config = load_config(conf_cls(), name, read_commandline=False)
 
     return sub_cls(config, topic)
 
