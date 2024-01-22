@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from heisskleber.mqtt import AsyncMqttSubscriber
-from heisskleber.stream import Joint, ResamplerConf
+from heisskleber.stream import Joint, Resampler, ResamplerConf
 
 
 @pytest.fixture
@@ -52,8 +52,9 @@ async def test_two_streams_are_parallel():
     )
     conf = ResamplerConf(resample_rate=1000)
 
-    joiner = Joint(conf, [sub1, sub2])
-    await joiner.setup()
+    resamplers = [Resampler(conf, sub1), Resampler(conf, sub2)]
+
+    joiner = Joint(conf, resamplers)
 
     return_data = await joiner.receive()
     assert return_data == {"epoch": 2, "x": 2, "y": 0}

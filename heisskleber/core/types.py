@@ -14,7 +14,6 @@ class Sink(ABC):
     """
 
     pack: Callable[[dict[str, Serializable]], str]
-    config: BaseConf
 
     @abstractmethod
     def __init__(self, config: BaseConf) -> None:
@@ -37,7 +36,6 @@ class Source(ABC):
     """
 
     unpack: Callable[[str], dict[str, Serializable]]
-    config: BaseConf
 
     @abstractmethod
     def __init__(self, config: BaseConf, topic: str | list[str]) -> None:
@@ -77,9 +75,46 @@ class AsyncSubscriber(ABC):
         """
         pass
 
+
+class AsyncSource(ABC):
+    """
+    AsyncSubscriber interface
+    """
+
     @abstractmethod
-    def run(self) -> None:
+    def __init__(self, config: Any, topic: str | list[str]) -> None:
         """
-        Run the subscriber loop.
+        Initialize the subscriber with a topic and a configuration object.
+        """
+        pass
+
+    @abstractmethod
+    async def receive(self) -> tuple[str, dict[str, Serializable]]:
+        """
+        Blocking function to receive data from the implemented input stream.
+
+        Data is returned as a tuple of (topic, data).
+        """
+        pass
+
+
+class AsyncSink(ABC):
+    """
+    Sink interface to send() data to.
+    """
+
+    pack: Callable[[dict[str, Serializable]], str]
+
+    @abstractmethod
+    def __init__(self, config: BaseConf) -> None:
+        """
+        Initialize the publisher with a configuration object.
+        """
+        pass
+
+    @abstractmethod
+    async def send(self, data: dict[str, Any], topic: str) -> None:
+        """
+        Send data via the implemented output stream.
         """
         pass

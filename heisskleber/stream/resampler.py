@@ -1,10 +1,11 @@
 import math
-from collections.abc import AsyncGenerator, Generator
+from asyncio import Queue, Task, create_task
+from collections.abc import Generator
 from datetime import datetime, timedelta
 
 import numpy as np
 
-from heisskleber.core.types import AsyncSubscriber, Serializable
+from heisskleber.core.types import AsyncSource, Serializable
 
 from .config import ResamplerConf
 
@@ -27,7 +28,7 @@ def timestamp_generator(start_epoch: float, timedelta_in_ms: int) -> Generator[f
         next_timestamp += delta
 
 
-def interpolate(t1, y1, t2, y2, t_target):
+def interpolate(t1, y1, t2, y2, t_target) -> list[float]:
     """Perform linear interpolation between two data points."""
     y1, y2 = np.array(y1), np.array(y2)
     fraction = (t_target - t1) / (t2 - t1)
@@ -47,13 +48,18 @@ class Resampler:
         Asynchronous Subscriber
     """
 
-    def __init__(self, config: ResamplerConf, subscriber: AsyncSubscriber) -> None:
+    def __init__(self, config: ResamplerConf, subscriber: AsyncSource) -> None:
         self.config = config
         self.subscriber = subscriber
         self.resample_rate = self.config.resample_rate
         self.delta_t = round(self.resample_rate / 1_000, 3)
+        self.message_queue: Queue[dict[str, Serializable]] = Queue(maxsize=50)
+        self.resample_task: Task = create_task(self.resample())
 
-    async def resample(self) -> AsyncGenerator[dict[str, Serializable], None]:
+    async def receive(self) -> dict[str, Serializable]:
+        return await self.message_queue.get()
+
+    async def resample(self) -> None:
         """
         Resample data based on a fixed rate.
 
@@ -81,10 +87,7 @@ class Resampler:
                 aggregated_timestamps.append(timestamp)
                 aggregated_data.append(message)
                 # timestamp, message = await self.buffer.get()
-                try:
-                    topic, data = await self.subscriber.receive()
-                except Exception as e:
-                    raise StopAsyncIteration from e
+                topic, data = await self.subscriber.receive()
                 timestamp, message = self._pack_data(data)
                 # timestamp, message = self._pack_data(message)
 
@@ -113,7 +116,7 @@ class Resampler:
                     last_timestamp = return_timestamp
                     return_timestamp += self.delta_t
                     next_timestamp = next(timestamps)
-                    yield self._unpack_data(last_timestamp, last_message)
+                    await self.message_queue.put(self._unpack_data(last_timestamp, last_message))
 
                 if self._is_upsampling:
                     last_message = interpolate(
@@ -127,12 +130,12 @@ class Resampler:
                 # else:
                 #     return_timestamp += self.delta_t
 
-                yield self._unpack_data(last_timestamp, last_message)
+                await self.message_queue.put(self._unpack_data(last_timestamp, last_message))
 
             if len(aggregated_data) > 1:
                 # Case 4 - downsampling: Multiple data points were during the resampling timeframe
                 mean_message = np.mean(np.array(aggregated_data), axis=0)
-                yield self._unpack_data(return_timestamp, mean_message)
+                await self.message_queue.put(self._unpack_data(return_timestamp, mean_message))
 
             # reset the aggregator
             aggregated_data.clear()

@@ -8,7 +8,7 @@ async def main():
     sub = AsyncMqttSubscriber(conf, topic="#")
     # async for topic, message in sub:
     #     print(message)
-    _ = asyncio.create_task(sub.run())
+    # _ = asyncio.create_task(sub.run())
     while True:
         topic, message = await sub.receive()
         print(message)
