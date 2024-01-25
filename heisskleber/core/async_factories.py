@@ -1,5 +1,3 @@
-import os
-
 from heisskleber.config import BaseConf, load_config
 from heisskleber.mqtt import AsyncMqttPublisher, AsyncMqttSubscriber, MqttConf
 from heisskleber.zmq import ZmqAsyncPublisher, ZmqAsyncSubscriber, ZmqConf
@@ -32,12 +30,7 @@ def get_async_sink(name: str) -> AsyncSink:
 
     pub_cls, conf_cls = _registered_async_sinks[name]
 
-    if "MSB_CONFIG_DIR" in os.environ:
-        print(f"loading {name} config")
-        config = load_config(conf_cls(), name, read_commandline=False)
-    else:
-        print(f"using default {name} config")
-        config = conf_cls()
+    config = load_config(conf_cls(), name, read_commandline=False)
 
     return pub_cls(config)
 
@@ -58,11 +51,6 @@ def get_async_source(name: str, topic: str | list[str] | tuple[str]) -> AsyncSou
 
     sub_cls, conf_cls = _registered_async_sources[name]
 
-    if "MSB_CONFIG_DIR" in os.environ:
-        print(f"loading {name} config")
-        config = load_config(conf_cls(), name, read_commandline=False)
-    else:
-        print(f"using default {name} config")
-        config = conf_cls()
+    config = load_config(conf_cls(), name, read_commandline=False)
 
     return sub_cls(config, topic)
