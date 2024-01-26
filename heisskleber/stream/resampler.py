@@ -67,13 +67,19 @@ class Resampler:
         Data will always be centered around the output resample timestamp.
         (i.e. for data returned for t = 1.0s, the data will be resampled for [0.5, 1.5]s)
         """
+
+        print("Starting resampler")
         aggregated_data = []
         aggregated_timestamps = []
 
         # Get first element to determine timestamp
         topic, data = await self.subscriber.receive()
+        if "datetime" in data:
+            data.pop("datetime")
+
         timestamp, message = self._pack_data(data)
         timestamps = timestamp_generator(timestamp, self.resample_rate)
+        print(f"Got first element {topic}: {data}")
 
         # Set data keys to reconstruct dict later
         self.data_keys = data.keys()
@@ -87,9 +93,11 @@ class Resampler:
                 aggregated_timestamps.append(timestamp)
                 aggregated_data.append(message)
                 # timestamp, message = await self.buffer.get()
+
                 topic, data = await self.subscriber.receive()
+                if "datetime" in data:
+                    data.pop("datetime")
                 timestamp, message = self._pack_data(data)
-                # timestamp, message = self._pack_data(message)
 
             return_timestamp = round(next_timestamp - self.delta_t / 2, 3)
 
