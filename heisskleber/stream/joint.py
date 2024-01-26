@@ -1,5 +1,7 @@
 import asyncio
+from typing import Any
 
+from heisskleber.core.types import Serializable
 from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
@@ -20,23 +22,24 @@ class Joint:
     def __init__(self, conf: ResamplerConf, resamplers: list[Resampler]):
         self.conf = conf
         self.resamplers = resamplers
-        self.output_queue = asyncio.Queue()
+        self.output_queue: asyncio.Queue[dict[str, Serializable]] = asyncio.Queue()
         self.initialized = asyncio.Event()
         self.initalize_task = asyncio.create_task(self.sync())
         self.output_task = asyncio.create_task(self.output_work())
-
-        self.combined_dict = {}
+        self.combined_dict: dict[str, Serializable] = {}
 
     """
     Main interaction coroutine: Get next value out of the queue.
     """
 
-    async def receive(self) -> dict:
-        return await self.output_queue.get()
+    async def receive(self) -> dict[str, Any]:
+        output = await self.output_queue.get()
+        return output
 
     async def sync(self) -> None:
         print("Starting sync")
         datas = await asyncio.gather(*[source.receive() for source in self.resamplers])
+        print("Got data")
         output_data = {}
         data = {}
 
@@ -76,8 +79,7 @@ class Joint:
     Coroutine that waits for new queue data and updates dict.
     """
 
-    async def update_dict(self, resampler):
-        # queue is passed by reference, python y u so weird!
+    async def update_dict(self, resampler: Resampler) -> None:
         data = await resampler.receive()
         if self.combined_dict and self.combined_dict["epoch"] != data["epoch"]:
             print("Oh shit, this is bad!")
@@ -87,7 +89,7 @@ class Joint:
     Output worker: iterate through queues, read data and join into output queue.
     """
 
-    async def output_work(self):
+    async def output_work(self) -> None:
         print("Output worker waiting for intitialization")
         await self.initialized.wait()
         print("Output worker resuming")

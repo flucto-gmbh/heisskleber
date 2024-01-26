@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
+def run() -> None:
     args = parse_args()
     # source = get_source(args.type, args.topic)
     sink = ConsoleSink()
@@ -52,9 +52,13 @@ def main() -> None:
         sink.send(data, topic)
 
 
-if __name__ == "__main__":
+def main() -> None:
     try:
-        main()
+        run()
     except KeyboardInterrupt:
         print("Exiting...")
         sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
