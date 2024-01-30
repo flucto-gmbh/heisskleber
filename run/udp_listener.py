@@ -1,4 +1,4 @@
-from heisskleber.udp import UdpSubscriber, UdpConf
+from heisskleber.udp import UdpConf, UdpSubscriber
 
 
 def main() -> None:
@@ -12,4 +12,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

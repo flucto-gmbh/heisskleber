@@ -17,9 +17,8 @@ class ConsoleSource(Source):
 
     def listener_task(self):
         while True:
-            data = sys.stdin.readline()
-            payload = self.pack(data)
-            self.queue.put(payload)
+            data = sys.stdin.readline().rstrip()
+            self.queue.put(data)  # will always be of type string
 
     def receive(self) -> tuple[str, dict[str, Serializable]]:
         data = self.queue.get()
