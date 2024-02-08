@@ -7,6 +7,7 @@
 
 [![Read the documentation at https://heisskleber.readthedocs.io/](https://img.shields.io/readthedocs/heisskleber/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/flucto-gmbh/heisskleber/workflows/Tests/badge.svg)][tests]
+[![codecov](https://codecov.io/gh/flucto-gmbh/heisskleber/graph/badge.svg?token=U5TH74MOLO)](https://codecov.io/gh/flucto-gmbh/heisskleber)
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
