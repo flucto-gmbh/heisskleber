@@ -57,10 +57,10 @@ def load_config(config: ConfigType, config_filename: str, read_commandline: bool
 
     Parameters
     ----------
-    config : MSBConf
+    config : BaseConf
         The config object to fill with values.
     config_filename : str
-        The name of the config file in $MSB_CONF/msb/conf.d/.
+        The name of the config file in $HOME/.config
         If the file does not have an extension the default extension .yaml is appended.
     read_commandline : bool
         Whether to read arguments from the command line. Optional. Defaults to True.
