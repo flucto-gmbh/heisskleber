@@ -11,10 +11,12 @@ TopicType = Union[str, list[str]]
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--type", type=str, choices=["zmq", "mqtt", "serial", "udp"], default="zmq")
-    parser.add_argument("--topic", type=str, default="#")
-    parser.add_argument("--host", type=str, default="localhost")
-    parser.add_argument("--port", type=int, default=1883)
+    parser.add_argument("-t", "--type", type=str, choices=["zmq", "mqtt", "serial", "udp"], default="zmq")
+    parser.add_argument("-T", "--topic", type=str, default="#")
+    parser.add_argument("-H", "--host", type=str, default="localhost")
+    parser.add_argument("-P", "--port", type=int, default=1883)
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("--pretty", action="store_true")
 
     return parser.parse_args()
 
@@ -22,7 +24,7 @@ def parse_args() -> argparse.Namespace:
 def run() -> None:
     args = parse_args()
     # source = get_source(args.type, args.topic)
-    sink = ConsoleSink()
+    sink = ConsoleSink(pretty=args.pretty, verbose=args.verbose)
 
     sub_cls, conf_cls = _registered_sources[args.type]
 
