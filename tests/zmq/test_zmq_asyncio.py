@@ -33,13 +33,13 @@ def start_broker() -> Generator[Process, None, None]:
 
 
 def test_instantiate_subscriber() -> None:
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
     sub = ZmqAsyncSubscriber(conf, "test")
     assert sub.config == conf
 
 
 def test_instantiate_publisher() -> None:
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
     pub = ZmqPublisher(conf)
     assert pub.config == conf
 
@@ -48,7 +48,7 @@ def test_instantiate_publisher() -> None:
 async def test_send_receive(start_broker) -> None:
     print("test_send_receive")
     topic = "test"
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
     source = ZmqAsyncSubscriber(conf, topic)
     sink = ZmqAsyncPublisher(conf)
     source.start()

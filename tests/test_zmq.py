@@ -33,9 +33,9 @@ def start_broker():
 
 
 def test_config_parses_correctly():
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
     assert conf.protocol == "tcp"
-    assert conf.interface == "localhost"
+    assert conf.host == "localhost"
     assert conf.publisher_port == 5555
     assert conf.subscriber_port == 5556
 
@@ -44,13 +44,13 @@ def test_config_parses_correctly():
 
 
 def test_instantiate_subscriber():
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
     sub = ZmqSubscriber(conf, "test")
     assert sub.config == conf
 
 
 def test_instantiate_publisher():
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
     pub = ZmqPublisher(conf)
     assert pub.config == conf
 

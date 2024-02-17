@@ -44,7 +44,7 @@ class AsyncMqttPublisher(AsyncSink):
         while True:
             try:
                 async with aiomqtt.Client(
-                    hostname=self.config.broker,
+                    hostname=self.config.host,
                     port=self.config.port,
                     username=self.config.user,
                     password=self.config.password,
@@ -59,7 +59,7 @@ class AsyncMqttPublisher(AsyncSink):
                 await sleep(5)
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(broker={self.config.broker}, port={self.config.port})"
+        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
 
     def start(self) -> None:
         self._sender_task = create_task(self.send_work())

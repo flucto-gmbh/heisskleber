@@ -16,7 +16,7 @@ class AsyncMqttSubscriber(AsyncSource):
     def __init__(self, config: MqttConf, topic: str | list[str]) -> None:
         self.config: MqttConf = config
         self.client = Client(
-            hostname=self.config.broker,
+            hostname=self.config.host,
             port=self.config.port,
             username=self.config.user,
             password=self.config.password,
@@ -26,7 +26,7 @@ class AsyncMqttSubscriber(AsyncSource):
         self.message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(broker={self.config.broker}, port={self.config.port})"
+        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
 
     def start(self) -> None:
         self._listener_task = create_task(self.run())
