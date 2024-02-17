@@ -59,7 +59,9 @@ def test_send_receive(start_broker):
     print("test_send_receive")
     topic = "test"
     source = get_source("zmq", topic)
+    source.start()
     sink = get_sink("zmq")
+    sink.start()
     time.sleep(1)  # this is crucial, otherwise the source might hang
     for i in range(10):
         message = {"m": i}

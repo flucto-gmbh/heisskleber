@@ -1,6 +1,7 @@
 import socket
+import sys
 import threading
-from queue import SimpleQueue
+from queue import Queue
 
 from heisskleber.core.packer import get_unpacker
 from heisskleber.core.types import Serializable, Source
@@ -11,15 +12,30 @@ class UdpSubscriber(Source):
     def __init__(self, config: UdpConf, topic: str | None = None):
         self.config = config
         self.topic = topic
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((self.config.ip, self.config.port))
         self.unpacker = get_unpacker(self.config.packer)
-        self._queue: SimpleQueue[tuple[str, dict[str, Serializable]]] = SimpleQueue()
+        self._queue: Queue[tuple[str, dict[str, Serializable]]] = Queue(maxsize=self.config.max_queue_size)
         self._running = threading.Event()
+
+    def start(self) -> None:
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        except OSError as e:
+            print(f"failed to create socket: {e}")
+            sys.exit(-1)
+        self.socket.bind((self.config.host, self.config.port))
         self._running.set()
-        self._thread: threading.Thread | None = None
+        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._thread.start()
+
+    def stop(self) -> None:
+        self._running.clear()
+        # if self._thread is not None:
+        #     self._thread.join()
+        self.socket.close()
 
     def receive(self) -> tuple[str, dict[str, Serializable]]:
+        if not self._running.is_set():
+            self.start()
         return self._queue.get()
 
     def _loop(self) -> None:
@@ -33,15 +49,5 @@ class UdpSubscriber(Source):
                 error_message = f"Error in UDP listener loop: {e}"
                 print(error_message)
 
-    def start_loop(self) -> None:
-        self._thread = threading.Thread(target=self._loop, daemon=True)
-        self._thread.start()
-
-    def stop_loop(self) -> None:
-        self._running.clear()
-        if self._thread is not None:
-            self._thread.join()
-        self.socket.close()
-
-    def __del__(self) -> None:
-        self.stop_loop()
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"

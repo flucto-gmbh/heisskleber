@@ -17,19 +17,22 @@ def mock_socket():
 
 @pytest.fixture
 def mock_conf():
-    return UdpConf(ip="127.0.0.1", port=12345, packer="json")
+    return UdpConf(host="127.0.0.1", port=12345, packer="json")
 
 
 def test_connects_to_socket(mock_socket, mock_conf) -> None:
-    _ = UdpPublisher(mock_conf)
+    pub = UdpPublisher(mock_conf)
+    pub.start()
 
     # constructor was called
     mock_socket.assert_called_with(socket.AF_INET, socket.SOCK_DGRAM)
+    pub.stop()
 
 
 def test_closes_socket(mock_socket, mock_conf) -> None:
     pub = UdpPublisher(mock_conf)
-    del pub
+    pub.start()
+    pub.stop()
 
     # instace was closed
     mock_socket.return_value.close.assert_called()
@@ -45,8 +48,9 @@ def test_packs_and_sends_message(mock_socket, mock_conf) -> None:
 
     mock_socket.return_value.sendto.assert_called_with(
         b'{"key": "val", "intkey": 1, "floatkey": 1.0, "topic": "test"}',
-        (str(mock_conf.ip), mock_conf.port),
+        (str(mock_conf.host), mock_conf.port),
     )
+    pub.stop()
 
 
 def test_subscriber_receives_message_from_queue(mock_conf) -> None:
@@ -59,13 +63,16 @@ def test_subscriber_receives_message_from_queue(mock_conf) -> None:
     topic, data = sub.receive()
     assert test_topic == topic
     assert test_data == data
+    sub.stop()
 
 
 @pytest.fixture
 def udp_sub(mock_conf):
     sub = UdpSubscriber(mock_conf)
-    sub.start_loop()
+    sub.config.port = 12346  # explicitly set port to avoid conflicts
+    sub.start()
     yield sub
+    sub.stop()
 
 
 def test_sends_message_between_pub_and_sub(udp_sub, mock_conf):

@@ -51,6 +51,8 @@ async def test_send_receive(start_broker) -> None:
     conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
     source = ZmqAsyncSubscriber(conf, topic)
     sink = ZmqAsyncPublisher(conf)
+    source.start()
+    sink.start()
     time.sleep(1)  # this is crucial, otherwise the source might hang
     for i in range(10):
         message = {"m": i}
