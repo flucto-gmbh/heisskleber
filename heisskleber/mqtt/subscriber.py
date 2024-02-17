@@ -22,9 +22,8 @@ class MqttSubscriber(MqttBase, Source):
 
     def __init__(self, config: MqttConf, topics: str | list[str]) -> None:
         super().__init__(config)
+        self.topics = topics
         self._message_queue: SimpleQueue[MQTTMessage] = SimpleQueue()
-        self.subscribe(topics)
-        self.client.on_message = self._on_message
         self.unpack = get_unpacker(config.packstyle)
 
     def subscribe(self, topics: str | list[str] | tuple[str]) -> None:
@@ -47,13 +46,28 @@ class MqttSubscriber(MqttBase, Source):
         Messages are saved in a stack, if no message is available, this function blocks.
 
         Returns:
-            tuple(topic: bytes, message: dict): the message received
+            tuple(topic: str, message: dict): the message received
         """
+        if not self.client:
+            self.start()
+
         self._raise_if_thread_died()
         mqtt_message = self._message_queue.get(block=True, timeout=self.config.timeout_s)
 
         message_returned = self.unpack(mqtt_message.payload.decode())
         return (mqtt_message.topic, message_returned)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(broker={self.config.broker}, port={self.config.port})"
+
+    def start(self) -> None:
+        super().start()
+        self.subscribe(self.topics)
+        self.client.on_message = self._on_message
+        self.is_connected = True
+
+    def stop(self) -> None:
+        super().stop()
 
     # callback to add incoming messages onto stack
     def _on_message(self, client, userdata, message) -> None:

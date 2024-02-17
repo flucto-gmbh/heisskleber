@@ -39,6 +39,16 @@ def test_console_sink_pretty_verbose(capsys) -> None:
     assert captured.out == 'test:\t{\n    "key": 3\n}\n'
 
 
+def test_console_repr() -> None:
+    sink = ConsoleSink()
+    assert repr(sink) == "ConsoleSink(pretty=False, verbose=False)"
+
+
+def test_async_console_repr() -> None:
+    sink = AsyncConsoleSink()
+    assert repr(sink) == "AsyncConsoleSink(pretty=False, verbose=False)"
+
+
 @pytest.mark.asyncio
 async def test_async_console_sink(capsys) -> None:
     sink = AsyncConsoleSink()

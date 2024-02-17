@@ -93,7 +93,7 @@ def test_serial_publisher_initialization(mock_serial_device_publisher, serial_co
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
     )
-    assert publisher.serial
+    assert publisher.serial_connection
 
 
 def test_serial_publisher_send(mock_serial_device_publisher, serial_conf):

@@ -1,4 +1,4 @@
-from asyncio import Queue, Task, create_task, sleep
+from asyncio import Queue, create_task, sleep
 
 from aiomqtt import Client, Message, MqttError
 
@@ -24,17 +24,27 @@ class AsyncMqttSubscriber(AsyncSource):
         self.topics = topic
         self.unpack = get_unpacker(self.config.packstyle)
         self.message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
-        self._listener_task: Task = create_task(self.create_listener())
 
-    """
-    Await the newest message in the queue and return Tuple
-    """
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(broker={self.config.broker}, port={self.config.port})"
+
+    def start(self) -> None:
+        self._listener_task = create_task(self.run())
+
+    def stop(self) -> None:
+        self._listener_task.cancel()
 
     async def receive(self) -> tuple[str, dict[str, Serializable]]:
-        mqtt_message: Message = await self.message_queue.get()
+        """
+        Await the newest message in the queue and return Tuple
+        """
+        mqtt_message = await self.message_queue.get()
         return self._handle_message(mqtt_message)
 
-    async def create_listener(self):
+    async def run(self):
+        """
+        Handle the connection to MQTT broker and run the message loop.
+        """
         while True:
             try:
                 async with self.client:
@@ -45,11 +55,10 @@ class AsyncMqttSubscriber(AsyncSource):
                 print("Connection to MQTT failed. Retrying...")
                 await sleep(1)
 
-    """
-    Listen to incoming messages asynchronously and put them into a queue
-    """
-
     async def _listen_mqtt_loop(self) -> None:
+        """
+        Listen to incoming messages asynchronously and put them into a queue
+        """
         async with self.client.messages() as messages:
             # async with self.client.filtered_messages(self.topics) as messages:
             async for message in messages:

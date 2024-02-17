@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Union
 
-from heisskleber.config.config import BaseConf
+from heisskleber.config import BaseConf
 
 Serializable = Union[str, int, float]
 
@@ -23,7 +23,7 @@ class Sink(ABC):
         pass
 
     @abstractmethod
-    def send(self, data: dict[str, Any], topic: str) -> None:
+    def send(self, data: dict[str, Serializable], topic: str) -> None:
         """
         Send data via the implemented output stream.
         """
