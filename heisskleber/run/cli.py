@@ -10,19 +10,48 @@ TopicType = Union[str, list[str]]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--type", type=str, choices=["zmq", "mqtt", "serial", "udp"], default="zmq")
-    parser.add_argument("--topic", type=str, default="#")
-    parser.add_argument("--host", type=str, default="localhost")
-    parser.add_argument("--port", type=int, default=1883)
+    parser = argparse.ArgumentParser(
+        prog="hkcli",
+        description="Heisskleber command line interface",
+        usage="%(prog)s [options]",
+    )
+    parser.add_argument(
+        "-t",
+        "--type",
+        type=str,
+        choices=["zmq", "mqtt", "serial", "udp"],
+        default="zmq",
+    )
+    parser.add_argument(
+        "-T",
+        "--topic",
+        type=str,
+        default="#",
+        help="Topic to subscribe to, valid for zmq and mqtt only.",
+    )
+    parser.add_argument(
+        "-H",
+        "--host",
+        type=str,
+        default="localhost",
+        help="Host or broker for MQTT, zmq and UDP.",
+    )
+    parser.add_argument(
+        "-P",
+        "--port",
+        type=int,
+        default=1883,
+        help="Port or serial interface for MQTT, zmq and UDP.",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("-p", "--pretty", action="store_true", help="Pretty print JSON data.")
 
     return parser.parse_args()
 
 
 def run() -> None:
     args = parse_args()
-    # source = get_source(args.type, args.topic)
-    sink = ConsoleSink()
+    sink = ConsoleSink(pretty=args.pretty, verbose=args.verbose)
 
     sub_cls, conf_cls = _registered_sources[args.type]
 
