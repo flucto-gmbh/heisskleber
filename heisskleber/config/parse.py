@@ -1,5 +1,4 @@
 import os
-import sys
 import warnings
 from typing import TypeVar
 
@@ -13,16 +12,19 @@ ConfigType = TypeVar(
 )  # https://stackoverflow.com/a/46227137 , https://docs.python.org/3/library/typing.html#typing.TypeVar
 
 
-def get_msb_config_filepath(config_filename: str = "heisskleber.conf") -> str:
-    config_subpath = os.path.join("msb/conf.d/", config_filename)
-    try:
-        config_filepath = os.path.join(os.environ["MSB_CONFIG_DIR"], config_subpath)
-    except Exception as e:
-        print(f"could no get MSB_CONFIG from PATH: {e}")
-        sys.exit(1)
+def get_config_dir() -> str:
+    config_dir = os.path.join(os.path.join(os.environ["HOME"], ".config"), "heisskleber")
+    if not os.path.isdir(config_dir):
+        warnings.warn(f"no such directory: {config_dir}", stacklevel=2)
+        raise FileNotFoundError
+    return config_dir
+
+
+def get_config_filepath(filename: str) -> str:
+    config_filepath = os.path.join(get_config_dir(), filename)
     if not os.path.isfile(config_filepath):
-        print(f"not a file: {config_filepath}!")
-        sys.exit(1)
+        warnings.warn(f"no such file: {config_filepath}", stacklevel=2)
+        raise FileNotFoundError
     return config_filepath
 
 
@@ -42,7 +44,10 @@ def update_config(config: ConfigType, config_dict: dict) -> ConfigType:
         try:
             config[config_key] = cast_func(config_value)
         except Exception as e:
-            print(f"failed to cast {config_value} to {type(config[config_key])}: {e}. skipping")
+            warnings.warn(
+                f"failed to cast {config_value} to {type(config[config_key])}: {e}. skipping",
+                stacklevel=2,
+            )
             continue
     return config
 
@@ -52,16 +57,16 @@ def load_config(config: ConfigType, config_filename: str, read_commandline: bool
 
     Parameters
     ----------
-    config : MSBConf
+    config : BaseConf
         The config object to fill with values.
     config_filename : str
-        The name of the config file in $MSB_CONF/msb/conf.d/.
+        The name of the config file in $HOME/.config
         If the file does not have an extension the default extension .yaml is appended.
     read_commandline : bool
         Whether to read arguments from the command line. Optional. Defaults to True.
     """
     config_filename = config_filename if "." in config_filename else config_filename + ".yaml"
-    config_filepath = get_msb_config_filepath(config_filename)
+    config_filepath = get_config_filepath(config_filename)
     config_dict = read_yaml_config_file(config_filepath)
     config = update_config(config, config_dict)
 

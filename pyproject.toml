@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "heisskleber"
-version = "0.3.0"
+version = "0.4.5"
 description = "Heisskleber"
 authors = ["Felix Weiler <felix@flucto.tech>"]
 license = "MIT"
@@ -40,6 +40,8 @@ typeguard = ">=2.13.3"
 xdoctest = { extras = ["colors"], version = ">=0.15.10" }
 myst-parser = { version = ">=0.16.1" }
 pytest-asyncio = "^0.21.1"
+termcolor = "^2.4.0"
+codecov = "^2.1.13"
 
 
 [tool.poetry.group.types.dependencies]
@@ -48,7 +50,8 @@ types-pyyaml = "^6.0.12.12"
 types-paho-mqtt = "^1.6.0.7"
 
 [tool.poetry.scripts]
-heisskleber = "heisskleber.__main__:main"
+hkcli = "heisskleber.run.cli:main"
+zmqbroker = "heisskleber.run.zmqbroker:main"
 
 [tool.coverage.paths]
 source = ["heisskleber", "*/site-packages"]

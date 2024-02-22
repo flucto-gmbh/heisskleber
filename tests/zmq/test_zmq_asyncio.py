@@ -1,19 +1,19 @@
 import time
+from collections.abc import Generator
 from multiprocessing import Process
 from unittest.mock import patch
 
 import pytest
 
-from heisskleber import get_sink, get_source
 from heisskleber.broker.zmq_broker import zmq_broker
 from heisskleber.config import load_config
 from heisskleber.zmq.config import ZmqConf
-from heisskleber.zmq.publisher import ZmqPublisher
-from heisskleber.zmq.subscriber import ZmqSubscriber
+from heisskleber.zmq.publisher import ZmqAsyncPublisher, ZmqPublisher
+from heisskleber.zmq.subscriber import ZmqAsyncSubscriber
 
 
 @pytest.fixture
-def start_broker():
+def start_broker() -> Generator[Process, None, None]:
     # setup broker
     with patch(
         "heisskleber.config.parse.get_config_filepath",
@@ -32,40 +32,31 @@ def start_broker():
         broker_process.terminate()
 
 
-def test_config_parses_correctly():
+def test_instantiate_subscriber() -> None:
     conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
-    assert conf.protocol == "tcp"
-    assert conf.interface == "localhost"
-    assert conf.publisher_port == 5555
-    assert conf.subscriber_port == 5556
-
-    assert conf.publisher_address == "tcp://localhost:5555"
-    assert conf.subscriber_address == "tcp://localhost:5556"
-
-
-def test_instantiate_subscriber():
-    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
-    sub = ZmqSubscriber(conf, "test")
+    sub = ZmqAsyncSubscriber(conf, "test")
     assert sub.config == conf
 
 
-def test_instantiate_publisher():
+def test_instantiate_publisher() -> None:
     conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
     pub = ZmqPublisher(conf)
     assert pub.config == conf
 
 
-def test_send_receive(start_broker):
+@pytest.mark.asyncio
+async def test_send_receive(start_broker) -> None:
     print("test_send_receive")
     topic = "test"
-    source = get_source("zmq", topic)
-    sink = get_sink("zmq")
+    conf = ZmqConf(protocol="tcp", interface="localhost", publisher_port=5555, subscriber_port=5556)
+    source = ZmqAsyncSubscriber(conf, topic)
+    sink = ZmqAsyncPublisher(conf)
     time.sleep(1)  # this is crucial, otherwise the source might hang
     for i in range(10):
         message = {"m": i}
-        sink.send(message, topic)
+        await sink.send(message, topic)
         print(f"sent {topic} {message}")
-        t, m = source.receive()
+        t, m = await source.receive()
         print(f"received {t} {m}")
         assert t == topic
         assert m == {"m": i}

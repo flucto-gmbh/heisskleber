@@ -114,7 +114,7 @@ def test_receive_with_message(mock_mqtt_conf: MqttConf, mock_mqtt_client, mock_q
     fake_message = create_fake_mqtt_message(topic, payload)
 
     mock_queue.return_value.get.side_effect = [fake_message]
-    subscriber = MqttSubscriber(topics=[topic], config=mock_mqtt_conf)
+    subscriber = MqttSubscriber(topics=[topic.decode()], config=mock_mqtt_conf)
 
     received_topic, received_payload = subscriber.receive()
 
@@ -129,7 +129,7 @@ def test_message_is_put_into_queue(mock_mqtt_conf: MqttConf, mock_mqtt_client, m
     fake_message = create_fake_mqtt_message(topic, payload)
 
     mock_queue.return_value.get.side_effect = [fake_message]
-    subscriber = MqttSubscriber(topics=[topic], config=mock_mqtt_conf)
+    subscriber = MqttSubscriber(topics=[topic.decode()], config=mock_mqtt_conf)
 
     subscriber._on_message(None, None, fake_message)
 
@@ -143,7 +143,7 @@ def test_message_is_put_into_queue_with_actual_queue(mock_mqtt_conf, mock_mqtt_c
     fake_message = create_fake_mqtt_message(topic, payload)
 
     # mock_queue.return_value.get.side_effect = [fake_message]
-    subscriber = MqttSubscriber(topics=[topic], config=mock_mqtt_conf)
+    subscriber = MqttSubscriber(topics=[topic.decode()], config=mock_mqtt_conf)
 
     subscriber._on_message(None, None, fake_message)
 

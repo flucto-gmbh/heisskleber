@@ -1,21 +1,18 @@
 import asyncio
 
 from heisskleber.mqtt import AsyncMqttSubscriber, MqttConf
-from heisskleber.stream import Joint, ResamplerConf
+from heisskleber.stream import Joint, Resampler, ResamplerConf
 
 
 async def main():
-    topic1 = "topic1"
-    topic2 = "topic2"
+    topics = ["topic0", "topic1", "topic2", "topic3"]
 
     config = MqttConf(broker="localhost", port=1883, user="", password="")  # not a real password
-    sub1 = AsyncMqttSubscriber(config, topic1)
-    sub2 = AsyncMqttSubscriber(config, topic2)
+    subs = [AsyncMqttSubscriber(config, topic=topic) for topic in topics]
 
-    resampler_config = ResamplerConf(resample_rate=250)
+    resampler_config = ResamplerConf(resample_rate=1000)
 
-    joint = Joint(resampler_config, [sub1, sub2])
-    await joint.setup()
+    joint = Joint(resampler_config, [Resampler(resampler_config, sub) for sub in subs])
 
     while True:
         data = await joint.receive()

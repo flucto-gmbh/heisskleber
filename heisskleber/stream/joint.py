@@ -1,6 +1,7 @@
 import asyncio
+from typing import Any
 
-from heisskleber.core.types import AsyncSubscriber
+from heisskleber.core.types import Serializable
 from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
@@ -18,65 +19,83 @@ class Joint:
 
     """
 
-    def __init__(self, conf: ResamplerConf, subscribers: list[AsyncSubscriber]):
+    def __init__(self, conf: ResamplerConf, resamplers: list[Resampler]):
         self.conf = conf
-        self.subscribers = subscribers
-        self.generators = []
-        self.resampler_timestamps = []
-        self.latest_timestamp = 0
-        self.latest_data = {}
-        self.tasks = []
+        self.resamplers = resamplers
+        self.output_queue: asyncio.Queue[dict[str, Serializable]] = asyncio.Queue()
+        self.initialized = asyncio.Event()
+        self.initalize_task = asyncio.create_task(self.sync())
+        self.output_task = asyncio.create_task(self.output_work())
+        self.combined_dict: dict[str, Serializable] = {}
 
-    async def receive(self):
-        old_value = self.latest_data.copy()
-        await self._update()
-        return old_value
+    """
+    Main interaction coroutine: Get next value out of the queue.
+    """
 
-    async def generate(self):
-        while True:
-            yield self.latest_data
-            await self._update()
+    async def receive(self) -> dict[str, Any]:
+        output = await self.output_queue.get()
+        return output
 
-    """Set up the streamer joint, which will activate all subscribers."""
-
-    async def setup(self):
-        for sub in self.subscribers:
-            # Start an async task to run the subscriber loop
-            task = asyncio.create_task(sub.run())
-            self.tasks.append(task)
-            self.generators.append(Resampler(self.conf, sub).resample())
-
-        await self._synchronize()
-
-    async def _synchronize(self):
+    async def sync(self) -> None:
+        print("Starting sync")
+        datas = await asyncio.gather(*[source.receive() for source in self.resamplers])
+        print("Got data")
+        output_data = {}
         data = {}
-        # first pass to initialize resamplers
-        for resampler in self.generators:
-            data = await anext(resampler)
-            self.resampler_timestamps.append(data["epoch"])
 
-            if data["epoch"] > self.latest_timestamp:
-                self.latest_timestamp = data["epoch"]
-                self.latest_data = dict(data)
+        latest_timestamp: float = 0.0
+        timestamps = []
 
-        for resampler, timestamp in zip(self.generators, self.resampler_timestamps):
-            if timestamp == self.latest_timestamp:
-                continue
+        print("Syncing...")
+        for data in datas:
+            if not isinstance(data["epoch"], float):
+                error = "Timestamps must be floats"
+                raise TypeError(error)
 
-            while timestamp < self.latest_timestamp:
-                data = await anext(resampler)
-                timestamp = data["epoch"]
+            ts = float(data["epoch"])
 
-            self.latest_data.update(data)
+            print(f"Syncing..., got {ts}")
 
-    async def _update(self):
-        data: dict = {}
-        for resampler in self.generators:
-            try:
-                data = await anext(resampler)
+            timestamps.append(ts)
+            if ts > latest_timestamp:
+                latest_timestamp = ts
 
-                if data["epoch"] >= self.latest_timestamp:
-                    self.latest_timestamp = data["epoch"]
-                    self.latest_data.update(data)
-            except Exception:
-                print(Exception)
+                # only take the piece of the latest data
+                output_data = data
+
+        for resampler, ts in zip(self.resamplers, timestamps):
+            while ts < latest_timestamp:
+                data = await resampler.receive()
+                ts = float(data["epoch"])
+
+            output_data.update(data)
+
+        await self.output_queue.put(output_data)
+
+        print("Finished initalization")
+        self.initialized.set()
+
+    """
+    Coroutine that waits for new queue data and updates dict.
+    """
+
+    async def update_dict(self, resampler: Resampler) -> None:
+        data = await resampler.receive()
+        if self.combined_dict and self.combined_dict["epoch"] != data["epoch"]:
+            print("Oh shit, this is bad!")
+        self.combined_dict.update(data)
+
+    """
+    Output worker: iterate through queues, read data and join into output queue.
+    """
+
+    async def output_work(self) -> None:
+        print("Output worker waiting for intitialization")
+        await self.initialized.wait()
+        print("Output worker resuming")
+
+        while True:
+            self.combined_dict = {}
+            tasks = [asyncio.create_task(self.update_dict(res)) for res in self.resamplers]
+            await asyncio.gather(*tasks)
+            await self.output_queue.put(self.combined_dict)
