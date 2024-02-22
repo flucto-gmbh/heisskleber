@@ -13,7 +13,7 @@ def main():
     # topic2 = "topic2"
 
     config = MqttConf(
-        broker="localhost", port=1883, user="", password=""
+        host="localhost", port=1883, user="", password=""
     )  # , not a real password port=1883, user="", password="")
     sub1 = MqttSubscriber(config, topic1)
     # sub2 = MqttSubscriber(config, topic2)

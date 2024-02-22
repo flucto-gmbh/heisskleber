@@ -10,5 +10,7 @@ class UdpConf(BaseConf):
     """
 
     port: int = 1234
-    ip: str = "127.0.0.1"
+    host: str = "127.0.0.1"
     packer: str = "json"
+    max_queue_size: int = 1000
+    encoding: str = "utf-8"

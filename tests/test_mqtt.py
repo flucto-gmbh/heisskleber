@@ -14,7 +14,7 @@ from heisskleber.mqtt.subscriber import MqttSubscriber
 @pytest.fixture
 def mock_mqtt_conf() -> MqttConf:
     return MqttConf(
-        broker="localhost",
+        host="localhost",
         port=1883,
         user="user",
         password="passwd",  # noqa: S106, this is a test password
@@ -40,12 +40,14 @@ def mock_queue():
 def test_mqtt_base_intialization(mock_mqtt_client, mock_mqtt_conf):
     """Test that the intialization of the mqtt client is as expected."""
     base = MqttBase(config=mock_mqtt_conf)
+    base.start()
 
     mock_mqtt_client.assert_called_once()
     mock_mqtt_client.return_value.loop_start.assert_called_once()
     mock_client_instance = mock_mqtt_client.return_value
     mock_client_instance.username_pw_set.assert_called_with(mock_mqtt_conf.user, mock_mqtt_conf.password)
-    mock_client_instance.connect.assert_called_with(mock_mqtt_conf.broker, mock_mqtt_conf.port)
+    mock_client_instance.connect.assert_called_with(mock_mqtt_conf.host, mock_mqtt_conf.port)
+    assert base.client
     assert base.client.on_connect == base._on_connect
     assert base.client.on_disconnect == base._on_disconnect
     assert base.client.on_publish == base._on_publish
@@ -56,7 +58,7 @@ def test_mqtt_base_on_connect(mock_mqtt_client, mock_mqtt_conf, capsys):
     base = MqttBase(config=mock_mqtt_conf)
     base._on_connect(None, None, {}, 0)
     captured = capsys.readouterr()
-    assert f"MQTT node connected to {mock_mqtt_conf.broker}:{mock_mqtt_conf.port}" in captured.out
+    assert f"MQTT node connected to {mock_mqtt_conf.host}:{mock_mqtt_conf.port}" in captured.out
 
 
 def test_mqtt_base_on_disconnect_with_error(mock_mqtt_client, mock_mqtt_conf, capsys):
@@ -71,7 +73,8 @@ def test_mqtt_base_on_disconnect_with_error(mock_mqtt_client, mock_mqtt_conf, ca
 
 def test_mqtt_subscribes_single_topic(mock_mqtt_client, mock_mqtt_conf):
     """Test that the mqtt client subscribes to a single topic."""
-    _ = MqttSubscriber(topics="singleTopic", config=mock_mqtt_conf)
+    sub = MqttSubscriber(topics="singleTopic", config=mock_mqtt_conf)
+    sub.start()
 
     actual_calls = mock_mqtt_client.return_value.subscribe.call_args_list
     assert actual_calls == [call("singleTopic", mock_mqtt_conf.qos)]
@@ -82,7 +85,8 @@ def test_mqtt_subscribes_multiple_topics(mock_mqtt_client, mock_mqtt_conf):
 
     I would love to do this via parametrization, but the call argument is built differently for single size lists and longer lists.
     """
-    _ = MqttSubscriber(topics=["multiple1", "multiple2"], config=mock_mqtt_conf)
+    sub = MqttSubscriber(topics=["multiple1", "multiple2"], config=mock_mqtt_conf)
+    sub.start()
 
     actual_calls = mock_mqtt_client.return_value.subscribe.call_args_list
     assert actual_calls == [
@@ -92,7 +96,8 @@ def test_mqtt_subscribes_multiple_topics(mock_mqtt_client, mock_mqtt_conf):
 
 def test_mqtt_subscribes_multiple_topics_tuple(mock_mqtt_client, mock_mqtt_conf):
     """Test that the mqtt client subscribes to multiple topics passed as tuple."""
-    _ = MqttSubscriber(topics=("multiple1", "multiple2"), config=mock_mqtt_conf)
+    sub = MqttSubscriber(topics=("multiple1", "multiple2"), config=mock_mqtt_conf)
+    sub.start()
 
     actual_calls = mock_mqtt_client.return_value.subscribe.call_args_list
     assert actual_calls == [
