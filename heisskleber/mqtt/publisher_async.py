@@ -1,7 +1,4 @@
-from __future__ import annotations
-
-import asyncio
-from asyncio import Queue, Task, create_task
+from asyncio import Queue, Task, create_task, sleep
 
 import aiomqtt
 
@@ -22,8 +19,8 @@ class AsyncMqttPublisher(AsyncSink):
     def __init__(self, config: MqttConf) -> None:
         self.config = config
         self.pack = get_packer(config.packstyle)
-        self._send_queue: Queue[tuple[dict[str, Serializable], str]] = Queue(maxsize=config.max_saved_messages)
-        self._sender_task: Task[None] = create_task(self.send_work())
+        self._send_queue: Queue[tuple[dict[str, Serializable], str]] = Queue()
+        self._sender_task: Task[None] | None = None
 
     async def send(self, data: dict[str, Serializable], topic: str) -> None:
         """
@@ -32,6 +29,8 @@ class AsyncMqttPublisher(AsyncSink):
 
         Publishing is asynchronous
         """
+        if not self._sender_task:
+            self.start()
 
         await self._send_queue.put((data, topic))
 
@@ -45,7 +44,7 @@ class AsyncMqttPublisher(AsyncSink):
         while True:
             try:
                 async with aiomqtt.Client(
-                    hostname=self.config.broker,
+                    hostname=self.config.host,
                     port=self.config.port,
                     username=self.config.user,
                     password=self.config.password,
@@ -57,4 +56,15 @@ class AsyncMqttPublisher(AsyncSink):
                         await client.publish(topic, payload)
             except aiomqtt.MqttError:
                 print("Connection to MQTT broker failed. Retrying in 5 seconds")
-                await asyncio.sleep(5)
+                await sleep(5)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
+
+    def start(self) -> None:
+        self._sender_task = create_task(self.send_work())
+
+    def stop(self) -> None:
+        if self._sender_task:
+            self._sender_task.cancel()
+            self._sender_task = None

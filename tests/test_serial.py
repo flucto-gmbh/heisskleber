@@ -29,10 +29,11 @@ def mock_serial_device_publisher():
 def test_serial_subscriber_initialization(mock_serial_device_subscriber, serial_conf):
     """Test that the SerialSubscriber class initializes correctly.
     Mocks the serial.Serial class to avoid opening a serial port."""
-    _ = SerialSubscriber(
+    sub = SerialSubscriber(
         config=serial_conf,
         topic="",
     )
+    sub.start()
     mock_serial_device_subscriber.assert_called_with(
         port=serial_conf.port,
         baudrate=serial_conf.baudrate,
@@ -45,6 +46,7 @@ def test_serial_subscriber_initialization(mock_serial_device_subscriber, serial_
 def test_serial_subscriber_receive(mock_serial_device_subscriber, serial_conf):
     """Test that the SerialSubscriber class calls readline and unpack as expected."""
     subscriber = SerialSubscriber(config=serial_conf, topic="")
+    subscriber.start()
 
     # Set up the readline return value
     mock_serial_instance = mock_serial_device_subscriber.return_value
@@ -69,6 +71,7 @@ def test_serial_subscriber_converts_bytes_to_str():
     """Test that the SerialSubscriber class converts bytes to str as expected."""
     with patch("heisskleber.serial.subscriber.serial.Serial") as mock_serial:
         subscriber = SerialSubscriber(config=SerialConf(), topic="", custom_unpack=lambda x: x)
+        subscriber.start()
 
         # Set the readline method to raise UnicodeError
         mock_serial_instance = mock_serial.return_value
@@ -86,6 +89,7 @@ def test_serial_publisher_initialization(mock_serial_device_publisher, serial_co
     """Test that the SerialPublisher class initializes correctly.
     Mocks the serial.Serial class to avoid opening a serial port."""
     publisher = SerialPublisher(config=serial_conf)
+    publisher.start()
     mock_serial_device_publisher.assert_called_with(
         port=serial_conf.port,
         baudrate=serial_conf.baudrate,
@@ -93,7 +97,7 @@ def test_serial_publisher_initialization(mock_serial_device_publisher, serial_co
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
     )
-    assert publisher.serial
+    assert publisher.serial_connection
 
 
 def test_serial_publisher_send(mock_serial_device_publisher, serial_conf):

@@ -34,8 +34,14 @@ class MqttBase:
 
     def __init__(self, config: MqttConf) -> None:
         self.config = config
+        self.client: mqtt_client | None = None
+
+    def start(self) -> None:
         self.connect()
-        self.client.loop_start()
+
+    def stop(self) -> None:
+        if self.client:
+            self.client.loop_stop()
 
     def connect(self) -> None:
         self.client = mqtt_client()
@@ -52,7 +58,8 @@ class MqttBase:
             # the default certification authority of the system is used.
             self.client.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
 
-        self.client.connect(self.config.broker, self.config.port)
+        self.client.connect(self.config.host, self.config.port)
+        self.client.loop_start()
 
     @staticmethod
     def _raise_if_thread_died() -> None:
@@ -63,7 +70,7 @@ class MqttBase:
     # MQTT callbacks
     def _on_connect(self, client, userdata, flags, return_code) -> None:
         if return_code == 0:
-            print(f"MQTT node connected to {self.config.broker}:{self.config.port}")
+            print(f"MQTT node connected to {self.config.host}:{self.config.port}")
         else:
             print("Connection failed!")
         if self.config.verbose:
@@ -84,4 +91,4 @@ class MqttBase:
             print(f"Received message: {message.payload!s}, topic: {message.topic}, qos: {message.qos}")
 
     def __del__(self) -> None:
-        self.client.loop_stop()
+        self.stop()

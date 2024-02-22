@@ -67,11 +67,12 @@ async def test_resampler_multiple_modes(mock_subscriber):
         ]
     )
 
-    config = ResamplerConf(resample_rate=1000)  # Fill in your MQTT configuration
+    config = ResamplerConf(resample_rate=1000)
     resampler = Resampler(config, mock_subscriber)
 
     # Test the resample method
     resampled_data = [await resampler.receive() for _ in range(3)]
+    resampler.stop()
 
     assert resampled_data[0] == {"epoch": 0.0, "data": 1.5}
     assert resampled_data[1] == {"epoch": 1.0, "data": 3.5}
@@ -89,11 +90,12 @@ async def test_resampler_upsampling(mock_subscriber):
         ]
     )
 
-    config = ResamplerConf(resample_rate=250)  # Fill in your MQTT configuration
+    config = ResamplerConf(resample_rate=250)
     resampler = Resampler(config, mock_subscriber)
 
     # Test the resample method
     resampled_data = [await resampler.receive() for _ in range(7)]
+    resampler.stop()
 
     assert resampled_data[0] == {"epoch": 0.0, "data": 1.0}
     assert resampled_data[1] == {"epoch": 0.25, "data": 1.25}

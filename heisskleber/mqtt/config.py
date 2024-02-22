@@ -9,7 +9,7 @@ class MqttConf(BaseConf):
     MQTT configuration class.
     """
 
-    broker: str = "localhost"
+    host: str = "localhost"
     user: str = ""
     password: str = ""
     port: int = 1883

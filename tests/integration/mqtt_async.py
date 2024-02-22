@@ -4,7 +4,7 @@ from heisskleber.mqtt import AsyncMqttSubscriber, MqttConf
 
 
 async def main():
-    conf = MqttConf(broker="localhost", port=1883, user="", password="")
+    conf = MqttConf(host="localhost", port=1883, user="", password="")
     sub = AsyncMqttSubscriber(conf, topic="#")
     # async for topic, message in sub:
     #     print(message)

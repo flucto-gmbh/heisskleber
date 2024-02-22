@@ -1,7 +1,6 @@
-from __future__ import annotations
-
+import sys
 from collections.abc import Generator
-from typing import Callable, Optional
+from typing import Callable
 
 import serial
 
@@ -11,6 +10,7 @@ from .config import SerialConf
 
 
 class SerialSubscriber(Source):
+    serial_connection: serial.Serial
     """
     Subscriber for serial devices. Connects to a serial port and reads from it.
 
@@ -30,22 +30,38 @@ class SerialSubscriber(Source):
         self,
         config: SerialConf,
         topic: str | None = None,
-        custom_unpack: Optional[Callable] = None,  # noqa: UP007
+        custom_unpack: Callable | None = None,
     ):
         self.config = config
         self.topic = topic
         self.unpack = custom_unpack if custom_unpack else lambda x: x  # types: ignore
-        self._connect()
+        self.is_connected = False
 
-    def _connect(self):
-        self.serial: serial.Serial = serial.Serial(
-            port=self.config.port,
-            baudrate=self.config.baudrate,
-            bytesize=self.config.bytesize,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-        )
+    def start(self) -> None:
+        """
+        Start the serial connection.
+        """
+        try:
+            self.serial_connection = serial.Serial(
+                port=self.config.port,
+                baudrate=self.config.baudrate,
+                bytesize=self.config.bytesize,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+            )
+        except serial.SerialException:
+            print(f"Failed to connect to serial device at port {self.config.port}")
+            sys.exit(1)
         print(f"Successfully connected to serial device at port {self.config.port}")
+        self.is_connected = True
+
+    def stop(self) -> None:
+        """
+        Stop the serial connection.
+        """
+        if hasattr(self, "serial_connection") and self.serial_connection.is_open:
+            self.serial_connection.flush()
+            self.serial_connection.close()
 
     def receive(self) -> tuple[str, dict]:
         """
@@ -57,6 +73,9 @@ class SerialSubscriber(Source):
             topic is a placeholder to adhere to the Subscriber interface
             payload is a dictionary containing the data from the serial port
         """
+        if not self.is_connected:
+            self.start()
+
         # message is a string
         message = next(self.read_serial_port())
         # payload is a dictionary
@@ -76,7 +95,7 @@ class SerialSubscriber(Source):
         buffer = ""
         while True:
             try:
-                buffer = self.serial.readline().decode(self.config.encoding, "ignore")
+                buffer = self.serial_connection.readline().decode(self.config.encoding, "ignore")
                 yield buffer
             except UnicodeError as e:
                 if self.config.verbose:
@@ -84,10 +103,8 @@ class SerialSubscriber(Source):
                     print(e)
                 continue
 
+    def __repr__(self) -> str:
+        return f"SerialPublisher(port={self.config.port}, baudrate={self.config.baudrate}, bytezize={self.config.bytesize}, encoding={self.config.encoding})"
+
     def __del__(self) -> None:
-        if not hasattr(self, "serial"):
-            return
-        if not self.serial.is_open:
-            return
-        self.serial.flush()
-        self.serial.close()
+        self.stop()

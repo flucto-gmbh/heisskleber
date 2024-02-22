@@ -16,6 +16,15 @@ class ConsoleSink(Sink):
         else:
             print(verbose_topic + str(data))
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(pretty={self.pretty}, verbose={self.verbose})"
+
+    def start(self) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
+
 
 class AsyncConsoleSink(AsyncSink):
     def __init__(self, pretty: bool = False, verbose: bool = False) -> None:
@@ -28,6 +37,15 @@ class AsyncConsoleSink(AsyncSink):
             print(verbose_topic + json.dumps(data, indent=4))
         else:
             print(verbose_topic + str(data))
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(pretty={self.pretty}, verbose={self.verbose})"
+
+    def start(self) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ async def send_every_n_miliseconds(frequency, value, pub, topic):
 
 
 async def main2():
-    config = MqttConf(broker="localhost", port=1883, user="", password="")
+    config = MqttConf(host="localhost", port=1883, user="", password="")
 
     pubs = [AsyncMqttPublisher(config) for i in range(5)]
     tasks = []
