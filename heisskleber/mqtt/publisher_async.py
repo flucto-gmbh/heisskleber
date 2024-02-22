@@ -1,12 +1,9 @@
-from __future__ import annotations
-
-import asyncio
-from typing import Any
+from asyncio import Queue, Task, create_task, sleep
 
 import aiomqtt
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import AsyncSink
+from heisskleber.core.types import AsyncSink, Serializable
 
 from .config import MqttConf
 
@@ -47,6 +44,8 @@ class AsyncMqttPublisher(AsyncSink):
 
         Publishing is asynchronous
         """
+        if not self._sender_task:
+            self.start()
 
         # Lazy initializatiton of the sender task
         if not self._sender_task:

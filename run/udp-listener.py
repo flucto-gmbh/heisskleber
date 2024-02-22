@@ -1,8 +1,8 @@
-from heisskleber.udp import UdpSubscriber, UdpConf
+from heisskleber.udp import UdpConf, UdpSubscriber
 
 
 def main() -> None:
-    conf = UdpConf(ip="192.168.137.1", port=6600)
+    conf = UdpConf(host="192.168.137.1", port=6600)
     subscriber = UdpSubscriber(conf)
 
     while True:
@@ -12,4 +12,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

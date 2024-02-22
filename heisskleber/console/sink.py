@@ -1,33 +1,51 @@
 import json
-import sys
 import time
-from typing import TextIO
 
 from heisskleber.core.types import AsyncSink, Serializable, Sink
 
 
-def pretty_print(data: dict[str, Serializable]) -> str:
-    return json.dumps(data, indent=4)
-
-
 class ConsoleSink(Sink):
-    def __init__(self, stream: TextIO = sys.stdout, pretty: bool = False):
-        self.stream = stream
-        self.print = pretty_print if pretty else json.dumps
+    def __init__(self, pretty: bool = False, verbose: bool = False) -> None:
+        self.verbose = verbose
+        self.pretty = pretty
 
     def send(self, data: dict[str, Serializable], topic: str) -> None:
-        self.stream.write(self.print(data))  # type: ignore[operator]
-        self.stream.write("\n")
+        verbose_topic = topic + ":\t" if self.verbose else ""
+        if self.pretty:
+            print(verbose_topic + json.dumps(data, indent=4))
+        else:
+            print(verbose_topic + str(data))
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(pretty={self.pretty}, verbose={self.verbose})"
+
+    def start(self) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
 
 
 class AsyncConsoleSink(AsyncSink):
-    def __init__(self, stream: TextIO = sys.stdout, pretty: bool = False):
-        self.stream = stream
-        self.print = pretty_print if pretty else json.dumps
+    def __init__(self, pretty: bool = False, verbose: bool = False) -> None:
+        self.verbose = verbose
+        self.pretty = pretty
 
     async def send(self, data: dict[str, Serializable], topic: str) -> None:
-        self.stream.write(self.print(data))  # type: ignore[operator]
-        self.stream.write("\n")
+        verbose_topic = topic + ":\t" if self.verbose else ""
+        if self.pretty:
+            print(verbose_topic + json.dumps(data, indent=4))
+        else:
+            print(verbose_topic + str(data))
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(pretty={self.pretty}, verbose={self.verbose})"
+
+    def start(self) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
 
 
 if __name__ == "__main__":

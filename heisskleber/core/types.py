@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Union
 
-from heisskleber.config.config import BaseConf
+from heisskleber.config import BaseConf
 
 Serializable = Union[str, int, float]
 
@@ -23,9 +23,27 @@ class Sink(ABC):
         pass
 
     @abstractmethod
-    def send(self, data: dict[str, Any], topic: str) -> None:
+    def send(self, data: dict[str, Serializable], topic: str) -> None:
         """
         Send data via the implemented output stream.
+        """
+        pass
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
+
+    @abstractmethod
+    def start(self) -> None:
+        """
+        Start any background processes and tasks.
+        """
+        pass
+
+    @abstractmethod
+    def stop(self) -> None:
+        """
+        Stop any background processes and tasks.
         """
         pass
 
@@ -53,25 +71,21 @@ class Source(ABC):
         """
         pass
 
-
-class AsyncSubscriber(ABC):
-    """
-    AsyncSubscriber interface
-    """
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
 
     @abstractmethod
-    def __init__(self, config: Any, topic: str | list[str]) -> None:
+    def start(self) -> None:
         """
-        Initialize the subscriber with a topic and a configuration object.
+        Start any background processes and tasks.
         """
         pass
 
     @abstractmethod
-    async def receive(self) -> tuple[str, dict[str, Serializable]]:
+    def stop(self) -> None:
         """
-        Blocking function to receive data from the implemented input stream.
-
-        Data is returned as a tuple of (topic, data).
+        Stop any background processes and tasks.
         """
         pass
 
@@ -97,6 +111,24 @@ class AsyncSource(ABC):
         """
         pass
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
+
+    @abstractmethod
+    def start(self) -> None:
+        """
+        Start any background processes and tasks.
+        """
+        pass
+
+    @abstractmethod
+    def stop(self) -> None:
+        """
+        Stop any background processes and tasks.
+        """
+        pass
+
 
 class AsyncSink(ABC):
     """
@@ -116,5 +148,23 @@ class AsyncSink(ABC):
     async def send(self, data: dict[str, Any], topic: str) -> None:
         """
         Send data via the implemented output stream.
+        """
+        pass
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
+
+    @abstractmethod
+    def start(self) -> None:
+        """
+        Start any background processes and tasks.
+        """
+        pass
+
+    @abstractmethod
+    def stop(self) -> None:
+        """
+        Stop any background processes and tasks.
         """
         pass

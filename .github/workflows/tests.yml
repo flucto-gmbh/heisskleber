@@ -12,12 +12,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4.6.1
+        uses: actions/setup-python@v5.0.0
         with:
           python-version: "3.10"
 
       - name: Cache poetry install
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.local
           key: poetry-1.7.1-0
@@ -31,7 +31,7 @@ jobs:
 
       - name: cache deps
         id: cache-deps
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: .venv
           key: pydeps-${{ hashFiles('**/poetry.lock') }}
@@ -50,6 +50,6 @@ jobs:
       - run: poetry run pytest --cov
 
       - name: Upload coverage roports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}

@@ -25,18 +25,31 @@ class Joint:
         self.output_queue: asyncio.Queue[dict[str, Serializable]] = asyncio.Queue()
         self.initialized = asyncio.Event()
         self.initalize_task = asyncio.create_task(self.sync())
-        self.output_task = asyncio.create_task(self.output_work())
         self.combined_dict: dict[str, Serializable] = {}
+        self.task: asyncio.Task[None] | None = None
 
-    """
-    Main interaction coroutine: Get next value out of the queue.
-    """
+    def __repr__(self) -> str:
+        return f"""Joint(resample_rate={self.conf.resample_rate},
+        sources={len(self.resamplers)} of type(s): {{r.__class__.__name__ for r in self.resamplers}})"""
+
+    def start(self) -> None:
+        self.task = asyncio.create_task(self.output_work())
+
+    def stop(self) -> None:
+        if self.task:
+            self.task.cancel()
 
     async def receive(self) -> dict[str, Any]:
+        """
+        Main interaction coroutine: Get next value out of the queue.
+        """
+        if not self.task:
+            self.start()
         output = await self.output_queue.get()
         return output
 
     async def sync(self) -> None:
+        """Synchronize the resamplers by pulling data from each until the timestamp is aligned. Retains first matching data."""
         print("Starting sync")
         datas = await asyncio.gather(*[source.receive() for source in self.resamplers])
         print("Got data")
