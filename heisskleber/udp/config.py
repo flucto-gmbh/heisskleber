@@ -14,3 +14,4 @@ class UdpConf(BaseConf):
     packer: str = "json"
     max_queue_size: int = 1000
     encoding: str = "utf-8"
+    delimiter: str = "\r\n"

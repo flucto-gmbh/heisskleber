@@ -63,6 +63,9 @@ class UdpProtocol(asyncio.DatagramProtocol):
     def datagram_received(self, data: bytes, addr: tuple[str | Any, int]) -> None:
         self.queue.put_nowait(data)
 
+    def connection_made(self, transport) -> None:
+        print("Connection made")
+
 
 class AsyncUdpSubscriber(AsyncSource):
     """
@@ -72,6 +75,7 @@ class AsyncUdpSubscriber(AsyncSource):
     def __init__(self, config: UdpConf, topic: str = "udp"):
         self.config = config
         self.topic = topic
+        self.EOF = self.config.delimiter.encode(self.config.encoding)
         self.unpacker = get_unpacker(self.config.packer)
         self.queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=self.config.max_queue_size)
         self.task: asyncio.Task[None] | None = None
@@ -84,8 +88,10 @@ class AsyncUdpSubscriber(AsyncSource):
             local_addr=(self.config.host, self.config.port),
         )
         self.is_connected = True
+        print("Udp connection established.")
 
     def start(self) -> None:
+        # Background loop not required, handled by Protocol
         pass
 
     def stop(self) -> None:
@@ -94,16 +100,13 @@ class AsyncUdpSubscriber(AsyncSource):
     async def receive(self) -> tuple[str, dict[str, Serializable]]:
         if not self.is_connected:
             await self.setup()
-
         data = await self.queue.get()
         try:
             payload = self.unpacker(data.decode(self.config.encoding))
         except UnicodeDecodeError:
             print(f"Could not decode data, is not {self.config.encoding}")
-            sys.exit(-1)
         except Exception:
             print(f"Could not deserialize data: {data!r}")
-            sys.exit(-1)
         return (self.topic, payload)
 
     def __repr__(self) -> str:
