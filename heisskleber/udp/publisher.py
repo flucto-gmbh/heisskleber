@@ -3,7 +3,7 @@ import socket
 import sys
 
 from heisskleber.core.packer import get_packer
-from heisskleber.core.types import Serializable, Sink
+from heisskleber.core.types import AsyncSink, Serializable, Sink
 from heisskleber.udp.config import UdpConf
 
 
@@ -48,7 +48,7 @@ class UdpProtocol(asyncio.DatagramProtocol):
         self.is_connected = False
 
 
-class AsyncUdpPublisher:
+class AsyncUdpSink(AsyncSink):
     def __init__(self, config: UdpConf) -> None:
         self.config = config
         self.pack = get_packer(self.config.packer)
@@ -59,26 +59,26 @@ class AsyncUdpPublisher:
         # No background loop required
         pass
 
-    async def stop(self) -> None:
+    def stop(self) -> None:
         if self.socket is not None:
             self.socket.close()
         self.is_connected = False
 
-    async def _ensure_connected(self):
+    async def _ensure_connection(self) -> None:
         if not self.is_connected:
             loop = asyncio.get_running_loop()
-            transport, _ = await loop.create_datagram_endpoint(
-                lambda: UdpProtocol(self.is_connected), remote_addr=(self.config.host, self.config.port)
+            self.socket, _ = await loop.create_datagram_endpoint(
+                lambda: UdpProtocol(self.is_connected),
+                remote_addr=(self.config.host, self.config.port),
             )
-            self.socket = transport
             self.is_connected = True
 
     async def send(self, data: dict[str, Serializable], topic: str | None = None) -> None:
-        await self._ensure_connected()
+        await self._ensure_connection()
         if topic:
             data["topic"] = topic
         payload = self.pack(data).encode(self.config.encoding)
-        self.socket.sendto(payload)
+        self.socket.sendto(payload)  # type: ignore
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"

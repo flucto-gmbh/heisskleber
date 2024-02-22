@@ -63,11 +63,11 @@ class UdpProtocol(asyncio.DatagramProtocol):
     def datagram_received(self, data: bytes, addr: tuple[str | Any, int]) -> None:
         self.queue.put_nowait(data)
 
-    def connection_made(self, transport) -> None:
+    def connection_made(self, transport: asyncio.DatagramTransport) -> None:
         print("Connection made")
 
 
-class AsyncUdpSubscriber(AsyncSource):
+class AsyncUdpSource(AsyncSource):
     """
     An asynchronous UDP subscriber based on asyncio.protocols.DatagramProtocol
     """
@@ -107,7 +107,10 @@ class AsyncUdpSubscriber(AsyncSource):
             print(f"Could not decode data, is not {self.config.encoding}")
         except Exception:
             print(f"Could not deserialize data: {data!r}")
-        return (self.topic, payload)
+        else:
+            return (self.topic, payload)
+
+        return await self.receive()  # Try again
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"
