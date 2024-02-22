@@ -1,4 +1,4 @@
-from asyncio import Queue, create_task, sleep
+from asyncio import Queue, Task, create_task, sleep
 
 from aiomqtt import Client, Message, MqttError
 
@@ -24,6 +24,7 @@ class AsyncMqttSubscriber(AsyncSource):
         self.topics = topic
         self.unpack = get_unpacker(self.config.packstyle)
         self.message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
+        self._listener_task: Task[None] | None = None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
@@ -32,12 +33,16 @@ class AsyncMqttSubscriber(AsyncSource):
         self._listener_task = create_task(self.run())
 
     def stop(self) -> None:
-        self._listener_task.cancel()
+        if self._listener_task:
+            self._listener_task.cancel()
+        self._listener_task = None
 
     async def receive(self) -> tuple[str, dict[str, Serializable]]:
         """
         Await the newest message in the queue and return Tuple
         """
+        if not self._listener_task:
+            self.start()
         mqtt_message = await self.message_queue.get()
         return self._handle_message(mqtt_message)
 
