@@ -59,7 +59,8 @@ tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["heisskleber", "tests"]
+source = ["heisskleber"]
+omit = ["tests/*"]
 
 [tool.coverage.report]
 show_missing = true
@@ -79,28 +80,28 @@ target-version = "py39"
 line-length = 120
 fix = true
 select = [
-    "YTT", # flake8-2020
-    "S",   # flake8-bandit
-    "B",   # flake8-bugbear
-    "A",   # flake8-builtins
-    "C4",  # flake8-comprehensions
-    "T10", # flake8-debugger
-    "SIM", # flake8-simplify
-    "I",   # isort
-    "C90", # mccabe
-    "E",
-    "W",   # pycodestyle
-    "F",   # pyflakes
-    "PGH", # pygrep-hooks
-    "UP",  # pyupgrade
-    "RUF", # ruff
-    "TRY", # tryceratops
+  "YTT", # flake8-2020
+  "S",   # flake8-bandit
+  "B",   # flake8-bugbear
+  "A",   # flake8-builtins
+  "C4",  # flake8-comprehensions
+  "T10", # flake8-debugger
+  "SIM", # flake8-simplify
+  "I",   # isort
+  "C90", # mccabe
+  "E",
+  "W",   # pycodestyle
+  "F",   # pyflakes
+  "PGH", # pygrep-hooks
+  "UP",  # pyupgrade
+  "RUF", # ruff
+  "TRY", # tryceratops
 ]
 ignore = [
-    "E501",   # LineTooLong
-    "E731",   # DoNotAssignLambda
-    "A001",   #
-    "PGH003", # Use specific rules when ignoring type issues
+  "E501",   # LineTooLong
+  "E731",   # DoNotAssignLambda
+  "A001",   #
+  "PGH003", # Use specific rules when ignoring type issues
 ]
 
 [tool.ruff.per-file-ignores]
