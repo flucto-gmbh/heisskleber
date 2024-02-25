@@ -102,7 +102,7 @@ class AsyncUdpSource(AsyncSource):
             await self.setup()
         data = await self.queue.get()
         try:
-            payload = self.unpacker(data.decode(self.config.encoding))
+            payload = self.unpacker(data.decode(self.config.encoding, errors="ignore"))
         except UnicodeDecodeError:
             print(f"Could not decode data, is not {self.config.encoding}")
         except Exception:
