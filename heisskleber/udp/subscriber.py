@@ -103,10 +103,11 @@ class AsyncUdpSource(AsyncSource):
         data = await self.queue.get()
         try:
             payload = self.unpacker(data.decode(self.config.encoding, errors="ignore"))
-        except UnicodeDecodeError:
-            print(f"Could not decode data, is not {self.config.encoding}")
+        # except UnicodeDecodeError: # this won't be thrown anymore, as the error flag is set to ignore!
+        #     print(f"Could not decode data, is not {self.config.encoding}")
         except Exception:
-            print(f"Could not deserialize data: {data!r}")
+            if self.config.verbose:
+                print(f"Could not deserialize data: {data!r}")
         else:
             return (self.topic, payload)
 
