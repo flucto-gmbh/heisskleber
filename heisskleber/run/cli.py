@@ -79,7 +79,7 @@ def main() -> None:
     elif isinstance(source, ZmqSubscriber):
         source.config.host = args.host or source.config.host
         source.config.subscriber_port = args.port or source.config.subscriber_port
-        args.topic = "" if args.topic == "#" else args.topic
+        source.topic = "" if args.topic == "#" else args.topic
     elif isinstance(source, UdpSubscriber):
         source.config.port = args.port or source.config.port
 
