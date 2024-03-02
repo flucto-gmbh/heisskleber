@@ -1,5 +1,6 @@
 from heisskleber.config import BaseConf, load_config
 from heisskleber.mqtt import AsyncMqttPublisher, AsyncMqttSubscriber, MqttConf
+from heisskleber.udp import AsyncUdpSink, AsyncUdpSource, UdpConf
 from heisskleber.zmq import ZmqAsyncPublisher, ZmqAsyncSubscriber, ZmqConf
 
 from .types import AsyncSink, AsyncSource
@@ -7,11 +8,13 @@ from .types import AsyncSink, AsyncSource
 _registered_async_sinks: dict[str, tuple[type[AsyncSink], type[BaseConf]]] = {
     "mqtt": (AsyncMqttPublisher, MqttConf),
     "zmq": (ZmqAsyncPublisher, ZmqConf),
+    "udp": (AsyncUdpSink, UdpConf),
 }
 
 _registered_async_sources: dict[str, tuple] = {
     "mqtt": (AsyncMqttSubscriber, MqttConf),
     "zmq": (ZmqAsyncSubscriber, ZmqConf),
+    "udp": (AsyncUdpSource, UdpConf),
 }
 
 

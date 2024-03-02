@@ -130,7 +130,7 @@ class ZmqAsyncSubscriber(AsyncSource):
         self.context = zmq.asyncio.Context.instance()
         self.socket: zmq.asyncio.Socket = self.context.socket(zmq.SUB)
         self.unpack = get_unpacker(config.packstyle)
-        self.is_connected = True
+        self.is_connected = False
 
     async def receive(self) -> tuple[str, dict]:
         """
