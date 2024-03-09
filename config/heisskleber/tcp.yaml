@@ -1,0 +1,6 @@
+# Heisskleber config file for TcpConf
+host: localhost
+port: 6000
+print_stdout: false
+timeout: 60
+verbose: false

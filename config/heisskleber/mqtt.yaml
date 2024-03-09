@@ -1,9 +1,16 @@
-host: "10.47.36.1"
-user: ""
-password: ""
+# Heisskleber config file for MqttConf
+host: localhost
+mapping: /deprecated/
+max_saved_messages: 100
+packstyle: json
+password: ''
 port: 1883
-ssl: False
+print_stdout: false
 qos: 0
-topics: ["test"]
-mapping: ""
-packstyle: "json"
+retain: false
+source_id: box-01
+ssl: false
+timeout_s: 60
+topics: []
+user: ''
+verbose: false
