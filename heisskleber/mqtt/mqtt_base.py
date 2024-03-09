@@ -34,17 +34,19 @@ class MqttBase:
 
     def __init__(self, config: MqttConf) -> None:
         self.config = config
-        self.client: mqtt_client | None = None
+        self.client = mqtt_client()
+        self.is_connected = False
 
     def start(self) -> None:
-        self.connect()
+        if not self.is_connected:
+            self.connect()
 
     def stop(self) -> None:
         if self.client:
             self.client.loop_stop()
+        self.is_connected = False
 
     def connect(self) -> None:
-        self.client = mqtt_client()
         self.client.username_pw_set(self.config.user, self.config.password)
 
         # Add callbacks
@@ -60,6 +62,7 @@ class MqttBase:
 
         self.client.connect(self.config.host, self.config.port)
         self.client.loop_start()
+        self.is_connected = True
 
     @staticmethod
     def _raise_if_thread_died() -> None:

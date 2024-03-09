@@ -26,7 +26,7 @@ class MqttPublisher(MqttBase, Sink):
 
         Publishing is asynchronous
         """
-        if not self.client.is_connected():
+        if not self.is_connected:
             self.start()
 
         self._raise_if_thread_died()
@@ -35,7 +35,7 @@ class MqttPublisher(MqttBase, Sink):
         self.client.publish(topic, payload, qos=self.config.qos, retain=self.config.retain)
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
+        return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"
 
     def start(self) -> None:
         super().start()
