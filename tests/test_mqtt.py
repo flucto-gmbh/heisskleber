@@ -3,10 +3,11 @@ from queue import SimpleQueue
 from unittest.mock import call, patch
 
 import pytest
-from paho.mqtt.client import MQTTMessage
+from paho.mqtt.client import Client, MQTTMessage
 
 from heisskleber.mqtt.config import MqttConf
 from heisskleber.mqtt.mqtt_base import MqttBase
+from heisskleber.mqtt.publisher import MqttPublisher
 from heisskleber.mqtt.subscriber import MqttSubscriber
 
 
@@ -27,7 +28,7 @@ def mock_mqtt_conf() -> MqttConf:
 # Mock the paho mqtt client
 @pytest.fixture
 def mock_mqtt_client():
-    with patch("heisskleber.mqtt.mqtt_base.mqtt_client", autospec=True) as mock:
+    with patch("heisskleber.mqtt.mqtt_base.mqtt_client", spec=Client) as mock:
         yield mock
 
 
@@ -156,3 +157,38 @@ def test_message_is_put_into_queue_with_actual_queue(mock_mqtt_conf, mock_mqtt_c
 
     assert topic == "test/topic"
     assert return_dict == {"key": "value"}
+
+
+def test_publisher_starts_correctly(mock_mqtt_conf, mock_mqtt_client):
+    publisher = MqttPublisher(mock_mqtt_conf)
+    publisher.start()
+    mock_mqtt_client.return_value.connect.assert_called_once_with("localhost", 1883)
+
+
+def test_publisher_starts_on_send(mock_mqtt_conf, mock_mqtt_client):
+    publisher = MqttPublisher(mock_mqtt_conf)
+    publisher.send({"test": 1.0}, "test")
+    mock_mqtt_client.return_value.connect.assert_called_once_with("localhost", 1883)
+
+
+def test_publisher_starts_only_once(mock_mqtt_conf, mock_mqtt_client):
+    publisher = MqttPublisher(mock_mqtt_conf)
+    publisher.start()
+    publisher.send({"test": 1.0}, "test")
+    mock_mqtt_client.return_value.connect.assert_called_once_with("localhost", 1883)
+
+
+def test_publisher_not_connected(mock_mqtt_conf, mock_mqtt_client):
+    publisher = MqttPublisher(mock_mqtt_conf)
+    assert not publisher.is_connected
+    publisher.start()
+    assert publisher.is_connected
+    mock_mqtt_client.return_value.connect.assert_called_once_with("localhost", 1883)
+    publisher.stop()
+    assert not publisher.is_connected
+    mock_mqtt_client.return_value.loop_stop.assert_called_once()
+
+
+def test_publisher_repr(mock_mqtt_conf):
+    publisher = MqttPublisher(mock_mqtt_conf)
+    assert str(publisher) == "MqttPublisher(host=localhost, port=1883)"

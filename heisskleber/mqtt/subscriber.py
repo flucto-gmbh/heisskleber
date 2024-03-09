@@ -30,6 +30,10 @@ class MqttSubscriber(MqttBase, Source):
         """
         Subscribe to one or multiple topics
         """
+        if not self.is_connected:
+            super().start()
+            self.client.on_message = self._on_message
+
         if isinstance(topics, (list, tuple)):
             # if subscribing to multiple topics, use a list of tuples
             subscription_list = [(topic, self.config.qos) for topic in topics]
@@ -58,13 +62,12 @@ class MqttSubscriber(MqttBase, Source):
         return (mqtt_message.topic, message_returned)
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
+        return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"
 
     def start(self) -> None:
         super().start()
         self.subscribe(self.topics)
         self.client.on_message = self._on_message
-        self.is_connected = True
 
     def stop(self) -> None:
         super().stop()
