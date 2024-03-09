@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "heisskleber"
-version = "0.5.5"
+version = "0.5.6"
 description = "Heisskleber"
 authors = ["Felix Weiler <felix@flucto.tech>"]
 license = "MIT"
