@@ -1,4 +1,8 @@
-protocol: "tcp" # ipc protocol
-host: "127.0.0.1" # the interface to bind to
-publisher_port: 5555 # port used by primary producers
-subscriber_port: 5556 # port used by primary consumers
+# Heisskleber config file for ZmqConf
+host: 127.0.0.1
+packstyle: json
+print_stdout: false
+protocol: tcp
+publisher_port: 5555
+subscriber_port: 5556
+verbose: false

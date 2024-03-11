@@ -17,7 +17,8 @@ class MqttConf(BaseConf):
     qos: int = 0
     retain: bool = False
     topics: list[str] = field(default_factory=list)
-    mapping: str = "/msb/"
+    mapping: str = "/deprecated/"  # deprecated
     packstyle: str = "json"
     max_saved_messages: int = 100
     timeout_s: int = 60
+    source_id: str = "box-01"

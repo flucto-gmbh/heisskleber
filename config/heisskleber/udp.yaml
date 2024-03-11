@@ -1,0 +1,9 @@
+# Heisskleber config file for UdpConf
+delimiter: "\r\n"
+encoding: utf-8
+host: 127.0.0.1
+max_queue_size: 1000
+packer: json
+port: 1234
+print_stdout: false
+verbose: false

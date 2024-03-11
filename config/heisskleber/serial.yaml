@@ -1,6 +1,7 @@
-verbose: false
-port: "/dev/ttyUSB0"
-baudrate: 19200
+# Heisskleber config file for SerialConf
+baudrate: 9600
 bytesize: 8
-encoding: "utf-8"
-packstyle: "serial" # not yet implemented
+encoding: ascii
+port: /dev/serial0
+print_stdout: false
+verbose: false
