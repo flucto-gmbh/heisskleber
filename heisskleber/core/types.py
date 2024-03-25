@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncGenerator, Generator
 from typing import Any, Callable, Union
 
 from heisskleber.config import BaseConf
@@ -55,6 +56,10 @@ class Source(ABC):
 
     unpack: Callable[[str], dict[str, Serializable]]
 
+    def __iter__(self) -> Generator[tuple[str, dict[str, Serializable]], None, None]:
+        topic, data = self.receive()
+        yield topic, data
+
     @abstractmethod
     def __init__(self, config: BaseConf, topic: str | list[str]) -> None:
         """
@@ -94,6 +99,11 @@ class AsyncSource(ABC):
     """
     AsyncSubscriber interface
     """
+
+    async def __aiter__(self) -> AsyncGenerator[tuple[str, dict[str, Serializable]], None]:
+        while True:
+            topic, data = await self.receive()
+            yield topic, data
 
     @abstractmethod
     def __init__(self, config: Any, topic: str | list[str]) -> None:
