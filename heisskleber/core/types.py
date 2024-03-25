@@ -5,7 +5,7 @@ from typing import Any, Callable, Union
 
 from heisskleber.config import BaseConf
 
-Serializable = Union[str, int, float]
+Serializable = Union[int, float]
 
 
 class Sink(ABC):
