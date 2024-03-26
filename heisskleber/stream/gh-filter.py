@@ -13,7 +13,7 @@ class GhFilter(Filter):
 
     Example:
         >>> source = get_async_source()
-        >>> filter = LowPassFilter(source, 0.1, 100, 3)
+        >>> filter = GhFilter(source, 0.008, 0.001)
         >>> async for topic, data in filter:
         >>>     print(topic, data)
     """
