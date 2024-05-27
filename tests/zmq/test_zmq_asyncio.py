@@ -1,6 +1,7 @@
 import time
 from collections.abc import Generator
 from multiprocessing import Process
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -17,7 +18,7 @@ def start_broker() -> Generator[Process, None, None]:
     # setup broker
     with patch(
         "heisskleber.config.parse.get_config_filepath",
-        return_value="tests/resources/zmq.yaml",
+        return_value=Path("tests/resources/zmq.yaml"),
     ):
         broker_config = load_config(ZmqConf(), "zmq", read_commandline=False)
         broker_process = Process(
