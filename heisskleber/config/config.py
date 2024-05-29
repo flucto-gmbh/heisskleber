@@ -1,7 +1,7 @@
 import socket
 import warnings
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 
 @dataclass
@@ -28,3 +28,8 @@ class BaseConf:
     @property
     def serial_number(self) -> str:
         return socket.gethostname().upper()
+
+
+Config = TypeVar(
+    "Config", bound=BaseConf
+)  # https://stackoverflow.com/a/46227137 , https://docs.python.org/3/library/typing.html#typing.TypeVar
