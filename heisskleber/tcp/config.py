@@ -7,8 +7,8 @@ from heisskleber.config import BaseConf
 @dataclass
 class TcpConf(BaseConf):
     class RestartBehavior(Enum):
-        NEVER = 0,  # Never restart on failure
-        ONCE = 1,  # Restart once
+        NEVER = 0  # Never restart on failure
+        ONCE = 1  # Restart once
         INFINITELY = 2  # Restart until the connection succeeds
 
     host: str = "localhost"
