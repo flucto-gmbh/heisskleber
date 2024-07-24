@@ -21,8 +21,10 @@ class Unpacker(ABC):
     """
 
     @abstractmethod
-    def __call__(self, payload: bytes) -> tuple[dict[str, Any], str | None]:
+    def __call__(self, payload: bytes) -> dict[str, Any]:
         """Unpacks the payload into a topic and data dictionary.
+
+        Special treatment will be given to keys that start with an underscore, such as '_topic', which will be used to set the topic.
 
         Args:
             payload (bytes): The input payload to be unpacked.
@@ -33,7 +35,7 @@ class Unpacker(ABC):
                 - dict[str, Any]: The data dictionary created from the payload.
 
         Raises:
-            NotImplementedError: This method must be implemented by subclasses.
+            ParserError: The payload could not be unpacked.
         """
         pass
 
@@ -63,7 +65,7 @@ class Packer(ABC):
             bytes: The packed payload.
 
         Raises:
-            NotImplementedError: This method must be implemented by subclasses.
+            SerializationError: The data dictionary could not be packed.
         """
         pass
 

@@ -1,9 +1,10 @@
 from asyncio import Queue, Task, create_task, sleep
+from typing import Any
 
 from aiomqtt import Client, Message, MqttError
 
-from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import AsyncSource, Serializable
+from heisskleber.core import Unpacker, json_unpacker
+from heisskleber.core.types import AsyncSource
 from heisskleber.mqtt import MqttConf
 
 
@@ -13,8 +14,9 @@ class AsyncMqttSubscriber(AsyncSource):
     Data is received by the `receive` method returns the newest message in the queue.
     """
 
-    def __init__(self, config: MqttConf, topic: str | list[str]) -> None:
-        self.config: MqttConf = config
+    def __init__(self, config: MqttConf, topic: str | list[str], unpacker: Unpacker = json_unpacker) -> None:
+        self.config = config
+        # TODO: Move to start method
         self.client = Client(
             hostname=self.config.host,
             port=self.config.port,
@@ -22,7 +24,7 @@ class AsyncMqttSubscriber(AsyncSource):
             password=self.config.password,
         )
         self.topics = topic
-        self.unpack = get_unpacker(self.config.packstyle)
+        self.unpack = unpacker
         self.message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
         self._listener_task: Task[None] | None = None
 
@@ -37,7 +39,7 @@ class AsyncMqttSubscriber(AsyncSource):
             self._listener_task.cancel()
         self._listener_task = None
 
-    async def receive(self) -> tuple[str, dict[str, Serializable]]:
+    async def receive(self) -> tuple[str, dict[str, Any]]:
         """
         Await the newest message in the queue and return Tuple
         """
@@ -69,13 +71,13 @@ class AsyncMqttSubscriber(AsyncSource):
             async for message in messages:
                 await self.message_queue.put(message)
 
-    def _handle_message(self, message: Message) -> tuple[str, dict[str, Serializable]]:
+    def _handle_message(self, message: Message) -> tuple[str, dict[str, Any]]:
         if not isinstance(message.payload, bytes):
             error_msg = "Payload is not of type bytes."
             raise TypeError(error_msg)
 
         topic = str(message.topic)
-        message_returned = self.unpack(message.payload.decode())
+        message_returned = self.unpack(message.payload)
         return (topic, message_returned)
 
     async def _subscribe_topics(self) -> None:
