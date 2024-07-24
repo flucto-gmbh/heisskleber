@@ -1,5 +1,5 @@
 from .config import UdpConf
-from .publisher import AsyncUdpSink, UdpPublisher
-from .subscriber import AsyncUdpSource, UdpSubscriber
+from .publisher import AsyncUdpSink
+from .subscriber import AsyncUdpSource
 
-__all__ = ["AsyncUdpSource", "UdpSubscriber", "AsyncUdpSink", "UdpPublisher", "UdpConf"]
+__all__ = ["AsyncUdpSource", "AsyncUdpSink", "UdpConf"]

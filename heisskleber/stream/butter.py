@@ -1,10 +1,11 @@
 from collections import deque
+from typing import Any
 
 import numpy as np
 import scipy.signal  # type: ignore [import-untyped]
 from numpy.typing import NDArray
 
-from heisskleber.core.types import AsyncSource, Serializable
+from heisskleber.core.types import AsyncSource
 from heisskleber.stream.filter import Filter
 
 
@@ -66,7 +67,7 @@ class ButterFilter(Filter):
         self.b, self.a = scipy.signal.iirfilter(order, Wn=Wn, fs=sampling_rate, btype=btype, ftype="butter")
         self.filters: dict[str, LiveLFilter] = {}
 
-    def _filter(self, data: dict[str, Serializable]) -> dict[str, Serializable]:
+    def _filter(self, data: dict[str, Any]) -> dict[str, Any]:
         if not self.filters:
             for key in data:
                 self.filters[key] = LiveLFilter(a=self.a, b=self.b)
