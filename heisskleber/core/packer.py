@@ -1,44 +1,82 @@
 """Packer and unpacker for network data."""
+
 import json
-import pickle
-from typing import Any, Callable
-
-from .types import Serializable
+from abc import ABC, abstractmethod
+from typing import Any
 
 
-def get_packer(style: str) -> Callable[[dict[str, Serializable]], str]:
-    """Return a packer function for the given style.
+class Unpacker(ABC):
+    """Unpacker Interface.
 
-    Packer func serializes a given dict."""
-    if style in _packstyles:
-        return _packstyles[style]
-    else:
-        return _packstyles["default"]
+    This abstract base class defines an interface for unpacking payloads.
+    It takes a payload of bytes, creates a data dictionary and an optional topic,
+    and returns a tuple containing the topic and data.
+
+    Attributes:
+        None
+
+    Methods:
+        __call__(payload: bytes) -> tuple[str | None, dict[str, Any]]:
+            Unpacks the given payload and returns the resulting topic and data.
+    """
+
+    @abstractmethod
+    def __call__(self, payload: bytes) -> tuple[str | None, dict[str, Any]]:
+        """Unpacks the payload into a topic and data dictionary.
+
+        Args:
+            payload (bytes): The input payload to be unpacked.
+
+        Returns:
+            tuple[str | None, dict[str, Any]]: A tuple containing:
+                - str | None: The topic extracted from the payload, if any.
+                - dict[str, Any]: The data dictionary created from the payload.
+
+        Raises:
+            NotImplementedError: This method must be implemented by subclasses.
+        """
+        pass
 
 
-def get_unpacker(style: str) -> Callable[[str], dict[str, Serializable]]:
-    """Return an unpacker function for the given style.
+class Packer(ABC):
+    """Packer Interface.
 
-    Unpacker func deserializes a string."""
-    if style in _unpackstyles:
-        return _unpackstyles[style]
-    else:
-        return _unpackstyles["default"]
+    This abstract base class defines an interface for packing data.
+    It takes a dictionary of data and converts it into a bytes payload.
+
+    Attributes:
+        None
+
+    Methods:
+        __call__(data: dict[str, Any]) -> bytes:
+            Packs the given data dictionary into a bytes payload.
+    """
+
+    @abstractmethod
+    def __call__(self, data: dict[str, Any]) -> bytes:
+        """Packs the data dictionary into a bytes payload.
+
+        Args:
+            data (dict[str, Any]): The input data dictionary to be packed.
+
+        Returns:
+            bytes: The packed payload.
+
+        Raises:
+            NotImplementedError: This method must be implemented by subclasses.
+        """
+        pass
 
 
-def serialpacker(data: dict[str, Any]) -> str:
-    return ",".join([str(v) for v in data.values()])
+class JSONUnpacker(Unpacker):
+    """Default implementation for deserialzation of json data."""
+
+    def __call__(self, payload: bytes) -> tuple[str | None, dict[str, Any]]:
+        return None, json.loads(payload.decode())
 
 
-_packstyles: dict[str, Callable[[dict[str, Serializable]], str]] = {
-    "default": json.dumps,
-    "json": json.dumps,
-    "pickle": pickle.dumps,  # type: ignore
-    "serial": serialpacker,
-}
+class JSONPacker(Packer):
+    """Default implementation for serialization of json data."""
 
-_unpackstyles: dict[str, Callable[[str], dict[str, Serializable]]] = {
-    "default": json.loads,
-    "json": json.loads,
-    "pickle": pickle.loads,  # type: ignore
-}
+    def __call__(self, data: dict[str, Any]) -> bytes:
+        return json.dumps(data).encode()

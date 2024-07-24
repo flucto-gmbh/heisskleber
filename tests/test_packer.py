@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from heisskleber.core.packer import get_packer, get_unpacker, serialpacker
+from heisskleber.core.packer import get_packer, get_unpacker, csv_packer
 
 
 def test_get_packer() -> None:
@@ -12,7 +12,7 @@ def test_get_packer() -> None:
     assert get_packer("pickle") == pickle.dumps
     assert get_packer("default") == json.dumps
     assert get_packer("foobar") == json.dumps
-    assert get_packer("serial") == serialpacker
+    assert get_packer("serial") == csv_packer
 
 
 def test_get_unpacker() -> None:
@@ -32,4 +32,4 @@ def test_get_unpacker() -> None:
     ],
 )
 def test_serial_packer_functionality(message: dict[str, Any], expected: str) -> None:
-    assert serialpacker(message) == expected
+    assert csv_packer(message) == expected

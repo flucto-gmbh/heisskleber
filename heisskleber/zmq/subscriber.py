@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import sys
+from typing import Any, Callable
 
 import zmq
 import zmq.asyncio
 
-from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import AsyncSource, Source
+from heisskleber.core.packer import json_unpacker
+from heisskleber.core.types import AsyncSource
 
 from .config import ZmqConf
 
@@ -32,7 +33,9 @@ class ZmqAsyncSubscriber(AsyncSource):
         Close the socket.
     """
 
-    def __init__(self, config: ZmqConf, topic: str | list[str]):
+    def __init__(
+        self, config: ZmqConf, topic: str | list[str], unpacker: Callable[[bytes], dict[str, Any]] = json_unpacker
+    ):
         """
         Constructs new ZmqAsyncSubscriber instance.
 
@@ -47,7 +50,7 @@ class ZmqAsyncSubscriber(AsyncSource):
         self.topic = topic
         self.context = zmq.asyncio.Context.instance()
         self.socket: zmq.asyncio.Socket = self.context.socket(zmq.SUB)
-        self.unpack = get_unpacker(config.packstyle)
+        self.unpack = unpacker
         self.is_connected = False
 
     async def receive(self) -> tuple[str, dict]:
@@ -60,7 +63,7 @@ class ZmqAsyncSubscriber(AsyncSource):
         if not self.is_connected:
             self.start()
         (topic, payload) = await self.socket.recv_multipart()
-        message = self.unpack(payload.decode())
+        message = self.unpack(payload)
         topic = topic.decode()
         return (topic, message)
 

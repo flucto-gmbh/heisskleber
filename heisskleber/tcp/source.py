@@ -1,14 +1,9 @@
 import asyncio
-from typing import Callable
+from typing import Any, Callable
 
-from heisskleber.core.types import AsyncSource, Serializable
+from heisskleber.core.packer import bytes_csv_unpacker
+from heisskleber.core.types import AsyncSource
 from heisskleber.tcp.config import TcpConf
-
-
-def bytes_csv_unpacker(data: bytes) -> tuple[str, dict[str, str]]:
-    vals = data.decode().rstrip().split(",")
-    keys = [f"key{i}" for i in range(len(vals))]
-    return ("tcp", dict(zip(keys, vals)))
 
 
 class AsyncTcpSource(AsyncSource):
@@ -25,18 +20,20 @@ class AsyncTcpSource(AsyncSource):
 
     """
 
-    def __init__(self, config: TcpConf, unpack: Callable[[bytes], tuple[str, dict[str, Serializable]]] | None) -> None:
+    def __init__(
+        self, config: TcpConf, unpacker: Callable[[bytes], tuple[str | None, dict[str, Any]]] = bytes_csv_unpacker
+    ) -> None:
         self.config = config
         self.is_connected = asyncio.Event()
-        self.unpack = unpack or bytes_csv_unpacker
+        self.unpack = unpacker
         self.timeout = config.timeout
         self.start_task: asyncio.Task[None] | None = None
 
-    async def receive(self) -> tuple[str, dict[str, Serializable]]:
+    async def receive(self) -> tuple[str, dict[str, Any]]:
         await self._check_connection()
         data = await self.reader.readline()
         topic, payload = self.unpack(data)
-        return (topic, payload)  # type: ignore
+        return (topic, payload)
 
     def start(self) -> None:
         self.start_task = asyncio.create_task(self._connect())
