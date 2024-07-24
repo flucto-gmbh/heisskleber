@@ -21,7 +21,7 @@ class Unpacker(ABC):
     """
 
     @abstractmethod
-    def __call__(self, payload: bytes) -> tuple[str | None, dict[str, Any]]:
+    def __call__(self, payload: bytes) -> tuple[dict[str, Any], str | None]:
         """Unpacks the payload into a topic and data dictionary.
 
         Args:
@@ -71,8 +71,8 @@ class Packer(ABC):
 class JSONUnpacker(Unpacker):
     """Default implementation for deserialzation of json data."""
 
-    def __call__(self, payload: bytes) -> tuple[str | None, dict[str, Any]]:
-        return None, json.loads(payload.decode())
+    def __call__(self, payload: bytes) -> tuple[dict[str, Any], str | None]:
+        return json.loads(payload.decode()), None
 
 
 class JSONPacker(Packer):
