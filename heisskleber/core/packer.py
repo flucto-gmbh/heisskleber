@@ -2,45 +2,12 @@
 
 import json
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Callable, Generic, Protocol, TypeVar
+
+T = TypeVar("T", contravariant=True)
 
 
-class Unpacker(ABC):
-    """Unpacker Interface.
-
-    This abstract base class defines an interface for unpacking payloads.
-    It takes a payload of bytes, creates a data dictionary and an optional topic,
-    and returns a tuple containing the topic and data.
-
-    Attributes:
-        None
-
-    Methods:
-        __call__(payload: bytes) -> tuple[str | None, dict[str, Any]]:
-            Unpacks the given payload and returns the resulting topic and data.
-    """
-
-    @abstractmethod
-    def __call__(self, payload: bytes) -> dict[str, Any]:
-        """Unpacks the payload into a topic and data dictionary.
-
-        Special treatment will be given to keys that start with an underscore, such as '_topic', which will be used to set the topic.
-
-        Args:
-            payload (bytes): The input payload to be unpacked.
-
-        Returns:
-            tuple[str | None, dict[str, Any]]: A tuple containing:
-                - str | None: The topic extracted from the payload, if any.
-                - dict[str, Any]: The data dictionary created from the payload.
-
-        Raises:
-            ParserError: The payload could not be unpacked.
-        """
-        pass
-
-
-class Packer(ABC):
+class Packer(Protocol[T]):
     """Packer Interface.
 
     This abstract base class defines an interface for packing data.
@@ -55,7 +22,7 @@ class Packer(ABC):
     """
 
     @abstractmethod
-    def __call__(self, data: dict[str, Any]) -> bytes:
+    def __call__(self, data: T) -> bytes:
         """Packs the data dictionary into a bytes payload.
 
         Args:
@@ -70,14 +37,7 @@ class Packer(ABC):
         pass
 
 
-class JSONUnpacker(Unpacker):
-    """Default implementation for deserialzation of json data."""
-
-    def __call__(self, payload: bytes) -> tuple[dict[str, Any], str | None]:
-        return json.loads(payload.decode()), None
-
-
-class JSONPacker(Packer):
+class JSONPacker(Packer[dict[str, Any]]):
     """Default implementation for serialization of json data."""
 
     def __call__(self, data: dict[str, Any]) -> bytes:

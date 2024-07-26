@@ -2,24 +2,24 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Any, Generic
 
 from heisskleber.config import BaseConf
 
-from .packer import Packer, Unpacker
+from .packer import Packer, T, Unpacker
 
 
-class AsyncSource(ABC):
+class AsyncSource(ABC, Generic[T]):
     """
     AsyncSubscriber interface
     """
 
     unpacker: Unpacker
 
-    async def __aiter__(self) -> AsyncGenerator[tuple[str, dict[str, Any]], None]:
+    async def __aiter__(self) -> AsyncGenerator[tuple[T, dict[str, Any]], None]:
         while True:
-            topic, data = await self.receive()
-            yield topic, data
+            data, meta = await self.receive()
+            yield data, meta
 
     @abstractmethod
     def __init__(self, config: BaseConf, topic: str | list[str]) -> None:
@@ -29,7 +29,7 @@ class AsyncSource(ABC):
         pass
 
     @abstractmethod
-    async def receive(self) -> tuple[str, dict[str, Any]]:
+    async def receive(self) -> tuple[T, dict[str, Any]]:
         """
         Blocking function to receive data from the implemented input stream.
 
@@ -56,7 +56,7 @@ class AsyncSource(ABC):
         pass
 
 
-class AsyncSink(ABC):
+class AsyncSink(ABC, Generic[T]):
     """
     Sink interface to send() data to.
     """
@@ -71,7 +71,7 @@ class AsyncSink(ABC):
         pass
 
     @abstractmethod
-    async def send(self, data: dict[str, Any], topic: str) -> None:
+    async def send(self, data: dict[str, T], topic: str) -> None:
         """
         Send data via the implemented output stream.
         """

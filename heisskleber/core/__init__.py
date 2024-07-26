@@ -1,5 +1,7 @@
-from .packer import JSONPacker, JSONUnpacker, Packer, Unpacker
-from .types import AsyncSink, AsyncSource
+from .packer import JSONPacker, Packer
+from .sink import AsyncSink
+from .source import AsyncSource
+from .unpacker import JSONUnpacker, Unpacker
 
 json_packer = JSONPacker()
 json_unpacker = JSONUnpacker()
