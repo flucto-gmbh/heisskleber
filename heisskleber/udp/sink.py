@@ -13,6 +13,9 @@ class UdpProtocol(asyncio.DatagramProtocol):
         super().__init__()
         self.is_connected = is_connected
 
+    def connection_made(self, transport: asyncio.DatagramTransport) -> None:
+        print("Connection made")
+
     def connection_lost(self, exc: Exception | None) -> None:
         print("Connection lost")
         self.is_connected = False

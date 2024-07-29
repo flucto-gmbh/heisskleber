@@ -9,15 +9,21 @@ T = TypeVar("T")
 
 
 class UdpProtocol(asyncio.DatagramProtocol):
-    def __init__(self, queue: asyncio.Queue[bytes]) -> None:
+    def __init__(self, is_connected: bool, queue: asyncio.Queue[bytes]) -> None:
         super().__init__()
         self.queue = queue
+        self.is_connected = is_connected
+        self.logger = logging.getLogger("heisskleber")
 
     def datagram_received(self, data: bytes, addr: tuple[str | Any, int]) -> None:
         self.queue.put_nowait(data)
 
     def connection_made(self, transport: asyncio.DatagramTransport) -> None:
-        print("Connection made")
+        self.logger.info("Connection made")
+
+    def connection_lost(self, exc: Exception | None) -> None:
+        self.is_connected = False
+        self.logger.info("Connection lost")
 
 
 class UdpSource(AsyncSource[T]):
@@ -36,20 +42,21 @@ class UdpSource(AsyncSource[T]):
         self.logger = logging.getLogger("heisskleber")
 
     async def start(self) -> None:
-        loop = asyncio.get_event_loop()
-        self.transport, self.protocol = await loop.create_datagram_endpoint(
-            lambda: UdpProtocol(self.queue),
-            local_addr=(self.config.host, self.config.port),
-        )
-        self.is_connected = True
-        print("Udp connection established.")
+        await self._ensure_connection()
+
+    async def _ensure_connection(self) -> None:
+        if not self.is_connected:
+            loop = asyncio.get_running_loop()
+            self.transport, self.protocol = await loop.create_datagram_endpoint(
+                lambda: UdpProtocol(self.is_connected, self.queue),
+                remote_addr=(self.config.host, self.config.port),
+            )
 
     def stop(self) -> None:
         self.transport.close()
 
     async def receive(self) -> tuple[T, dict[str, Any]]:
-        if not self.is_connected:
-            await self.start()
+        await self._ensure_connection()
 
         while True:
             data = None
