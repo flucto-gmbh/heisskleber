@@ -1,8 +1,11 @@
 import asyncio
-from typing import Any, Callable
+from typing import Any, TypeVar
 
 from heisskleber.core import AsyncSink, json_packer
+from heisskleber.core.packer import Packer
 from heisskleber.udp.config import UdpConf
+
+T = TypeVar("T")
 
 
 class UdpProtocol(asyncio.DatagramProtocol):
@@ -15,14 +18,14 @@ class UdpProtocol(asyncio.DatagramProtocol):
         self.is_connected = False
 
 
-class UdpSink(AsyncSink):
-    def __init__(self, config: UdpConf, packer: Callable[[dict[str, Any]], bytes] = json_packer) -> None:
+class UdpSink(AsyncSink[T]):
+    def __init__(self, config: UdpConf, packer: Packer[T] = json_packer) -> None:
         self.config = config
         self.pack = packer
         self.socket: asyncio.DatagramTransport | None = None
         self.is_connected = False
 
-    def start(self) -> None:
+    async def start(self) -> None:
         # No background loop required
         pass
 
@@ -40,10 +43,8 @@ class UdpSink(AsyncSink):
             )
             self.is_connected = True
 
-    async def send(self, data: dict[str, Any], topic: str | None = None) -> None:
+    async def send(self, data: T, **kwargs: dict[str, Any]) -> None:
         await self._ensure_connection()
-        if topic:
-            data["topic"] = topic
         payload = self.pack(data)
         self.socket.sendto(payload)  # type: ignore
 

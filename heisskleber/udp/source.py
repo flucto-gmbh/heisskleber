@@ -25,7 +25,7 @@ class UdpSource(AsyncSource[T]):
     An asynchronous UDP subscriber based on asyncio.protocols.DatagramProtocol
     """
 
-    def __init__(self, config: UdpConf, topic: str = "udp", unpacker: Unpacker = json_unpacker) -> None:
+    def __init__(self, config: UdpConf, topic: str = "udp", unpacker: Unpacker[T] = json_unpacker) -> None:
         self.config = config
         self.topic = topic
         self.EOF = self.config.delimiter.encode(self.config.encoding)
