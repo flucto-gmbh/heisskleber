@@ -2,7 +2,7 @@ import asyncio
 
 import numpy as np
 
-from heisskleber.mqtt import AsyncMqttSubscriber, MqttConf
+from heisskleber.mqtt import MqttConf, MqttSource
 from heisskleber.stream.resampler import Resampler, ResamplerConf
 
 
@@ -11,8 +11,8 @@ async def main():
     topic2 = "topic2"
 
     config = MqttConf(host="localhost", port=1883, user="", password="")  # not a real password
-    sub1 = AsyncMqttSubscriber(config, topic1)
-    sub2 = AsyncMqttSubscriber(config, topic2)
+    sub1 = MqttSource(config, topic1)
+    sub2 = MqttSource(config, topic2)
 
     resampler_config = ResamplerConf(resample_rate=250)
 

@@ -6,7 +6,7 @@ import pytest
 import pytest_asyncio
 
 from heisskleber.tcp.config import TcpConf
-from heisskleber.tcp.source import AsyncTcpSource
+from heisskleber.tcp.source import TcpSource
 
 
 class TcpTestSender:
@@ -25,7 +25,7 @@ class TcpTestSender:
         self.on_connected(writer)
 
     def _send_ok(self, writer):
-        writer.write(b'OK\n')
+        writer.write(b"OK\n")
 
 
 @pytest_asyncio.fixture
@@ -42,47 +42,49 @@ def mock_conf():
 
 @pytest.mark.asyncio
 async def test_01_connect_refused(mock_conf, caplog) -> None:
-    logger = logging.getLogger('AsyncTcpSource')
+    logger = logging.getLogger("AsyncTcpSource")
     logger.setLevel(logging.WARNING)
 
-    source = AsyncTcpSource(mock_conf, None)
+    source = TcpSource(mock_conf, None)
     with contextlib.suppress(ConnectionRefusedError):
-        await source.start_async()
+        await source.start()
     assert len(caplog.record_tuples) == 1
     logger_name, level, message = caplog.record_tuples[0]
-    assert logger_name == 'AsyncTcpSource'
+    assert logger_name == "AsyncTcpSource"
     assert level == 40
-    assert message == 'AsyncTcpSource(host=127.0.0.1, port=12345): ConnectionRefusedError'
+    assert message == "AsyncTcpSource(host=127.0.0.1, port=12345): ConnectionRefusedError"
     source.stop()
 
 
 @pytest.mark.asyncio
 async def test_02_connect_timedout(mock_conf, caplog) -> None:
-    logger = logging.getLogger('AsyncTcpSource')
+    logger = logging.getLogger("AsyncTcpSource")
     logger.setLevel(logging.WARNING)
 
     mock_conf.timeout = 1
-    source = AsyncTcpSource(mock_conf, None)
+    source = TcpSource(mock_conf, None)
     # Linux "ConnectionRefusedError", Windows says "TimeoutError"
     with contextlib.suppress(TimeoutError, ConnectionRefusedError):
-        await source.start_async()
+        await source.start()
     assert len(caplog.record_tuples) == 1
     logger_name, level, message = caplog.record_tuples[0]
-    assert logger_name == 'AsyncTcpSource'
+    assert logger_name == "AsyncTcpSource"
     assert level == 40
-    assert (message == 'AsyncTcpSource(host=127.0.0.1, port=12345): ConnectionRefusedError'
-            or message == 'AsyncTcpSource(host=127.0.0.1, port=12345): TimeoutError')
+    assert (
+        message == "AsyncTcpSource(host=127.0.0.1, port=12345): ConnectionRefusedError"
+        or message == "AsyncTcpSource(host=127.0.0.1, port=12345): TimeoutError"
+    )
     source.stop()
 
 
 @pytest.mark.asyncio
 async def test_03_connect_retry(mock_conf, caplog, test_sender) -> None:
-    logger = logging.getLogger('AsyncTcpSource')
+    logger = logging.getLogger("AsyncTcpSource")
     logger.setLevel(logging.INFO)
 
     mock_conf.timeout = 1
     mock_conf.restart_behavior = TcpConf.RestartBehavior.INFINITELY
-    source = AsyncTcpSource(mock_conf, None)
+    source = TcpSource(mock_conf, None)
     source.start()
 
     async def delayed_start():
@@ -90,33 +92,33 @@ async def test_03_connect_retry(mock_conf, caplog, test_sender) -> None:
         await test_sender.start(mock_conf.port)
 
     await asyncio.create_task(delayed_start())
-    await source.start_async()
+    await source.start()
     assert len(caplog.record_tuples) >= 3
     logger_name, level, message = caplog.record_tuples[-1]
-    assert logger_name == 'AsyncTcpSource'
+    assert logger_name == "AsyncTcpSource"
     assert level == 20
-    assert message == 'AsyncTcpSource(host=127.0.0.1, port=12345) connected successfully!'
+    assert message == "AsyncTcpSource(host=127.0.0.1, port=12345) connected successfully!"
     source.stop()
 
 
 @pytest.mark.asyncio
 async def test_04_connects_to_socket(mock_conf, caplog, test_sender) -> None:
-    logger = logging.getLogger('AsyncTcpSource')
+    logger = logging.getLogger("AsyncTcpSource")
     logger.setLevel(logging.INFO)
 
     await test_sender.start(mock_conf.port)
 
-    source = AsyncTcpSource(mock_conf, None)
-    await source.start_async()
+    source = TcpSource(mock_conf, None)
+    await source.start()
     assert len(caplog.record_tuples) == 2
     logger_name, level, message = caplog.record_tuples[0]
-    assert logger_name == 'AsyncTcpSource'
+    assert logger_name == "AsyncTcpSource"
     assert level == 20
-    assert message == 'AsyncTcpSource(host=127.0.0.1, port=12345) waiting for connection.'
+    assert message == "AsyncTcpSource(host=127.0.0.1, port=12345) waiting for connection."
     logger_name, level, message = caplog.record_tuples[1]
-    assert logger_name == 'AsyncTcpSource'
+    assert logger_name == "AsyncTcpSource"
     assert level == 20
-    assert message == 'AsyncTcpSource(host=127.0.0.1, port=12345) connected successfully!'
+    assert message == "AsyncTcpSource(host=127.0.0.1, port=12345) connected successfully!"
     source.stop()
 
 
@@ -129,7 +131,7 @@ async def test_05_connection_to_server_lost(mock_conf, caplog, test_sender) -> N
 
         # Second connection: send data
         writer = yield
-        writer.write(b'OK after second connect\n')
+        writer.write(b"OK after second connect\n")
 
     connection_handler = test_steps()
     next(connection_handler)
@@ -141,9 +143,9 @@ async def test_05_connection_to_server_lost(mock_conf, caplog, test_sender) -> N
 
     await test_sender.start(mock_conf.port)
 
-    source = AsyncTcpSource(mock_conf, None)
+    source = TcpSource(mock_conf, None)
     data = await source.receive()
-    _check_data(data, 'OK after second connect')
+    _check_data(data, "OK after second connect")
     source.stop()
 
 
@@ -151,17 +153,17 @@ async def test_05_connection_to_server_lost(mock_conf, caplog, test_sender) -> N
 async def test_06_data_received(mock_conf, caplog, test_sender) -> None:
     await test_sender.start(mock_conf.port)
 
-    source = AsyncTcpSource(mock_conf, None)
+    source = TcpSource(mock_conf, None)
     data = await source.receive()
-    _check_data(data, 'OK')
+    _check_data(data, "OK")
     source.stop()
 
 
 def _check_data(data, expected_value: str):
     assert isinstance(data, tuple)
     assert len(data) == 2
-    assert data[0] == 'tcp'
+    assert data[0] == "tcp"
     assert isinstance(data[1], dict)
     result = data[1]
-    assert 'key0' in result
-    assert result['key0'] == expected_value
+    assert "key0" in result
+    assert result["key0"] == expected_value
