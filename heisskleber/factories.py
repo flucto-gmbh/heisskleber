@@ -1,21 +1,20 @@
 from heisskleber.config import BaseConf, load_config
-from heisskleber.mqtt import AsyncMqttPublisher, AsyncMqttSubscriber, MqttConf
-from heisskleber.udp import AsyncUdpSink, AsyncUdpSource, UdpConf
-from heisskleber.zmq import ZmqAsyncPublisher, ZmqAsyncSubscriber, ZmqConf
-
-from .sink import AsyncSink
-from .source import AsyncSource
+from heisskleber.core.sink import AsyncSink
+from heisskleber.core.source import AsyncSource
+from heisskleber.mqtt import MqttConf, MqttSink, MqttSource
+from heisskleber.udp import UdpConf, UdpSink, UdpSource
+from heisskleber.zmq import ZmqConf, ZmqSink, ZmqSource
 
 _registered_async_sinks: dict[str, tuple[type[AsyncSink], type[BaseConf]]] = {
-    "mqtt": (AsyncMqttPublisher, MqttConf),
-    "zmq": (ZmqAsyncPublisher, ZmqConf),
-    "udp": (AsyncUdpSink, UdpConf),
+    "mqtt": (MqttSink, MqttConf),
+    "zmq": (ZmqSink, ZmqConf),
+    "udp": (UdpSink, UdpConf),
 }
 
 _registered_async_sources: dict[str, tuple] = {
-    "mqtt": (AsyncMqttSubscriber, MqttConf),
-    "zmq": (ZmqAsyncSubscriber, ZmqConf),
-    "udp": (AsyncUdpSource, UdpConf),
+    "mqtt": (MqttSource, MqttConf),
+    "zmq": (ZmqSource, ZmqConf),
+    "udp": (UdpSource, UdpConf),
 }
 
 

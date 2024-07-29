@@ -5,7 +5,7 @@ import numpy as np
 import scipy.signal  # type: ignore [import-untyped]
 from numpy.typing import NDArray
 
-from heisskleber.core.types import AsyncSource
+from heisskleber.core import AsyncSource
 from heisskleber.stream.filter import Filter
 
 

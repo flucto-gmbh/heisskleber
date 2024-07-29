@@ -15,7 +15,7 @@ class UdpProtocol(asyncio.DatagramProtocol):
         self.is_connected = False
 
 
-class AsyncUdpSink(AsyncSink):
+class UdpSink(AsyncSink):
     def __init__(self, config: UdpConf, packer: Callable[[dict[str, Any]], bytes] = json_packer) -> None:
         self.config = config
         self.pack = packer

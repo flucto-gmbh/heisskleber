@@ -1,4 +1,4 @@
-from heisskleber.core.types import AsyncSource
+from heisskleber.core import AsyncSource
 from heisskleber.stream.filter import Filter
 
 

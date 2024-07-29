@@ -10,7 +10,7 @@ from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 from .config import ZmqConf
 
 
-class ZmqAsyncSubscriber(AsyncSource):
+class ZmqSource(AsyncSource):
     """
     Async source that subscribes to one or many topics from a zmq broker and receives messages via the receive() function.
 

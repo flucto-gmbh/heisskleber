@@ -19,7 +19,7 @@ class UdpProtocol(asyncio.DatagramProtocol):
         print("Connection made")
 
 
-class AsyncUdpSource(AsyncSource):
+class UdpSource(AsyncSource):
     """
     An asynchronous UDP subscriber based on asyncio.protocols.DatagramProtocol
     """

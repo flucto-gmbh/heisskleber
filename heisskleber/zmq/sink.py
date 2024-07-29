@@ -9,7 +9,7 @@ from heisskleber.core import AsyncSink, json_packer
 from .config import ZmqConf
 
 
-class ZmqAsyncPublisher(AsyncSink):
+class ZmqSink(AsyncSink):
     """
     Async publisher that sends messages to a ZMQ PUB socket.
 

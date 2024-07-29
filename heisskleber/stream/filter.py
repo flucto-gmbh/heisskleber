@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from heisskleber.core.types import AsyncSource
+from heisskleber.core import AsyncSource
 
 
 class Filter(ABC):

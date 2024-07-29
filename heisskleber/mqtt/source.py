@@ -43,7 +43,7 @@ class MqttSource(AsyncSource):
         Await the newest message in the queue and return Tuple
         """
         if not self._listener_task:
-            self.start()
+            await self.start()
         mqtt_message = await self.message_queue.get()
         return self._handle_message(mqtt_message)
 
@@ -76,7 +76,7 @@ class MqttSource(AsyncSource):
             raise TypeError(error_msg)
 
         topic = str(message.topic)
-        message_returned = self.unpack(message.payload)
+        message_returned, _ = self.unpack(message.payload)
         return (topic, message_returned)
 
     async def _subscribe_topics(self) -> None:

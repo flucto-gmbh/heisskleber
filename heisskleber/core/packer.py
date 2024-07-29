@@ -2,12 +2,11 @@
 
 import json
 from abc import abstractmethod
-from typing import Any, Protocol, TypeVar, runtime_checkable
+from typing import Any, Protocol, TypeVar
 
 T = TypeVar("T", contravariant=True)
 
 
-@runtime_checkable
 class Packer(Protocol[T]):
     """Packer Interface.
 
