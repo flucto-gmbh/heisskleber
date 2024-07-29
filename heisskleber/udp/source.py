@@ -1,10 +1,11 @@
 import asyncio
-from typing import Any
+import logging
+from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSource, JSONUnpacker, Unpacker
+from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 from heisskleber.udp.config import UdpConf
 
-default_unpacker = JSONUnpacker()
+T = TypeVar("T")
 
 
 class UdpProtocol(asyncio.DatagramProtocol):
@@ -19,12 +20,12 @@ class UdpProtocol(asyncio.DatagramProtocol):
         print("Connection made")
 
 
-class UdpSource(AsyncSource):
+class UdpSource(AsyncSource[T]):
     """
     An asynchronous UDP subscriber based on asyncio.protocols.DatagramProtocol
     """
 
-    def __init__(self, config: UdpConf, topic: str = "udp", unpacker: Unpacker = default_unpacker) -> None:
+    def __init__(self, config: UdpConf, topic: str = "udp", unpacker: Unpacker = json_unpacker) -> None:
         self.config = config
         self.topic = topic
         self.EOF = self.config.delimiter.encode(self.config.encoding)
@@ -32,8 +33,9 @@ class UdpSource(AsyncSource):
         self.queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=self.config.max_queue_size)
         self.task: asyncio.Task[None] | None = None
         self.is_connected = False
+        self.logger = logging.getLogger("heisskleber")
 
-    async def setup(self) -> None:
+    async def start(self) -> None:
         loop = asyncio.get_event_loop()
         self.transport, self.protocol = await loop.create_datagram_endpoint(
             lambda: UdpProtocol(self.queue),
@@ -42,28 +44,23 @@ class UdpSource(AsyncSource):
         self.is_connected = True
         print("Udp connection established.")
 
-    def start(self) -> None:
-        # Background loop not required, handled by Protocol
-        pass
-
     def stop(self) -> None:
         self.transport.close()
 
-    async def receive(self) -> tuple[str, dict[str, Any]]:
+    async def receive(self) -> tuple[T, dict[str, Any]]:
         if not self.is_connected:
-            await self.setup()
-        data = await self.queue.get()
-        try:
-            topic, payload = self.unpacker(data)
-        # except UnicodeDecodeError: # this won't be thrown anymore, as the error flag is set to ignore!
-        #     print(f"Could not decode data, is not {self.config.encoding}")
-        except Exception:
-            if self.config.verbose:
-                print(f"Could not deserialize data: {data!r}")
-        else:
-            return (self.topic, payload)
+            await self.start()
 
-        return await self.receive()  # Try again
+        while True:
+            data = None
+            try:
+                data = await self.queue.get()
+                payload, extra = self.unpacker(data)
+            except Exception:
+                if data:
+                    self.logger.warning(f"Could not deserialize data: {data!r}")
+            else:
+                return (payload, extra)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"

@@ -4,7 +4,7 @@ import json
 from abc import abstractmethod
 from typing import Any, Protocol, TypeVar
 
-T = TypeVar("T", contravariant=True)
+T = TypeVar("T", covariant=True)
 
 
 class Unpacker(Protocol[T]):
