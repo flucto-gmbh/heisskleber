@@ -30,7 +30,7 @@ class MqttSource(AsyncSource):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
 
-    def start(self) -> None:
+    async def start(self) -> None:
         self._listener_task = create_task(self.run())
 
     def stop(self) -> None:
