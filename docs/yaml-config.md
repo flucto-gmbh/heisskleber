@@ -11,10 +11,6 @@ The configuration parameters are host, port, ssl, user and password to establish
   - 2: "At least once", where messages are assured to arrive but duplicates can occur.
   - 3: "Exactly once", where messages are assured to arrive exactly once.
 - **max_saved_messages**: maximum number of messages that will be saved in the buffer until connection is available.
-- **packstyle**: key of the serialization technique to use. Currently only JSON is supported.
-- **source_id**: id of the device that will be used to identify the MQTT messages to be used by clients to format the topic.
-  Suggested topic format is in the form of `f"/{measurement_type}/{source_id}"`, eg. "/temperature/box-01".
-- **topics**: the topics that the mqtt forwarder will subscribe to.
 
 ```yaml
 # Heisskleber config file for MqttConf
@@ -27,10 +23,4 @@ qos: 0 # quality of service, 0=at most once, 1=at least once, 2=exactly once
 timeout_s: 60
 retain: false # save last message
 max_saved_messages: 100 # buffer messages in until connection available
-packstyle: json
-
-# configs only valid for mqtt forwarder
-mapping: /deprecated/
-source_id: box-01
-topics: ["topic1", "topic2"]
 ```
