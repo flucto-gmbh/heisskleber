@@ -32,10 +32,10 @@ class TcpSource(AsyncSource[T]):
 
     """
 
-    def __init__(self, config: TcpConf, unpack: Unpacker[T] = bytes_csv_unpacker) -> None:
+    def __init__(self, config: TcpConf, unpacker: Unpacker[T] = bytes_csv_unpacker) -> None:
         self.logger = logging.getLogger("AsyncTcpSource")
         self.config = config
-        self.unpack = unpack
+        self.unpack = unpacker
         self.is_connected = False
         self.timeout = config.timeout
         self._start_task: asyncio.Task[None] | None = None
