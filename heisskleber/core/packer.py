@@ -1,12 +1,13 @@
 """Packer and unpacker for network data."""
 
 import json
-from abc import ABC, abstractmethod
-from typing import Any, Callable, Generic, Protocol, TypeVar
+from abc import abstractmethod
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 T = TypeVar("T", contravariant=True)
 
 
+@runtime_checkable
 class Packer(Protocol[T]):
     """Packer Interface.
 

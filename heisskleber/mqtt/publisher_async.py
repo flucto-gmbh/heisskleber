@@ -1,9 +1,8 @@
 import logging
 from asyncio import Queue, Task, create_task, sleep
-from typing import Any, Generic, Optional, TypedDict, TypeVar, Type
+from typing import Any, TypeVar
 
 import aiomqtt
-from typing_extensions import NotRequired
 
 from heisskleber.core import AsyncSink, Packer, json_packer
 
@@ -14,13 +13,7 @@ T = TypeVar("T")
 log = logging.getLogger(__name__)
 
 
-class MqttExtra(TypedDict):
-    topic: str
-    qos: NotRequired[int]
-    retain: NotRequired[bool]
-
-
-class AsyncMqttPublisher(AsyncSink[T, MqttExtra]):
+class AsyncMqttPublisher(AsyncSink[T]):
     """
     MQTT publisher class.
     Can be used everywhere that a flucto style publishing connection is required.
@@ -31,30 +24,22 @@ class AsyncMqttPublisher(AsyncSink[T, MqttExtra]):
     def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:
         self.config = config
         self.pack = packer
-        self._send_queue: Queue[tuple[T, MqttExtra]] = Queue()
+        self._send_queue: Queue[tuple[T, str]] = Queue()
         self._sender_task: Task[None] | None = None
 
-    @classmethod
-    def create(
-        cls: type["AsyncMqttPublisher[T]"], config: MqttConf, packer: Packer[T] = json_packer
-    ) -> "AsyncMqttPublisher[T]":
-        return cls(config, packer)
-
-    async def send(self, data: T, extra: MqttExtra | None = None) -> None:
+    async def send(
+        self, data: T, topic: str = "mqtt", qos: int = 0, retain: bool = False, **kwargs: dict[str, Any]
+    ) -> None:
         """
-        Takes python dictionary, serializes it according to the packstyle
+        Takes python dictionary, serializes it with the packer of the AsyncSink class
         and sends it to the broker.
 
         Publishing is asynchronous
         """
-        if not extra:
-            log.warning("Can't send mqtt messages without topic!")
-            raise TypeError
-
         if not self._sender_task:
-            self.start()
+            await self.start()
 
-        await self._send_queue.put((data, extra))
+        await self._send_queue.put((data, topic))
 
     async def send_work(self) -> None:
         """
@@ -73,9 +58,9 @@ class AsyncMqttPublisher(AsyncSink[T, MqttExtra]):
                     timeout=float(self.config.timeout_s),
                 ) as client:
                     while True:
-                        data, extra = await self._send_queue.get()
+                        data, topic = await self._send_queue.get()
                         payload = self.pack(data)
-                        await client.publish(topic=extra["topic"], payload=payload)
+                        await client.publish(topic=topic, payload=payload)
             except aiomqtt.MqttError:
                 print("Connection to MQTT broker failed. Retrying in 5 seconds")
                 await sleep(5)
@@ -90,19 +75,3 @@ class AsyncMqttPublisher(AsyncSink[T, MqttExtra]):
         if self._sender_task:
             self._sender_task.cancel()
             self._sender_task = None
-
-
-class FloatPacker(Packer[float]):
-    def __call__(self, data: float) -> bytes:
-        string_rep = f"{data}"
-        return string_rep.encode()
-
-
-async def main():
-    config = MqttConf()
-    packer = FloatPacker()
-    pub = AsyncMqttPublisher(config, packer)
-    normal_pub = AsyncMqttPublisher(config, json_packer)
-
-    await pub.send(1.0, extra={"topic": "/test"})
-    await normal_pub.send({"epoch": 1.0}, extra={"topic": "/test"})

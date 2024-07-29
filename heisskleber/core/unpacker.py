@@ -1,13 +1,13 @@
 """Packer and unpacker for network data."""
 
 import json
-from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from abc import abstractmethod
+from typing import Any, Protocol, TypeVar
 
-T = TypeVar("T")
+T = TypeVar("T", contravariant=True)
 
 
-class Unpacker(ABC, Generic[T]):
+class Unpacker(Protocol[T]):
     """Unpacker Interface.
 
     This abstract base class defines an interface for unpacking payloads.

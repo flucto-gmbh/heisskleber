@@ -1,8 +1,7 @@
 import asyncio
 from typing import Any, Callable
 
-from heisskleber.core.packer import json_packer
-from heisskleber.core.types import AsyncSink
+from heisskleber.core import AsyncSink, json_packer
 from heisskleber.udp.config import UdpConf
 
 

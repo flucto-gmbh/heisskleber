@@ -6,11 +6,9 @@ from typing import Any, Generic, TypeVar
 from .packer import Packer
 
 T = TypeVar("T")
-# E = TypeVar("E", bound=dict[str, Any])
-E = TypeVar("E")
 
 
-class AsyncSink(ABC, Generic[T, E]):
+class AsyncSink(ABC, Generic[T]):
     """
     Sink interface to send() data to.
     """
@@ -18,7 +16,7 @@ class AsyncSink(ABC, Generic[T, E]):
     packer: Packer[T]
 
     @abstractmethod
-    async def send(self, data: T, extra: E) -> None:
+    async def send(self, data: T, **kwargs: dict[str, Any]) -> None:
         """
         Send data via the implemented output stream.
         """
@@ -41,3 +39,10 @@ class AsyncSink(ABC, Generic[T, E]):
     @abstractmethod
     def __repr__(self) -> str:
         pass
+
+    async def __aenter__(self) -> AsyncSink[T]:
+        await self.start()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        self.stop()

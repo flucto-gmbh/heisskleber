@@ -5,8 +5,7 @@ import sys
 import zmq
 import zmq.asyncio
 
-from heisskleber.core import Unpacker, json_unpacker
-from heisskleber.core.types import AsyncSource
+from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 
 from .config import ZmqConf
 

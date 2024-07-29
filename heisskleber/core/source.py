@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
 from typing import Any, Generic
 
-from heisskleber.config import BaseConf
-
 from .unpacker import T, Unpacker
 
 
@@ -15,7 +13,6 @@ class AsyncSource(ABC, Generic[T]):
     """
 
     unpacker: Unpacker[T]
-    config: BaseConf
 
     @abstractmethod
     async def receive(self) -> tuple[T, dict[str, Any]]:
@@ -48,3 +45,10 @@ class AsyncSource(ABC, Generic[T]):
         while True:
             data, meta = await self.receive()
             yield data, meta
+
+    async def __aenter__(self) -> AsyncSource[T]:
+        await self.start()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        self.stop()
