@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from heisskleber.mqtt import AsyncMqttSubscriber
+from heisskleber.mqtt import MqttSource
 from heisskleber.stream import Resampler, ResamplerConf
 from heisskleber.stream.resampler import floor_dt, timestamp_generator
 
@@ -15,7 +15,7 @@ class EndofData(Exception):
 # Mocking the MQTT Subscriber
 @pytest.fixture
 def mock_subscriber():
-    mock = MagicMock(spec=AsyncMqttSubscriber)
+    mock = MagicMock(spec=MqttSource)
     return mock
 
 

@@ -13,7 +13,7 @@ T = TypeVar("T")
 log = logging.getLogger(__name__)
 
 
-class AsyncMqttPublisher(AsyncSink[T]):
+class MqttSink(AsyncSink[T]):
     """
     MQTT publisher class.
     Can be used everywhere that a flucto style publishing connection is required.

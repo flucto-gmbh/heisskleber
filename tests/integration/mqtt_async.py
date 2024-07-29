@@ -1,11 +1,11 @@
 import asyncio
 
-from heisskleber.mqtt import AsyncMqttSubscriber, MqttConf
+from heisskleber.mqtt import MqttConf, MqttSource
 
 
 async def main():
     conf = MqttConf(host="localhost", port=1883, user="", password="")
-    sub = AsyncMqttSubscriber(conf, topic="#")
+    sub = MqttSource(conf, topic="#")
     # async for topic, message in sub:
     #     print(message)
     # _ = asyncio.create_task(sub.run())

@@ -3,7 +3,7 @@ import time
 
 from termcolor import colored
 
-from heisskleber.mqtt import AsyncMqttPublisher, MqttConf
+from heisskleber.mqtt import MqttConf, MqttSink
 
 colortable = ["red", "green", "yellow", "blue", "magenta", "cyan"]
 
@@ -22,7 +22,7 @@ async def send_every_n_miliseconds(frequency, value, pub, topic):
 async def main2():
     config = MqttConf(host="localhost", port=1883, user="", password="")
 
-    pubs = [AsyncMqttPublisher(config) for i in range(5)]
+    pubs = [MqttSink(config) for i in range(5)]
     tasks = []
     for i, pub in enumerate(pubs):
         tasks.append(asyncio.create_task(send_every_n_miliseconds(1 + i * 0.1, i, pub, f"topic{i}")))

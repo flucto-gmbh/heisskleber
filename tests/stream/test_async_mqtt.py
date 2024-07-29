@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from heisskleber.mqtt import AsyncMqttSubscriber
+from heisskleber.mqtt import MqttSource
 from heisskleber.mqtt.config import MqttConf
 
 
@@ -37,7 +37,7 @@ async def test_subscribe_topics_single(mock_queue):
     mock_client = AsyncMock()
     config = MqttConf()
     topics = "single_topic"
-    sub = AsyncMqttSubscriber(config, topics)
+    sub = MqttSource(config, topics)
     sub.client = mock_client
     sub.message_queue = mock_queue
 
@@ -51,7 +51,7 @@ async def test_subscribe_topics_multiple(mock_queue):
     mock_client = AsyncMock()
     config = MqttConf()
     topics = ["topic1", "topic2"]
-    sub = AsyncMqttSubscriber(config, topics)
+    sub = MqttSource(config, topics)
     sub.client = mock_client
     sub.message_queue = mock_queue
 
@@ -63,7 +63,7 @@ async def test_subscribe_topics_multiple(mock_queue):
 @pytest.mark.asyncio
 async def test_receive(mock_client, mock_queue):
     config = MqttConf()
-    sub = AsyncMqttSubscriber(config, "some_topic")
+    sub = MqttSource(config, "some_topic")
     sub.client = mock_client
     sub.message_queue = mock_queue
 

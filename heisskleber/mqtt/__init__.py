@@ -1,5 +1,5 @@
 from .config import MqttConf
-from .sink import AsyncMqttPublisher
-from .source import AsyncMqttSubscriber
+from .sink import MqttSink
+from .source import MqttSource
 
-__all__ = ["MqttConf", "AsyncMqttSubscriber", "AsyncMqttPublisher"]
+__all__ = ["MqttConf", "MqttSource", "MqttSink"]

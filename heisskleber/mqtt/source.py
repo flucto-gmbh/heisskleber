@@ -7,7 +7,7 @@ from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 from heisskleber.mqtt import MqttConf
 
 
-class AsyncMqttSubscriber(AsyncSource):
+class MqttSource(AsyncSource):
     """Asynchronous MQTT susbsciber based on aiomqtt.
 
     Data is received by the `receive` method returns the newest message in the queue.

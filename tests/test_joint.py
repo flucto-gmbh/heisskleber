@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from heisskleber.mqtt import AsyncMqttSubscriber
+from heisskleber.mqtt import MqttSource
 from heisskleber.stream import Joint, Resampler, ResamplerConf
 
 
@@ -22,7 +22,7 @@ async def test_two_streams_are_parallel():
 
     The setup includes the mocked subscribers async receive() and run() methods.
     """
-    sub1 = MagicMock(autospec=AsyncMqttSubscriber)
+    sub1 = MagicMock(autospec=MqttSource)
     sub1.receive.side_effect = AsyncMock(
         side_effect=[
             ("topic1", {"epoch": 0, "x": 0}),
@@ -36,7 +36,7 @@ async def test_two_streams_are_parallel():
         ]
     )
     sub1.run = AsyncMock()
-    sub2 = MagicMock(autospec=AsyncMqttSubscriber)
+    sub2 = MagicMock(autospec=MqttSource)
     sub2.run = AsyncMock()
     sub2.receive.side_effect = AsyncMock(
         side_effect=[
