@@ -11,27 +11,27 @@
    :members:
 .. automodule:: heisskleber.udp
    :members:
+.. automodule:: heisskleber.tcp
+   :members:
 ```
 
 ## Baseclasses
 
 ```{eval-rst}
-.. automodule:: heisskleber.core.types
+.. automodule:: heisskleber.core.sink
+   :members:
+
+.. automodule:: heisskleber.core.source
    :members:
 ```
 
-## Stream
-
-Work on streaming data.
+## Serialization
 
 ```{eval-rst}
-.. automodule:: heisskleber.stream.filter
-   :members: __aiter__
-
-.. automodule:: heisskleber.stream.butter
+.. automodule:: heisskleber.core.packer
    :members:
 
-.. automodule:: heisskleber.stream.gh-filter
+.. automodule:: heisskleber.core.unpacker
    :members:
 ```
 

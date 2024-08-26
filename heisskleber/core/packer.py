@@ -1,44 +1,44 @@
 """Packer and unpacker for network data."""
+
 import json
-import pickle
-from typing import Any, Callable
+from abc import abstractmethod
+from typing import Any, Protocol, TypeVar
 
-from .types import Serializable
-
-
-def get_packer(style: str) -> Callable[[dict[str, Serializable]], str]:
-    """Return a packer function for the given style.
-
-    Packer func serializes a given dict."""
-    if style in _packstyles:
-        return _packstyles[style]
-    else:
-        return _packstyles["default"]
+T = TypeVar("T", contravariant=True)
 
 
-def get_unpacker(style: str) -> Callable[[str], dict[str, Serializable]]:
-    """Return an unpacker function for the given style.
+class Packer(Protocol[T]):
+    """Packer Interface.
 
-    Unpacker func deserializes a string."""
-    if style in _unpackstyles:
-        return _unpackstyles[style]
-    else:
-        return _unpackstyles["default"]
+    This abstract base class defines an interface for packing data.
+    It takes a dictionary of data and converts it into a bytes payload.
+
+    Attributes:
+        None
+
+    Methods:
+        __call__(data: dict[str, Any]) -> bytes:
+            Packs the given data dictionary into a bytes payload.
+    """
+
+    @abstractmethod
+    def __call__(self, data: T) -> bytes:
+        """Packs the data dictionary into a bytes payload.
+
+        Args:
+            data (dict[str, Any]): The input data dictionary to be packed.
+
+        Returns:
+            bytes: The packed payload.
+
+        Raises:
+            SerializationError: The data dictionary could not be packed.
+        """
+        pass
 
 
-def serialpacker(data: dict[str, Any]) -> str:
-    return ",".join([str(v) for v in data.values()])
+class JSONPacker(Packer[dict[str, Any]]):
+    """Default implementation for serialization of json data."""
 
-
-_packstyles: dict[str, Callable[[dict[str, Serializable]], str]] = {
-    "default": json.dumps,
-    "json": json.dumps,
-    "pickle": pickle.dumps,  # type: ignore
-    "serial": serialpacker,
-}
-
-_unpackstyles: dict[str, Callable[[str], dict[str, Serializable]]] = {
-    "default": json.loads,
-    "json": json.loads,
-    "pickle": pickle.loads,  # type: ignore
-}
+    def __call__(self, data: dict[str, Any]) -> bytes:
+        return json.dumps(data).encode()
