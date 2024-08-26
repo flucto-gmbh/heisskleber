@@ -1,5 +1,5 @@
 from .config import SerialConf
-from .publisher import SerialPublisher
-from .subscriber import SerialSubscriber
+from .sink import SerialSink
+from .source import SerialSource
 
-__all__ = ["SerialConf", "SerialPublisher", "SerialSubscriber"]
+__all__ = ["SerialConf", "SerialSink", "SerialSource"]
