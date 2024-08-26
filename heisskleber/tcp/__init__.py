@@ -1,5 +1,5 @@
-from heisskleber.tcp.config import TcpConf
-from heisskleber.tcp.sink import AsyncTcpSink
-from heisskleber.tcp.source import AsyncTcpSource
+from .config import TcpConf
+from .sink import TcpSink
+from .source import TcpSource
 
-__all__ = ["AsyncTcpSource", "AsyncTcpSink", "TcpConf"]
+__all__ = ["TcpSource", "TcpSink", "TcpConf"]
