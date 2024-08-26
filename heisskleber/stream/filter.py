@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from heisskleber.core.types import AsyncSource, Serializable
+from heisskleber.core import AsyncSource
 
 
 class Filter(ABC):
@@ -15,5 +15,5 @@ class Filter(ABC):
             yield topic, data
 
     @abstractmethod
-    def _filter(self, data: dict[str, Serializable]) -> dict[str, Serializable]:
+    def _filter(self, data: dict[str, Any]) -> dict[str, Any]:
         pass
