@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 import serial
 
-from heisskleber.core.packer import serialpacker
+from heisskleber.core.packer import csv_packer
 from heisskleber.serial.config import SerialConf
 from heisskleber.serial.publisher import SerialPublisher
 from heisskleber.serial.subscriber import SerialSubscriber
@@ -109,7 +109,7 @@ def test_serial_publisher_send(mock_serial_device_publisher, serial_conf):
     mock_serial_instance.readline.return_value = b"test message\n"
 
     # Set up the pack function to convert dict to comma separated string of values
-    publisher.pack = serialpacker
+    publisher.pack = csv_packer
 
     # Call the receive method and assert it behaves as expected
     publisher.send({"data": "test message", "more_data": "more message"}, "test")
