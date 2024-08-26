@@ -1,23 +1,23 @@
 import sys
-from typing import Callable
+from typing import Any, Callable
 
 import zmq
 import zmq.asyncio
 
-from heisskleber.core.packer import get_packer
-from heisskleber.core.types import AsyncSink, Serializable, Sink
+from heisskleber.core import AsyncSink, json_packer
 
 from .config import ZmqConf
 
 
-class ZmqAsyncPublisher(AsyncSink):
+class ZmqSink(AsyncSink):
     """
     Async publisher that sends messages to a ZMQ PUB socket.
 
     Attributes:
     -----------
     pack : Callable
-        The packer function to use for serializing the data.
+        The packer strategy to use for serializing the data.
+        Defaults to json packer with utf-8 encoding.
 
     Methods:
     --------
@@ -31,14 +31,14 @@ class ZmqAsyncPublisher(AsyncSink):
         Close the socket.
     """
 
-    def __init__(self, config: ZmqConf):
+    def __init__(self, config: ZmqConf, packer: Callable[[dict[str, Any]], bytes] = json_packer):
         self.config = config
         self.context = zmq.asyncio.Context.instance()
         self.socket: zmq.asyncio.Socket = self.context.socket(zmq.PUB)
-        self.pack: Callable = get_packer(config.packstyle)
+        self.pack: Callable = packer
         self.is_connected = False
 
-    async def send(self, data: dict[str, Serializable], topic: str) -> None:
+    async def send(self, data: dict[str, Any], topic: str) -> None:
         """
         Take the data as a dict, serialize it with the given packer and send it to the zmq socket.
         """

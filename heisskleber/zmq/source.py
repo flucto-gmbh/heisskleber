@@ -5,13 +5,12 @@ import sys
 import zmq
 import zmq.asyncio
 
-from heisskleber.core.packer import get_unpacker
-from heisskleber.core.types import AsyncSource, Source
+from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 
 from .config import ZmqConf
 
 
-class ZmqAsyncSubscriber(AsyncSource):
+class ZmqSource(AsyncSource):
     """
     Async source that subscribes to one or many topics from a zmq broker and receives messages via the receive() function.
 
@@ -32,7 +31,7 @@ class ZmqAsyncSubscriber(AsyncSource):
         Close the socket.
     """
 
-    def __init__(self, config: ZmqConf, topic: str | list[str]):
+    def __init__(self, config: ZmqConf, topic: str | list[str], unpacker: Unpacker = json_unpacker):
         """
         Constructs new ZmqAsyncSubscriber instance.
 
@@ -47,7 +46,7 @@ class ZmqAsyncSubscriber(AsyncSource):
         self.topic = topic
         self.context = zmq.asyncio.Context.instance()
         self.socket: zmq.asyncio.Socket = self.context.socket(zmq.SUB)
-        self.unpack = get_unpacker(config.packstyle)
+        self.unpack = unpacker
         self.is_connected = False
 
     async def receive(self) -> tuple[str, dict]:
@@ -60,7 +59,7 @@ class ZmqAsyncSubscriber(AsyncSource):
         if not self.is_connected:
             self.start()
         (topic, payload) = await self.socket.recv_multipart()
-        message = self.unpack(payload.decode())
+        message = self.unpack(payload)
         topic = topic.decode()
         return (topic, message)
 

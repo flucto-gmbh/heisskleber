@@ -1,5 +1,5 @@
 from .config import ZmqConf
-from .publisher import ZmqAsyncPublisher, ZmqPublisher
-from .subscriber import ZmqAsyncSubscriber, ZmqSubscriber
+from .sink import ZmqSink
+from .source import ZmqSource
 
-__all__ = ["ZmqConf", "ZmqPublisher", "ZmqSubscriber", "ZmqAsyncPublisher", "ZmqAsyncSubscriber"]
+__all__ = ["ZmqConf", "ZmqSink", "ZmqSource"]
