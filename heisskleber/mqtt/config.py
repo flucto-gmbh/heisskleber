@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from heisskleber.config import BaseConf
 
@@ -9,16 +9,15 @@ class MqttConf(BaseConf):
     MQTT configuration class.
     """
 
+    # transport
     host: str = "localhost"
-    user: str = ""
-    password: str = ""
     port: int = 1883
     ssl: bool = False
+
+    # mqtt
+    user: str = ""
+    password: str = ""
     qos: int = 0
     retain: bool = False
-    topics: list[str] = field(default_factory=list)
-    mapping: str = "/deprecated/"  # deprecated
-    packstyle: str = "json"
     max_saved_messages: int = 100
     timeout_s: int = 60
-    source_id: str = "box-01"
