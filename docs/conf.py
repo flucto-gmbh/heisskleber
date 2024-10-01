@@ -23,6 +23,10 @@ extensions = [
 
 autodoc_typehints = "description"
 
+autodoc_default_options: dict[str, Any] = {
+    "special-members": "__call__",
+}
+
 source_suffix = [".rst", ".md"]
 
 exclude_patterns = [

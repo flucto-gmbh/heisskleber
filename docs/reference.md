@@ -15,11 +15,13 @@
 See <project:serialization.md> for a tutorial on how to implement custom packer and unpacker for (de-)serialization.
 
 ```{eval-rst}
-.. automodule:: heisskleber.core.packer
-   :members:
+.. autoclass:: heisskleber.core.packer::Packer
 
-.. automodule:: heisskleber.core.unpacker
-   :members:
+.. autoclass:: heisskleber.core.unpacker::Unpacker
+
+.. autoclass:: heisskleber.core.unpacker::JSONUnpacker
+
+.. autoclass:: heisskleber.core.packer::JSONPacker
 ```
 
 ## Implementations (Adapters)
