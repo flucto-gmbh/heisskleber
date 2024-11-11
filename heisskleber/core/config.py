@@ -18,7 +18,7 @@ def _parse_yaml(file: TextIO) -> dict[str, Any]:
         raise
     try:
         return yaml.safe_load(file)
-    except yaml.YAMLError:
+    except yaml.YAMLError as e:
         msg = "Failed to parse config file!"
         logger.exception(msg)
         raise ValueError(msg) from e
