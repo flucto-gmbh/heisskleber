@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from heisskleber.config import BaseConf
+from heisskleber.core import BaseConf
 
 
 @dataclass
