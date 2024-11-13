@@ -1,3 +1,5 @@
+"""Mqtt config."""
+
 from dataclasses import dataclass
 
 from heisskleber.core import BaseConf
@@ -5,9 +7,7 @@ from heisskleber.core import BaseConf
 
 @dataclass
 class MqttConf(BaseConf):
-    """
-    MQTT configuration class.
-    """
+    """MQTT configuration class."""
 
     # transport
     host: str = "localhost"

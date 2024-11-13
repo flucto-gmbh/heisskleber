@@ -14,18 +14,18 @@ logger = logging.getLogger(__name__)
 
 
 class SerialSource(AsyncSource[T]):
-    """
-    An asynchronous source for reading data from a serial port.
+    """An asynchronous source for reading data from a serial port.
 
     This class implements the AsyncSource interface for reading data from a serial port.
     It uses a thread pool executor to perform blocking I/O operations asynchronously.
 
     Attributes:
-        config (SerialConf): Configuration for the serial port.
-        unpacker (Unpacker[T]): Function to unpack received data.
+        config: Configuration for the serial port.
+        unpacker: Function to unpack received data.
     """
 
     def __init__(self, config: SerialConf, unpack: Unpacker[T]) -> None:
+        """Constructor for SerialSource."""
         self.config = config
         self.unpacker = unpack
         self._loop = asyncio.get_running_loop()
@@ -35,14 +35,16 @@ class SerialSource(AsyncSource[T]):
         self._cancel_read_timeout = 1
 
     async def receive(self) -> tuple[T, dict[str, Any]]:
-        """
-        Receive data from the serial port.
+        """Receive data from the serial port.
 
         This method reads a line from the serial port, unpacks it, and returns the data.
         If the serial port is not connected, it will attempt to connect first.
 
         Returns:
             tuple[T, dict[str, Any]]: A tuple containing the unpacked data and any extra information.
+
+        Raises:
+            UnpackError: If the data could not be unpacked with the provided unpacker.
         """
         if not self._is_connected:
             await self.start()
@@ -54,18 +56,25 @@ class SerialSource(AsyncSource[T]):
             raise
 
         data, extra = self.unpacker(payload=payload)
-        logger.debug(f"SerialSource{self.config.port}: Unpacked payload: {data}, extra information: {extra}")
+        logger.debug(
+            "SerialSource(%(port)s): Unpacked: %(data)s, extra information: %(extra)s",
+            {"port": self.config.port, "data": data, "extra": extra},
+        )
         return (data, extra)
 
     async def _cancel_read(self) -> None:
         if not hasattr(self, "_ser"):
             return
-        logger.warning(f"SerialSource({self.config.port}).read() cancelled, waiting for {self._cancel_read_timeout}.")
+        logger.warning(
+            "SerialSource(%(port)s).read() cancelled, waiting for %(timeout)s",
+            {"port": self.config.port, "timeout": self._cancel_read_timeout},
+        )
         await asyncio.wait_for(
             asyncio.get_running_loop().run_in_executor(self._executor, self._ser.cancel_read), self._cancel_read_timeout
         )
 
     async def start(self) -> None:
+        """Open serial device."""
         if hasattr(self, "_ser"):
             return
 
@@ -78,7 +87,9 @@ class SerialSource(AsyncSource[T]):
         )
 
     def stop(self) -> None:
+        """Not implemented."""
         pass
 
     def __repr__(self) -> str:
+        """String representation of Serial Source."""
         return f"SerialSource({self.config.port}, baudrate={self.config.baudrate})"

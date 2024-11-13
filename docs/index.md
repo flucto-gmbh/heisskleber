@@ -16,6 +16,7 @@ maxdepth: 1
 yaml-config
 reference
 serialization
+development
 License <license>
 Changelog <https://github.com/flucto-gmbh/heisskleber/releases>
 ```

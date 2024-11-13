@@ -1,3 +1,5 @@
+"""Configuration baseclass."""
+
 import logging
 from dataclasses import dataclass, fields
 from pathlib import Path
@@ -17,7 +19,7 @@ def _parse_yaml(file: TextIO) -> dict[str, Any]:
         logging.exception("Could not import pyyaml. Install with 'pip install pyyaml'.")
         raise
     try:
-        return yaml.safe_load(file)
+        return dict(yaml.safe_load(file))
     except yaml.YAMLError as e:
         msg = "Failed to parse config file!"
         logger.exception(msg)
@@ -28,7 +30,7 @@ def _parse_json(file: TextIO) -> dict[str, Any]:
     import json
 
     try:
-        return json.load(file)
+        return dict(json.load(file))
     except json.JSONDecodeError as e:
         msg = "Failed to parse config file!"
         logger.exception(msg)
@@ -50,14 +52,10 @@ def _parser(path: Path) -> dict[str, Any]:
 
 @dataclass
 class BaseConf:
-    """
-    Default configuration class for generic configuration info.
-    """
+    """Default configuration class for generic configuration info."""
 
     def __post_init__(self) -> None:
-        """
-        Check if all attributes are the same type as the original defition of the dataclass.
-        """
+        """Check if all attributes are the same type as the original defition of the dataclass."""
         for field in fields(self):
             value = getattr(self, field.name)
             if value is None:  # Allow optional fields
@@ -73,8 +71,7 @@ class BaseConf:
 
     @classmethod
     def from_dict(cls: type[ConfigType], config_dict: dict[str, Any]) -> ConfigType:
-        """
-        Create a config instance from a dictionary, including only fields defined in the dataclass.
+        """Create a config instance from a dictionary, including only fields defined in the dataclass.
 
         Args:
             config_dict: Dictionary containing configuration values.

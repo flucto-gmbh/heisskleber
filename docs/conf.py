@@ -21,8 +21,22 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-autodoc_typehints = "description"
+autodoc_typehints = "description"  # or 'signature' or 'both'
 
+autodoc_type_aliases = {
+    "T": "heisskleber.core.T",
+    "T_co": "heisskleber.core.T_co",
+    "T_contra": "heisskleber.core.T_contra",
+}
+
+# If you're using typing.TypeVar in your code:
+nitpicky = True
+nitpick_ignore = [
+    ("py:class", "T"),
+    ("py:class", "T_co"),
+    ("py:class", "T_contra"),
+    ("py:data", "typing.Any"),
+]
 autodoc_default_options: dict[str, Any] = {
     "special-members": "__call__",
 }

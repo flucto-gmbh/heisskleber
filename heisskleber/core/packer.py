@@ -4,41 +4,51 @@ import json
 from abc import abstractmethod
 from typing import Any, Protocol, TypeVar
 
-T = TypeVar("T", contravariant=True)
+T_contra = TypeVar("T_contra", contravariant=True)
 
 
-class Packer(Protocol[T]):
+class Packer(Protocol[T_contra]):
     """Packer Interface.
 
-    This abstract base class defines an interface for packing data.
-    It takes a dictionary of data and converts it into a bytes payload.
+    This class defines a protocol for packing data.
+    It takes data and converts it into a bytes payload.
 
     Attributes:
         None
-
-    Methods:
-        __call__(data: dict[str, Any]) -> bytes:
-            Packs the given data dictionary into a bytes payload.
     """
 
     @abstractmethod
-    def __call__(self, data: T) -> bytes:
+    def __call__(self, data: T_contra) -> bytes:
         """Packs the data dictionary into a bytes payload.
 
         Args:
-            data (dict[str, Any]): The input data dictionary to be packed.
+            data (T_contra): The input data dictionary to be packed.
 
         Returns:
             bytes: The packed payload.
 
         Raises:
-            SerializationError: The data dictionary could not be packed.
+            TypeError: The data dictionary could not be packed.
         """
-        pass
 
 
 class JSONPacker(Packer[dict[str, Any]]):
-    """Default implementation for serialization of json data."""
+    """Converts a dictionary into JSON-formatted bytes.
 
-    def __call__(self, data: dict[str, Any]) -> bytes:
+    Args:
+        data: A dictionary with string keys and arbitrary values to be serialized into JSON format.
+
+    Returns:
+        bytes: The JSON-encoded data as a bytes object.
+
+    Raises:
+        TypeError: If the data cannot be serialized to JSON.
+
+    Example:
+        >>> packer = JSONPacker()
+        >>> result = packer({"key": "value"})
+        b'{"key": "value"}'
+    """
+
+    def __call__(self, data: dict[str, Any]) -> bytes:  # noqa: D102
         return json.dumps(data).encode()

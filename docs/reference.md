@@ -8,6 +8,9 @@
 
 .. automodule:: heisskleber.core.source
    :members:
+
+.. automodule:: heisskleber.core.config
+   :members:
 ```
 
 ## Serialization
@@ -31,16 +34,17 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 MQTT implementation is achieved via the [aiomqtt](https://github.com/mossblaser/aiomqtt) package, which is an async wrapper around the [paho-mqtt](https://github.com/eclipse/paho.mqtt.python) package.
 
 ```{eval-rst}
-.. autoclass:: heisskleber.mqtt::MqttConf
+.. automodule:: heisskleber.mqtt.config
+   :members:
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.mqtt::MqttSink
-   :members: send
+.. automodule:: heisskleber.mqtt.sink
+   :members:
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.mqtt::MqttSource
+.. autoclass:: heisskleber.mqtt.source::MqttSource
    :members: receive
 ```
 
