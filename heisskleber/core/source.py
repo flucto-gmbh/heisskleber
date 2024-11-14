@@ -19,12 +19,15 @@ class AsyncSource(ABC, Generic[T_co]):
     relationships.
 
     Attributes:
+    ----------
         unpacker: Component responsible for deserializing incoming data into type T_co.
 
     Example:
+    -------
         >>> async with CustomSource(unpacker) as source:
         ...     async for data, metadata in source:
         ...         print(f"Received: {data}, metadata: {metadata}")
+
     """
 
     unpacker: Unpacker[T_co]
@@ -33,40 +36,42 @@ class AsyncSource(ABC, Generic[T_co]):
     async def receive(self) -> tuple[T_co, dict[str, Any]]:
         """Receive data from the implemented input stream.
 
-        Returns:
+        Returns
+        -------
             tuple[T_co, dict[str, Any]]: A tuple containing:
                 - The received and unpacked data of type T_co
                 - A dictionary of metadata associated with the received data
 
-        Raises:
+        Raises
+        ------
             Any implementation-specific exceptions that might occur during receiving.
+
         """
-        pass
 
     @abstractmethod
     async def start(self) -> None:
         """Initialize and start any background processes and tasks of the source."""
-        pass
 
     @abstractmethod
     def stop(self) -> None:
         """Stop any background processes and tasks."""
-        pass
 
     @abstractmethod
     def __repr__(self) -> str:
         """A string reprensatiion of the source."""
-        pass
 
     async def __aiter__(self) -> AsyncGenerator[tuple[T_co, dict[str, Any]], None]:
         """Implement async iteration over the source's data stream.
 
-        Yields:
+        Yields
+        ------
             tuple[T_co, dict[str, Any]]: Each data item and its associated metadata
                 as returned by receive().
 
-        Raises:
+        Raises
+        ------
             Any exceptions that might occur during receive().
+
         """
         while True:
             data, meta = await self.receive()
@@ -75,11 +80,14 @@ class AsyncSource(ABC, Generic[T_co]):
     async def __aenter__(self) -> "AsyncSource[T_co]":
         """Initialize the source for use in an async context manager.
 
-        Returns:
+        Returns
+        -------
             AsyncSource[T_co]: The initialized source instance.
 
-        Raises:
+        Raises
+        ------
             Any exceptions that might occur during start().
+
         """
         await self.start()
         return self
@@ -93,8 +101,10 @@ class AsyncSource(ABC, Generic[T_co]):
         """Cleanup the source when exiting an async context manager.
 
         Args:
+        ----
             exc_type: The type of the exception that was raised, if any.
             exc_value: The instance of the exception that was raised, if any.
             traceback: The traceback of the exception that was raised, if any.
+
         """
         self.stop()

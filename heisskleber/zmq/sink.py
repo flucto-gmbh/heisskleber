@@ -1,65 +1,49 @@
-import sys
-from typing import Any, Callable
+import logging
+from typing import Any, TypeVar
 
 import zmq
 import zmq.asyncio
 
-from heisskleber.core import AsyncSink, json_packer
+from heisskleber.core import AsyncSink, Packer, json_packer
 
 from .config import ZmqConf
 
+logger = logging.getLogger("heisskleber.zmq")
 
-class ZmqSink(AsyncSink):
-    """
-    Async publisher that sends messages to a ZMQ PUB socket.
+T = TypeVar("T")
 
-    Attributes:
-    -----------
-    pack : Callable
-        The packer strategy to use for serializing the data.
-        Defaults to json packer with utf-8 encoding.
 
-    Methods:
-    --------
-    send(data : dict, topic : str):
-        Send the data with the given topic.
+class ZmqSink(AsyncSink[T]):
+    """Async publisher that sends messages to a ZMQ PUB socket.
 
-    start():
-        Connect to the socket.
+    Attributes
+    ----------
+        config: The ZmqConf configuration object for the connection.
+        packer : The packer strategy to use for serializing the data.
+            Defaults to json packer with utf-8 encoding.
 
-    stop():
-        Close the socket.
     """
 
-    def __init__(self, config: ZmqConf, packer: Callable[[dict[str, Any]], bytes] = json_packer):
+    def __init__(self, config: ZmqConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
         self.config = config
         self.context = zmq.asyncio.Context.instance()
         self.socket: zmq.asyncio.Socket = self.context.socket(zmq.PUB)
-        self.pack: Callable = packer
+        self.packer = packer
         self.is_connected = False
 
-    async def send(self, data: dict[str, Any], topic: str) -> None:
-        """
-        Take the data as a dict, serialize it with the given packer and send it to the zmq socket.
-        """
+    async def send(self, data: T, topic: str = "zmq", **kwargs: Any) -> None:
+        """Take the data as a dict, serialize it with the given packer and send it to the zmq socket."""
         if not self.is_connected:
-            self.start()
-        payload = self.pack(data)
-        if self.config.verbose:
-            print(f"sending message {payload} to topic {topic}")
-        await self.socket.send_multipart([topic.encode(), payload.encode()])
+            await self.start()
+        payload = self.packer(data)
+        logger.debug("sending payload %(payload)b to topic %(topic)s", {"payload": payload, "topic": topic})
+        await self.socket.send_multipart([topic.encode(), payload])
 
-    def start(self) -> None:
+    async def start(self) -> None:
         """Connect to the zmq socket."""
-        try:
-            if self.config.verbose:
-                print(f"connecting to {self.config.publisher_address}")
-            self.socket.connect(self.config.publisher_address)
-        except Exception as e:
-            print(f"failed to bind to zeromq socket: {e}")
-            sys.exit(-1)
-        else:
-            self.is_connected = True
+        logger.info("Connecting to %(addr)s", {"addr": self.config.publisher_address})
+        self.socket.connect(self.config.publisher_address)
+        self.is_connected = True
 
     def stop(self) -> None:
         """Close the zmq socket."""
@@ -67,4 +51,5 @@ class ZmqSink(AsyncSink):
         self.is_connected = False
 
     def __repr__(self) -> str:
+        """Return string representation of ZmqSink."""
         return f"{self.__class__.__name__}(host={self.config.publisher_address}, port={self.config.publisher_port})"

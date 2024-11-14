@@ -4,7 +4,7 @@ from .config import BaseConf, ConfigType
 from .packer import JSONPacker, Packer, T_contra
 from .sink import AsyncSink, T
 from .source import AsyncSource
-from .unpacker import JSONUnpacker, Unpacker, T_co
+from .unpacker import JSONUnpacker, T_co, Unpacker
 
 json_packer = JSONPacker()
 json_unpacker = JSONUnpacker()

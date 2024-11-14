@@ -6,7 +6,11 @@ from heisskleber.core import BaseConf
 
 @dataclass
 class TcpConf(BaseConf):
+    """Configuration dataclass for TCP connections."""
+
     class RestartBehavior(Enum):
+        """The three types of restart behaviour."""
+
         NEVER = 0  # Never restart on failure
         ONCE = 1  # Restart once
         ALWAYS = 2  # Restart until the connection succeeds

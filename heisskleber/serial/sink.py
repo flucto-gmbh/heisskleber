@@ -4,7 +4,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, TypeVar
 
-import serial
+import serial  # type: ignore[import-untyped]
 
 from heisskleber.core import AsyncSink, Packer
 
@@ -19,9 +19,11 @@ class SerialSink(AsyncSink[T]):
     This class implements the AsyncSink interface for writing data to a serial port.
     It uses a thread pool executor to perform blocking I/O operations asynchronously.
 
-    Attributes:
+    Attributes
+    ----------
         config: Configuration for the serial port.
         packer: Function to pack data for sending.
+
     """
 
     def __init__(self, config: SerialConf, pack: Packer[T]) -> None:
@@ -40,14 +42,18 @@ class SerialSink(AsyncSink[T]):
         This method packs the data, writes it to the serial port, and then flushes the port.
 
         Args:
+        ----
             data: The data to be sent.
             **kwargs: Not implemented.
 
         Raises:
+        ------
             PackerError: If data could not be packed to bytes with the provided packer.
 
         Note:
+        ----
             If the serial port is not connected, it will implicitly attempt to connect first.
+
         """
         if not self._is_connected:
             await self.start()
@@ -83,8 +89,7 @@ class SerialSink(AsyncSink[T]):
 
     def stop(self) -> None:
         """Not implemented."""
-        pass
 
     def __repr__(self) -> str:
-        """String representation of SerialSink."""
+        """Return string representation of SerialSink."""
         return f"SerialSink({self.config.port}, baudrate={self.config.baudrate})"

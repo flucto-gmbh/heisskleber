@@ -21,18 +21,14 @@ class MqttSink(AsyncSink[T]):
     This sink implementation provides asynchronous MQTT publishing capabilities with automatic connection management and message queueing.
     Network operations are handled in a separate task.
 
-    Attributes:
+    Attributes
+    ----------
         config: MQTT configuration in a dataclass.
         packer: Callable to pack data from type T to bytes for transport.
+
     """
 
-    def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:
-        """Constructor for MQTT sink.
-
-        Args:
-            config: MQTT broker configuration parameters.
-            packer: Component for serializing messages before publishing. Defaults to JSON packing.
-        """
+    def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
         self.config = config
         self.packer = packer
         self._send_queue: Queue[tuple[T, str]] = Queue()
@@ -42,11 +38,13 @@ class MqttSink(AsyncSink[T]):
         """Queue data for asynchronous publication to the mqtt broker.
 
         Arguments:
+        ---------
             data: The data to be published.
             topic: The mqtt topic to publish to.
             qos: MQTT QOS level (0, 1, or 2). Defaults to 0.o
             retain: Whether to set the MQTT retain flag. Defaults to False.
             **kwargs: Not implemented.
+
         """
         if not self._sender_task:
             await self.start()
@@ -74,7 +72,7 @@ class MqttSink(AsyncSink[T]):
                 await sleep(5)
 
     def __repr__(self) -> str:
-        """String representation of the MQTT sink object."""
+        """Return string representation of the MQTT sink object."""
         return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
 
     async def start(self) -> None:

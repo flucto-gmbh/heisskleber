@@ -1,6 +1,4 @@
-"""
-Async TCP Source - get data from arbitrary TCP server
-"""
+"""Async TCP Source - get data from arbitrary TCP server."""
 
 import asyncio
 import logging
@@ -11,29 +9,29 @@ from heisskleber.tcp.config import TcpConf
 
 T = TypeVar("T")
 
+logger = logging.getLogger("heisskleber.tcp")
+
 
 def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Unpack string containing comma separated values to dictionary."""
     vals = payload.decode().rstrip().split(",")
     keys = [f"key{i}" for i in range(len(vals))]
     return (dict(zip(keys, vals)), {"topic": "tcp"})
 
 
 class TcpSource(AsyncSource[T]):
-    """
-    Async TCP connection, connects to host:port and reads byte encoded strings.
-
+    """Async TCP connection, connects to host:port and reads byte encoded strings.
 
     Pass an unpack function like so:
 
-    Example
+    Example:
     -------
     def unpack(data: bytes) -> tuple[str, dict[str, float | int | str]]:
         return dict(zip(["key1", "key2"], data.decode().split(","))
 
     """
 
-    def __init__(self, config: TcpConf, unpacker: Unpacker[T] = bytes_csv_unpacker) -> None:
-        self.logger = logging.getLogger("AsyncTcpSource")
+    def __init__(self, config: TcpConf, unpacker: Unpacker[T] = bytes_csv_unpacker) -> None:  # type: ignore [assignment]
         self.config = config
         self.unpack = unpacker
         self.is_connected = False
@@ -41,6 +39,22 @@ class TcpSource(AsyncSource[T]):
         self._start_task: asyncio.Task[None] | None = None
 
     async def receive(self) -> tuple[T, dict[str, Any]]:
+        """Receive data from a connection.
+
+        Attempt to read data from the connection and handle the process of re-establishing the connection if necessary.
+
+        Returns
+        -------
+            tuple[T, dict[str, Any]]
+                - The unpacked message data
+                - A dictionary with metadata including the message topic
+
+        Raises
+        ------
+            TypeError: If the message payload is not of type bytes.
+            UnpackError: If the message could not be unpacked with the unpacker protocol.
+
+        """
         data = b""
         retry_delay = self.config.retry_delay
         while not data:
@@ -48,23 +62,24 @@ class TcpSource(AsyncSource[T]):
             data = await self.reader.readline()
             if not data:
                 self.is_connected = False
-                self.logger.warning(f"{self} nothing received, retrying connect in {retry_delay}s")
+                logger.warning(
+                    "%(self)s nothing received, retrying connect in %(seconds)s",
+                    {"self": self, "seconds": retry_delay},
+                )
                 await asyncio.sleep(retry_delay)
                 retry_delay = min(self.config.timeout, retry_delay * 2)
 
-        payload, extras = self.unpack(data)
-        topic = extras.get("topic", "tcp")
-        return topic, payload  # type: ignore
+        payload, extra = self.unpack(data)
+        return payload, extra
 
     async def start(self) -> None:
-        self._start_task = asyncio.create_task(self._connect())
-
-    async def start_async(self) -> None:
+        """Start TcpSource."""
         await self._ensure_connected()
 
     def stop(self) -> None:
+        """Stop TcpSource."""
         if self.is_connected:
-            self.logger.info(f"{self} stopping")
+            logger.info("%(self)s stopping", {"self": self})
 
     async def _ensure_connected(self) -> None:
         if self.is_connected:
@@ -81,18 +96,19 @@ class TcpSource(AsyncSource[T]):
             self._start_task = None
 
     async def _connect(self) -> None:
-        self.logger.info(f"{self} waiting for connection.")
+        logger.info("%(self)s waiting for connection.", {"self": self})
 
         num_attempts = 0
         while True:
             try:
                 self.reader, self.writer = await asyncio.wait_for(
-                    asyncio.open_connection(self.config.host, self.config.port), timeout=self.timeout
+                    asyncio.open_connection(self.config.host, self.config.port),
+                    timeout=self.timeout,
                 )
-                self.logger.info(f"{self} connected successfully!")
+                logger.info("%(self)s connected successfully!", {"self": self})
                 break
             except (ConnectionRefusedError, asyncio.TimeoutError) as e:
-                self.logger.exception(f"{self}: {type(e).__name__}")
+                logger.exception("%(self): %(error_type)s", {"self": self, "error_type": type(e).__name__})
                 if self.config.restart_behavior == TcpConf.RestartBehavior.NEVER:
                     raise
                 num_attempts += 1
@@ -103,4 +119,5 @@ class TcpSource(AsyncSource[T]):
         self.is_connected = True
 
     def __repr__(self) -> str:
+        """Return string representation of TcpSource."""
         return f"{self.__class__.__name__}(host={self.config.host}, port={self.config.port})"

@@ -8,7 +8,8 @@ from typing import Any, TextIO, TypeVar, Union
 logger = logging.getLogger("heisskleber")
 
 ConfigType = TypeVar(
-    "ConfigType", bound="BaseConf"
+    "ConfigType",
+    bound="BaseConf",
 )  # https://stackoverflow.com/a/46227137 , https://docs.python.org/3/library/typing.html#typing.TypeVar
 
 
@@ -61,29 +62,33 @@ class BaseConf:
             if value is None:  # Allow optional fields
                 continue
             if not isinstance(value, field.type):  # Failed field comparison
-                raise TypeError()
+                raise TypeError
             if (  # Failed Union comparison
                 hasattr(field.type, "__origin__")
                 and field.type.__origin__ is Union
                 and not any(isinstance(value, t) for t in field.type.__args__)
             ):
-                raise TypeError()
+                raise TypeError
 
     @classmethod
     def from_dict(cls: type[ConfigType], config_dict: dict[str, Any]) -> ConfigType:
         """Create a config instance from a dictionary, including only fields defined in the dataclass.
 
         Args:
+        ----
             config_dict: Dictionary containing configuration values.
                         Keys should match dataclass field names.
 
         Returns:
+        -------
             An instance of the configuration class with values from the dictionary.
 
         Raises:
+        ------
             TypeError: If provided values don't match field types.
 
         Example:
+        -------
             >>> from dataclasses import dataclass
             >>> @dataclass
             ... class ServerConfig(BaseConf):
@@ -112,6 +117,7 @@ class BaseConf:
             ... except TypeError as e:
             ...     print("TypeError raised as expected")
             TypeError raised as expected
+
         """
         valid_fields = {f.name for f in fields(cls)}
         filtered_dict = {k: v for k, v in config_dict.items() if k in valid_fields}
@@ -122,6 +128,6 @@ class BaseConf:
         path = Path(file_path)
         if not path.exists():
             logger.exception("Config file not found: %(path)s", {"path": path})
-            raise FileNotFoundError()
+            raise FileNotFoundError
 
         return cls.from_dict(_parser(path))

@@ -5,9 +5,7 @@ from heisskleber.core import BaseConf
 
 @dataclass
 class UdpConf(BaseConf):
-    """
-    UDP configuration.
-    """
+    """UDP configuration."""
 
     port: int = 1234
     host: str = "127.0.0.1"

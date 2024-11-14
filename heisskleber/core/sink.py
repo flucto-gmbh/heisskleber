@@ -16,8 +16,10 @@ class AsyncSink(ABC, Generic[T]):
     asynchronously. It supports context manager usage and ensures proper
     resource management.
 
-    Attributes:
+    Attributes
+    ----------
         packer: Component responsible for serializing type T data before sending.
+
     """
 
     packer: Packer[T]
@@ -27,15 +29,15 @@ class AsyncSink(ABC, Generic[T]):
         """Send data through the implemented output stream.
 
         Args:
+        ----
             data: The data to be sent, of type T.
             **kwargs: Additional implementation-specific arguments.
+
         """
-        pass
 
     @abstractmethod
     async def start(self) -> None:
         """Initialize and start the sink's background processes and tasks."""
-        pass
 
     @abstractmethod
     def stop(self) -> None:
@@ -44,21 +46,22 @@ class AsyncSink(ABC, Generic[T]):
         This method should be called when the sink is no longer needed.
         It should handle cleanup of any resources initialized in start().
         """
-        pass
 
     @abstractmethod
     def __repr__(self) -> str:
         """A string representation of the sink."""
-        pass
 
     async def __aenter__(self) -> "AsyncSink[T]":
         """Initialize the sink for use in an async context manager.
 
-        Returns:
+        Returns
+        -------
             AsyncSink[T]: The initialized sink instance.
 
-        Raises:
+        Raises
+        ------
             Any exceptions that might occur during start().
+
         """
         await self.start()
         return self
@@ -72,8 +75,10 @@ class AsyncSink(ABC, Generic[T]):
         """Cleanup the sink when exiting an async context manager.
 
         Args:
+        ----
             exc_type: The type of the exception that was raised, if any.
             exc_value: The instance of the exception that was raised, if any.
             traceback: The traceback of the exception that was raised, if any.
+
         """
         self.stop()

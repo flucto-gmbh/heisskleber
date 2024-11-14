@@ -12,7 +12,9 @@ def string_to_json(payload: str) -> tuple[dict[str, Any], str | None]:
 
 class AsyncConsoleSource(AsyncSource[dict[str, Any]]):
     def __init__(
-        self, topic: str = "console", unpacker: Callable[[str], tuple[dict[str, Any], str | None]] = string_to_json
+        self,
+        topic: str = "console",
+        unpacker: Callable[[str], tuple[dict[str, Any], str | None]] = string_to_json,
     ) -> None:
         self.topic = topic
         self.queue: asyncio.Queue[tuple[dict[str, Any], str | None]] = asyncio.Queue(maxsize=10)

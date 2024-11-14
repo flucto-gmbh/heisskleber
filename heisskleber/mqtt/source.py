@@ -1,6 +1,6 @@
+import logging
 from asyncio import Queue, Task, create_task, sleep
 from typing import Any, TypeVar
-import logging
 
 from aiomqtt import Client, Message, MqttError
 
@@ -18,15 +18,18 @@ class MqttSource(AsyncSource[T]):
 
     The subscriber maintains a queue of received messages which can be accessed through the `receive` method.
 
-    Attributes:
+    Attributes
+    ----------
         config (MqttConf): Stored configuration for MQTT connection.
         topics (Union[str, List[str]]): Topics to subscribe to.
+
     """
 
     def __init__(self, config: MqttConf, topic: str | list[str], unpacker: Unpacker[T] = json_unpacker) -> None:
         """Initialize the MQTT source.
 
         Args:
+        ----
             config: Configuration object containing:
                 - host (str): MQTT broker hostname
                 - port (int): MQTT broker port
@@ -36,6 +39,7 @@ class MqttSource(AsyncSource[T]):
                 - max_saved_messages (int): Maximum queue size
             topic: Single topic string or list of topics to subscribe to
             unpacker: Function to deserialize received messages, defaults to json_unpacker
+
         """
         self.config = config
         # TODO: Move to start method
@@ -51,7 +55,7 @@ class MqttSource(AsyncSource[T]):
         self._listener_task: Task[None] | None = None
 
     def __repr__(self) -> str:
-        """String representation of Mqtt Source class."""
+        """Return string representation of Mqtt Source class."""
         return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
 
     async def start(self) -> None:
@@ -67,14 +71,17 @@ class MqttSource(AsyncSource[T]):
     async def receive(self) -> tuple[T, dict[str, Any]]:
         """Receive and process the next message from the queue.
 
-        Returns:
+        Returns
+        -------
             tuple[T, dict[str, Any]]
                 - The unpacked message data
                 - A dictionary with metadata including the message topic
 
-        Raises:
+        Raises
+        ------
             TypeError: If the message payload is not of type bytes.
             UnpackError: If the message could not be unpacked with the unpacker protocol.
+
         """
         if not self._listener_task:
             await self.start()
@@ -92,8 +99,10 @@ class MqttSource(AsyncSource[T]):
         """Subscribe to an additional MQTT topic.
 
         Args:
+        ----
             topic: The topic to subscribe to
             qos: Quality of Service level, uses config.qos if None
+
         """
         qos = qos or self.config.qos
         await self._client.subscribe(topic, qos)
