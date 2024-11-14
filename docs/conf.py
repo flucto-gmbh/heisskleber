@@ -36,6 +36,8 @@ nitpick_ignore = [
     ("py:class", "T_co"),
     ("py:class", "T_contra"),
     ("py:data", "typing.Any"),
+    ("py:class", "_io.StringIO"),
+    ("py:class", "_io.BytesIO"),
 ]
 autodoc_default_options: dict[str, Any] = {
     "special-members": "__call__",
@@ -71,9 +73,5 @@ html_theme_options: dict[str, Any] = {
     "source_branch": "main",
     "source_directory": "docs/",
 }
-nitpick_ignore = [
-    ("py:class", "_io.StringIO"),
-    ("py:class", "_io.BytesIO"),
-]
 
 always_document_param_types = True

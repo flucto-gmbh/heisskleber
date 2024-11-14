@@ -3,13 +3,10 @@
 ## Baseclasses
 
 ```{eval-rst}
-.. automodule:: heisskleber.core.sink
+.. autoclass:: heisskleber.core.AsyncSink
    :members:
 
-.. automodule:: heisskleber.core.source
-   :members:
-
-.. automodule:: heisskleber.core.config
+.. autoclass:: heisskleber.core.AsyncSource
    :members:
 ```
 
@@ -18,9 +15,9 @@
 See <project:serialization.md> for a tutorial on how to implement custom packer and unpacker for (de-)serialization.
 
 ```{eval-rst}
-.. autoclass:: heisskleber.core.packer::Packer
+.. autoclass:: heisskleber.core::Packer
 
-.. autoclass:: heisskleber.core.unpacker::Unpacker
+.. autoclass:: heisskleber.core::Unpacker
 
 .. autoclass:: heisskleber.core.unpacker::JSONUnpacker
 
@@ -31,21 +28,15 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 
 ### MQTT
 
-MQTT implementation is achieved via the [aiomqtt](https://github.com/mossblaser/aiomqtt) package, which is an async wrapper around the [paho-mqtt](https://github.com/eclipse/paho.mqtt.python) package.
-
 ```{eval-rst}
-.. automodule:: heisskleber.mqtt.config
-   :members:
-```
+.. automodule:: heisskleber.mqtt
+    :no-members:
 
-```{eval-rst}
-.. automodule:: heisskleber.mqtt.sink
-   :members:
-```
+.. autoclass:: heisskleber.mqtt.MqttSink
+    :members: send
 
-```{eval-rst}
-.. autoclass:: heisskleber.mqtt.source::MqttSource
-   :members: receive
+.. autoclass:: heisskleber.mqtt.MqttSource
+    :members: receive, subscribe
 ```
 
 ### ZMQ
