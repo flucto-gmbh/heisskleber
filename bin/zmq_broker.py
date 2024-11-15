@@ -10,6 +10,7 @@ import logging
 import sys
 
 import zmq
+
 from heisskleber.zmq import ZmqConf
 
 logger = logging.getLogger(__name__)
