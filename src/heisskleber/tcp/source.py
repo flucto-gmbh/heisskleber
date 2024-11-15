@@ -20,16 +20,7 @@ def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
 
 
 class TcpSource(AsyncSource[T]):
-    """Async TCP connection, connects to host:port and reads byte encoded strings.
-
-    Pass an unpack function like so:
-
-    Example:
-    -------
-    def unpack(data: bytes) -> tuple[str, dict[str, float | int | str]]:
-        return dict(zip(["key1", "key2"], data.decode().split(","))
-
-    """
+    """Async TCP connection, connects to host:port and reads byte encoded strings."""
 
     def __init__(self, config: TcpConf, unpacker: Unpacker[T] = bytes_csv_unpacker) -> None:  # type: ignore [assignment]
         self.config = config
@@ -43,14 +34,12 @@ class TcpSource(AsyncSource[T]):
 
         Attempt to read data from the connection and handle the process of re-establishing the connection if necessary.
 
-        Returns
-        -------
+        Returns:
             tuple[T, dict[str, Any]]
                 - The unpacked message data
                 - A dictionary with metadata including the message topic
 
-        Raises
-        ------
+        Raises:
             TypeError: If the message payload is not of type bytes.
             UnpackError: If the message could not be unpacked with the unpacker protocol.
 
@@ -74,12 +63,32 @@ class TcpSource(AsyncSource[T]):
 
     async def start(self) -> None:
         """Start TcpSource."""
-        await self._ensure_connected()
+        await self._connect()
 
     def stop(self) -> None:
         """Stop TcpSource."""
+
+        async def shielded_disconnect() -> None:
+            if self._start_task:
+                self._start_task.cancel()
+                await self._start_task
+                self._start_task = None
+
+            if self.writer:
+                self.writer.close()
+                await self.writer.wait_closed()
+                self.writer = None
+                self.reader = None
+
+            self.is_connected = False
+            logger.info("%(self)s stopped successfully", {"self": self})
+
+        async def disconnect() -> None:
+            await asyncio.shield(shielded_disconnect())
+
         if self.is_connected:
             logger.info("%(self)s stopping", {"self": self})
+            self._shutdown_task = asyncio.create_task(disconnect())
 
     async def _ensure_connected(self) -> None:
         if self.is_connected:
@@ -107,8 +116,8 @@ class TcpSource(AsyncSource[T]):
                 )
                 logger.info("%(self)s connected successfully!", {"self": self})
                 break
-            except (ConnectionRefusedError, asyncio.TimeoutError) as e:
-                logger.exception("%(self): %(error_type)s", {"self": self, "error_type": type(e).__name__})
+            except ConnectionRefusedError as e:
+                logger.exception("%(self)s: %(error_type)s", {"self": self, "error_type": type(e).__name__})
                 if self.config.restart_behavior == TcpConf.RestartBehavior.NEVER:
                     raise
                 num_attempts += 1
