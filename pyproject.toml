@@ -94,6 +94,7 @@ ignore = [
   "D100",   # Missing module docstring
   "D104",   # Missing package docstring
   "D107",   # Missing __init__ docstring
+  "ANN101", # Deprecated and stupid self annotation
   "ANN401", # Dynamically typed annotation
   "FA102",  # Missing from __future__ import annotations
   "FBT001", # boolean style argument in function definition
