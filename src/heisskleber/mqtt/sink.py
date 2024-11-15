@@ -21,7 +21,7 @@ class MqttSink(AsyncSink[T]):
     This sink implementation provides asynchronous MQTT publishing capabilities with automatic connection management and message queueing.
     Network operations are handled in a separate task.
 
-    Attributes
+    Attributes:
     ----------
         config: MQTT configuration in a dataclass.
         packer: Callable to pack data from type T to bytes for transport.
@@ -67,7 +67,7 @@ class MqttSink(AsyncSink[T]):
                         data, topic = await self._send_queue.get()
                         payload = self.packer(data)
                         await client.publish(topic=topic, payload=payload)
-            except aiomqtt.MqttError:
+            except aiomqtt.MqttError:  # noqa: PERF203
                 logger.exception("Connection to MQTT broker failed. Retrying in 5 seconds")
                 await sleep(5)
 

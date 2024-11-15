@@ -18,7 +18,7 @@ class MqttSource(AsyncSource[T]):
 
     The subscriber maintains a queue of received messages which can be accessed through the `receive` method.
 
-    Attributes
+    Attributes:
     ----------
         config (MqttConf): Stored configuration for MQTT connection.
         topics (Union[str, List[str]]): Topics to subscribe to.
@@ -54,30 +54,16 @@ class MqttSource(AsyncSource[T]):
         self._message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
         self._listener_task: Task[None] | None = None
 
-    def __repr__(self) -> str:
-        """Return string representation of Mqtt Source class."""
-        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
-
-    async def start(self) -> None:
-        """Start the MQTT listener task."""
-        self._listener_task = create_task(self._run())
-
-    def stop(self) -> None:
-        """Stop the MQTT listener task."""
-        if self._listener_task:
-            self._listener_task.cancel()
-        self._listener_task = None
-
     async def receive(self) -> tuple[T, dict[str, Any]]:
         """Receive and process the next message from the queue.
 
-        Returns
+        Returns:
         -------
             tuple[T, dict[str, Any]]
                 - The unpacked message data
                 - A dictionary with metadata including the message topic
 
-        Raises
+        Raises:
         ------
             TypeError: If the message payload is not of type bytes.
             UnpackError: If the message could not be unpacked with the unpacker protocol.
@@ -92,8 +78,22 @@ class MqttSource(AsyncSource[T]):
             raise TypeError(error_msg)
 
         data, extra = self.unpacker(message.payload)
-        extra["topic"] = message.topic
+        extra["topic"] = message.topic.value
         return (data, extra)
+
+    def __repr__(self) -> str:
+        """Return string representation of Mqtt Source class."""
+        return f"{self.__class__.__name__}(broker={self.config.host}, port={self.config.port})"
+
+    async def start(self) -> None:
+        """Start the MQTT listener task."""
+        self._listener_task = create_task(self._run())
+
+    def stop(self) -> None:
+        """Stop the MQTT listener task."""
+        if self._listener_task:
+            self._listener_task.cancel()
+        self._listener_task = None
 
     async def subscribe(self, topic: str, qos: int | None = None) -> None:
         """Subscribe to an additional MQTT topic.
@@ -114,13 +114,13 @@ class MqttSource(AsyncSource[T]):
                 async with self._client:
                     await self._subscribe_topics()
                     await self._listen_mqtt_loop()
-            except MqttError:
+            except MqttError:  # noqa: PERF203
                 logger.exception("Connection to MQTT failed. Retrying...")
                 await sleep(1)
 
     async def _listen_mqtt_loop(self) -> None:
         """Listen to incoming messages asynchronously and put them into a queue."""
-        async with self._client.messages() as messages:
+        async with self._client.messages as messages:
             async for message in messages:
                 await self._message_queue.put(message)
 
