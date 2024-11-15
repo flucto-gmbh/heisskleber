@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSource, Unpacker
+from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 from heisskleber.tcp.config import TcpConf
 
 T = TypeVar("T")
@@ -12,17 +12,10 @@ T = TypeVar("T")
 logger = logging.getLogger("heisskleber.tcp")
 
 
-def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Unpack string containing comma separated values to dictionary."""
-    vals = payload.decode().rstrip().split(",")
-    keys = [f"key{i}" for i in range(len(vals))]
-    return (dict(zip(keys, vals)), {"topic": "tcp"})
-
-
 class TcpSource(AsyncSource[T]):
     """Async TCP connection, connects to host:port and reads byte encoded strings."""
 
-    def __init__(self, config: TcpConf, unpacker: Unpacker[T] = bytes_csv_unpacker) -> None:  # type: ignore [assignment]
+    def __init__(self, config: TcpConf, unpacker: Unpacker[T] = json_unpacker) -> None:  # type: ignore [assignment]
         self.config = config
         self.unpack = unpacker
         self.is_connected = False

@@ -2,11 +2,20 @@ import asyncio
 import contextlib
 import logging
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import pytest
 import pytest_asyncio
 from heisskleber.tcp.config import TcpConf
-from heisskleber.tcp.source import TcpSource, bytes_csv_unpacker
+from heisskleber.tcp.source import TcpSource
+
+
+def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Unpack string containing comma separated values to dictionary."""
+    vals = payload.decode().rstrip().split(",")
+    keys = [f"key{i}" for i in range(len(vals))]
+    return (dict(zip(keys, vals)), {"topic": "tcp"})
+
 
 port = 23456
 tcp_logger_name = "heisskleber.tcp"
@@ -154,7 +163,7 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
 
     await sender.start(mock_conf.port)
 
-    source = TcpSource(mock_conf)
+    source = TcpSource(mock_conf, unpacker=bytes_csv_unpacker)
     data = await source.receive()
     _check_data(data, "OK after second connect")
     source.stop()
@@ -164,7 +173,7 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
 async def test_06_data_received(mock_conf, sender) -> None:
     await sender.start(mock_conf.port)
 
-    source = TcpSource(mock_conf)
+    source = TcpSource(mock_conf, unpacker=bytes_csv_unpacker)
     data = await source.receive()
     _check_data(data, "OK")
     source.stop()
