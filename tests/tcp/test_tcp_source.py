@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 import pytest_asyncio
+
 from heisskleber.tcp.config import TcpConf
 from heisskleber.tcp.source import TcpSource
 
@@ -48,7 +49,7 @@ async def sender() -> AsyncGenerator[TcpTestSender, None]:
     await sender.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_conf():
     return TcpConf(host="127.0.0.1", port=port, restart_behavior=TcpConf.RestartBehavior.NEVER)
 
@@ -60,7 +61,7 @@ def test_00_bytes_csv_unpacker() -> None:
     assert extra == {"topic": "tcp"}
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_01_connect_refused(mock_conf, caplog) -> None:
     logger = logging.getLogger(tcp_logger_name)
     logger.setLevel(logging.WARNING)
@@ -76,7 +77,7 @@ async def test_01_connect_refused(mock_conf, caplog) -> None:
     source.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_02_connect_timedout(mock_conf, caplog) -> None:
     logger = logging.getLogger("heisskleber.tcp")
     logger.setLevel(logging.WARNING)
@@ -97,7 +98,7 @@ async def test_02_connect_timedout(mock_conf, caplog) -> None:
     source.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_03_connect_retry(mock_conf, caplog, sender) -> None:
     logger = logging.getLogger(tcp_logger_name)
     logger.setLevel(logging.INFO)
@@ -121,7 +122,7 @@ async def test_03_connect_retry(mock_conf, caplog, sender) -> None:
     source.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_04_connects_to_socket(mock_conf, caplog, sender) -> None:
     logger = logging.getLogger(tcp_logger_name)
     logger.setLevel(logging.INFO)
@@ -142,7 +143,7 @@ async def test_04_connects_to_socket(mock_conf, caplog, sender) -> None:
     source.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
     def test_steps():
         # First connection: close it
@@ -169,7 +170,7 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
     source.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_06_data_received(mock_conf, sender) -> None:
     await sender.start(mock_conf.port)
 

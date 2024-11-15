@@ -3,17 +3,18 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
 from heisskleber.udp.config import UdpConf
 from heisskleber.udp.sink import UdpProtocol, UdpSink
 
 
-@pytest.fixture()
+@pytest.fixture
 def udp_config():
     """Fixture providing basic UDP configuration."""
     return UdpConf(host="127.0.0.1", port=54321)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_transport():
     """Fixture providing a mock transport."""
     transport = MagicMock(spec=asyncio.DatagramTransport)
@@ -21,7 +22,7 @@ def mock_transport():
     return transport
 
 
-@pytest.fixture()
+@pytest.fixture
 def udp_sink(udp_config):
     """Fixture providing a UDP sink instance."""
     sink = UdpSink(udp_config)
@@ -29,7 +30,7 @@ def udp_sink(udp_config):
     sink.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestUdpSink:
     """Test suite for UdpSink class."""
 

@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 import serial
+
 from heisskleber.serial import SerialConf, SerialSink, SerialSource
 
 
@@ -15,7 +16,7 @@ def serial_packer(data: dict[str, Any]) -> bytes:
     return (json.dumps(data) + "\n").encode()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_serial_with_ser() -> None:
     writer_port, reader_port = "./writer", "./reader"
     await asyncio.sleep(1)

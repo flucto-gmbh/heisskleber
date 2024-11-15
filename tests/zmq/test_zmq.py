@@ -2,10 +2,11 @@ import json
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
 from heisskleber.zmq import ZmqConf, ZmqSink
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_zmq_sink_send() -> None:
     mock_socket = AsyncMock()
     mock_context = Mock()

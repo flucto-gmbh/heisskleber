@@ -2,6 +2,7 @@ import asyncio
 import json
 
 import pytest
+
 from heisskleber.udp import UdpConf, UdpSink, UdpSource
 
 
@@ -65,7 +66,7 @@ class UdpSender:
             self.transport.close()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_udp_source() -> None:
     receiver_host = "127.0.0.1"
     receiver_port = 35699
@@ -87,7 +88,7 @@ async def test_udp_source() -> None:
         receiver.stop()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_actual_udp_transport():
     """Test actual UDP communication between sender and receiver."""
     receiver = UdpReceiver()
