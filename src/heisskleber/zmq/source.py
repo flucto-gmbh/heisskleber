@@ -17,20 +17,9 @@ class ZmqSource(AsyncSource[T]):
     """Async source that subscribes to one or many topics from a zmq broker and receives messages via the receive() function.
 
     Attributes:
-    ----------
-    unpack : Callable
-        The unpacker function to use for deserializing the data.
+        config: The ZmqConf configuration object for the connection.
+        unpacker : The unpacker function to use for deserializing the data.
 
-    Methods:
-    -------
-    receive() -> tuple[str, dict]:
-        Send the data with the given topic.
-
-    start():
-        Connect to the socket.
-
-    stop():
-        Close the socket.
 
     """
 
@@ -46,11 +35,9 @@ class ZmqSource(AsyncSource[T]):
         """Read a message from the zmq bus and return it.
 
         Returns:
-        -------
             tuple(topic: str, message: dict): the message received
 
         Raises:
-        ------
             UnpackError: If payload could not be unpacked with provided unpacker.
 
         """

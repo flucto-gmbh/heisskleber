@@ -7,6 +7,25 @@ from typing import Any, Protocol, TypeVar
 T_contra = TypeVar("T_contra", contravariant=True)
 
 
+class PackerError(Exception):
+    """Raised when unpacking operations fail.
+
+    This exception wraps underlying errors that may occur during unpacking,
+    providing a consistent interface for error handling.
+
+    Arguments:
+        data: The data object that caused the PackerError
+
+    """
+
+    PREVIEW_LENGTH = 100
+
+    def __init__(self, data: Any) -> None:
+        """Initialize the error with the failed payload and cause."""
+        message = "Failed to pack data."
+        super().__init__(message)
+
+
 class Packer(Protocol[T_contra]):
     """Packer Interface.
 
@@ -14,7 +33,6 @@ class Packer(Protocol[T_contra]):
     It takes data and converts it into a bytes payload.
 
     Attributes:
-    ----------
         None
 
     """
@@ -23,16 +41,13 @@ class Packer(Protocol[T_contra]):
     def __call__(self, data: T_contra) -> bytes:
         """Packs the data dictionary into a bytes payload.
 
-        Args:
-        ----
+        Arguments:
             data (T_contra): The input data dictionary to be packed.
 
         Returns:
-        -------
             bytes: The packed payload.
 
         Raises:
-        ------
             TypeError: The data dictionary could not be packed.
 
         """
@@ -41,20 +56,16 @@ class Packer(Protocol[T_contra]):
 class JSONPacker(Packer[dict[str, Any]]):
     """Converts a dictionary into JSON-formatted bytes.
 
-    Args:
-    ----
+    Arguments:
         data: A dictionary with string keys and arbitrary values to be serialized into JSON format.
 
     Returns:
-    -------
         bytes: The JSON-encoded data as a bytes object.
 
     Raises:
-    ------
         TypeError: If the data cannot be serialized to JSON.
 
     Example:
-    -------
         >>> packer = JSONPacker()
         >>> result = packer({"key": "value"})
         b'{"key": "value"}'

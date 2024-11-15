@@ -19,17 +19,20 @@ class MqttSource(AsyncSource[T]):
     The subscriber maintains a queue of received messages which can be accessed through the `receive` method.
 
     Attributes:
-    ----------
         config (MqttConf): Stored configuration for MQTT connection.
         topics (Union[str, List[str]]): Topics to subscribe to.
 
     """
 
-    def __init__(self, config: MqttConf, topic: str | list[str], unpacker: Unpacker[T] = json_unpacker) -> None:
+    def __init__(
+        self,
+        config: MqttConf,
+        topic: str | list[str],
+        unpacker: Unpacker[T] = json_unpacker,  # type: ignore[assignment]
+    ) -> None:
         """Initialize the MQTT source.
 
         Args:
-        ----
             config: Configuration object containing:
                 - host (str): MQTT broker hostname
                 - port (int): MQTT broker port
@@ -58,13 +61,11 @@ class MqttSource(AsyncSource[T]):
         """Receive and process the next message from the queue.
 
         Returns:
-        -------
             tuple[T, dict[str, Any]]
                 - The unpacked message data
                 - A dictionary with metadata including the message topic
 
         Raises:
-        ------
             TypeError: If the message payload is not of type bytes.
             UnpackError: If the message could not be unpacked with the unpacker protocol.
 
@@ -99,7 +100,6 @@ class MqttSource(AsyncSource[T]):
         """Subscribe to an additional MQTT topic.
 
         Args:
-        ----
             topic: The topic to subscribe to
             qos: Quality of Service level, uses config.qos if None
 
@@ -120,9 +120,8 @@ class MqttSource(AsyncSource[T]):
 
     async def _listen_mqtt_loop(self) -> None:
         """Listen to incoming messages asynchronously and put them into a queue."""
-        async with self._client.messages as messages:
-            async for message in messages:
-                await self._message_queue.put(message)
+        async for message in self._client.messages:
+            await self._message_queue.put(message)
 
     async def _subscribe_topics(self) -> None:
         """Subscribe to one or multiple topics."""

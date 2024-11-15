@@ -21,6 +21,8 @@ class TcpSource(AsyncSource[T]):
         self.is_connected = False
         self.timeout = config.timeout
         self._start_task: asyncio.Task[None] | None = None
+        self.reader: asyncio.StreamReader | None = None
+        self.writer: asyncio.StreamWriter | None = None
 
     async def receive(self) -> tuple[T, dict[str, Any]]:
         """Receive data from a connection.
@@ -41,7 +43,7 @@ class TcpSource(AsyncSource[T]):
         retry_delay = self.config.retry_delay
         while not data:
             await self._ensure_connected()
-            data = await self.reader.readline()
+            data = await self.reader.readline()  # type: ignore [union-attr]
             if not data:
                 self.is_connected = False
                 logger.warning(

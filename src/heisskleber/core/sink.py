@@ -17,7 +17,6 @@ class AsyncSink(ABC, Generic[T]):
     resource management.
 
     Attributes:
-    ----------
         packer: Component responsible for serializing type T data before sending.
 
     """
@@ -28,8 +27,7 @@ class AsyncSink(ABC, Generic[T]):
     async def send(self, data: T, **kwargs: Any) -> None:
         """Send data through the implemented output stream.
 
-        Args:
-        ----
+        Arguments:
             data: The data to be sent, of type T.
             **kwargs: Additional implementation-specific arguments.
 
@@ -55,11 +53,9 @@ class AsyncSink(ABC, Generic[T]):
         """Initialize the sink for use in an async context manager.
 
         Returns:
-        -------
             AsyncSink[T]: The initialized sink instance.
 
         Raises:
-        ------
             Any exceptions that might occur during start().
 
         """
@@ -74,8 +70,7 @@ class AsyncSink(ABC, Generic[T]):
     ) -> None:
         """Cleanup the sink when exiting an async context manager.
 
-        Args:
-        ----
+        Arguments:
             exc_type: The type of the exception that was raised, if any.
             exc_value: The instance of the exception that was raised, if any.
             traceback: The traceback of the exception that was raised, if any.

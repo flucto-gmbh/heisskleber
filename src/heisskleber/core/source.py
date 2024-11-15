@@ -19,11 +19,9 @@ class AsyncSource(ABC, Generic[T_co]):
     relationships.
 
     Attributes:
-    ----------
         unpacker: Component responsible for deserializing incoming data into type T_co.
 
     Example:
-    -------
         >>> async with CustomSource(unpacker) as source:
         ...     async for data, metadata in source:
         ...         print(f"Received: {data}, metadata: {metadata}")
@@ -37,13 +35,11 @@ class AsyncSource(ABC, Generic[T_co]):
         """Receive data from the implemented input stream.
 
         Returns:
-        -------
             tuple[T_co, dict[str, Any]]: A tuple containing:
                 - The received and unpacked data of type T_co
                 - A dictionary of metadata associated with the received data
 
         Raises:
-        ------
             Any implementation-specific exceptions that might occur during receiving.
 
         """
@@ -64,12 +60,10 @@ class AsyncSource(ABC, Generic[T_co]):
         """Implement async iteration over the source's data stream.
 
         Yields:
-        ------
             tuple[T_co, dict[str, Any]]: Each data item and its associated metadata
                 as returned by receive().
 
         Raises:
-        ------
             Any exceptions that might occur during receive().
 
         """
@@ -81,11 +75,9 @@ class AsyncSource(ABC, Generic[T_co]):
         """Initialize the source for use in an async context manager.
 
         Returns:
-        -------
             AsyncSource[T_co]: The initialized source instance.
 
         Raises:
-        ------
             Any exceptions that might occur during start().
 
         """
@@ -100,8 +92,7 @@ class AsyncSource(ABC, Generic[T_co]):
     ) -> None:
         """Cleanup the source when exiting an async context manager.
 
-        Args:
-        ----
+        Arguments:
             exc_type: The type of the exception that was raised, if any.
             exc_value: The instance of the exception that was raised, if any.
             traceback: The traceback of the exception that was raised, if any.

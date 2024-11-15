@@ -12,7 +12,7 @@ class ConsoleSink(AsyncSink[T]):
         self,
         pretty: bool = False,
         verbose: bool = False,
-        packer: Packer[T] = json_packer,
+        packer: Packer[T] = json_packer,  # type: ignore[assignment]
     ) -> None:
         self.verbose = verbose
         self.pretty = pretty

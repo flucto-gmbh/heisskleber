@@ -20,7 +20,6 @@ class SerialSink(AsyncSink[T]):
     It uses a thread pool executor to perform blocking I/O operations asynchronously.
 
     Attributes:
-    ----------
         config: Configuration for the serial port.
         packer: Function to pack data for sending.
 
@@ -41,17 +40,14 @@ class SerialSink(AsyncSink[T]):
 
         This method packs the data, writes it to the serial port, and then flushes the port.
 
-        Args:
-        ----
+        Arguments:
             data: The data to be sent.
             **kwargs: Not implemented.
 
         Raises:
-        ------
             PackerError: If data could not be packed to bytes with the provided packer.
 
         Note:
-        ----
             If the serial port is not connected, it will implicitly attempt to connect first.
 
         """

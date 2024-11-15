@@ -24,6 +24,14 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 .. autoclass:: heisskleber.core.packer::JSONPacker
 ```
 
+### Errors
+
+```{eval-rst}
+.. autoclass:: heisskleber.core::UnpackError
+
+.. autoclass:: heisskleber.core::PackerError
+```
+
 ## Implementations (Adapters)
 
 ### MQTT
@@ -37,6 +45,9 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 
 .. autoclass:: heisskleber.mqtt.MqttSource
     :members: receive, subscribe
+
+.. autoclass:: heisskleber.mqtt.MqttConf
+    :members:
 ```
 
 ### ZMQ

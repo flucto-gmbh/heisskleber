@@ -39,9 +39,6 @@ nitpick_ignore = [
     ("py:class", "_io.StringIO"),
     ("py:class", "_io.BytesIO"),
 ]
-autodoc_default_options: dict[str, Any] = {
-    "special-members": "__call__",
-}
 
 source_suffix = [".rst", ".md"]
 

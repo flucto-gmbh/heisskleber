@@ -5,6 +5,8 @@ from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Any, TextIO, TypeVar, Union
 
+import yaml  # type: ignore[import-untyped]
+
 logger = logging.getLogger("heisskleber")
 
 ConfigType = TypeVar(
@@ -14,11 +16,8 @@ ConfigType = TypeVar(
 
 
 def _parse_yaml(file: TextIO) -> dict[str, Any]:
-    try:
-        import yaml
-    except ImportError:
-        logging.exception("Could not import pyyaml. Install with 'pip install pyyaml'.")
-        raise
+    logging.exception("Could not import pyyaml. Install with 'pip install pyyaml'.")
+
     try:
         return dict(yaml.safe_load(file))
     except yaml.YAMLError as e:
@@ -74,21 +73,17 @@ class BaseConf:
     def from_dict(cls: type[ConfigType], config_dict: dict[str, Any]) -> ConfigType:
         """Create a config instance from a dictionary, including only fields defined in the dataclass.
 
-        Args:
-        ----
+        Arguments:
             config_dict: Dictionary containing configuration values.
                         Keys should match dataclass field names.
 
         Returns:
-        -------
             An instance of the configuration class with values from the dictionary.
 
         Raises:
-        ------
             TypeError: If provided values don't match field types.
 
         Example:
-        -------
             >>> from dataclasses import dataclass
             >>> @dataclass
             ... class ServerConfig(BaseConf):

@@ -22,7 +22,6 @@ class MqttSink(AsyncSink[T]):
     Network operations are handled in a separate task.
 
     Attributes:
-    ----------
         config: MQTT configuration in a dataclass.
         packer: Callable to pack data from type T to bytes for transport.
 
@@ -38,7 +37,6 @@ class MqttSink(AsyncSink[T]):
         """Queue data for asynchronous publication to the mqtt broker.
 
         Arguments:
-        ---------
             data: The data to be published.
             topic: The mqtt topic to publish to.
             qos: MQTT QOS level (0, 1, or 2). Defaults to 0.o

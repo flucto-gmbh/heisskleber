@@ -12,7 +12,7 @@ class ConsoleSource(AsyncSource[T]):
 
     def __init__(
         self,
-        unpacker: Unpacker[T] = json_unpacker,
+        unpacker: Unpacker[T] = json_unpacker,  # type: ignore[assignment]
     ) -> None:
         self.queue: asyncio.Queue[tuple[T, dict[str, Any]]] = asyncio.Queue(maxsize=10)
         self.unpack = unpacker
