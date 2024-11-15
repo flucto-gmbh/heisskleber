@@ -1,87 +1,133 @@
+import asyncio
 import json
-import socket
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from heisskleber.udp.config import UdpConf
-from heisskleber.udp.publisher import UdpPublisher
-from heisskleber.udp.subscriber import UdpSubscriber
+from heisskleber.udp.sink import UdpProtocol, UdpSink
 
 
-@pytest.fixture
-def mock_socket():
-    with patch("heisskleber.udp.publisher.socket.socket") as mock_socket:
-        yield mock_socket
+@pytest.fixture()
+def udp_config():
+    """Fixture providing basic UDP configuration."""
+    return UdpConf(host="127.0.0.1", port=54321)
 
 
-@pytest.fixture
-def mock_conf():
-    return UdpConf(host="127.0.0.1", port=12345, packer="json")
+@pytest.fixture()
+def mock_transport():
+    """Fixture providing a mock transport."""
+    transport = MagicMock(spec=asyncio.DatagramTransport)
+    transport.is_closing.return_value = False
+    return transport
 
 
-def test_connects_to_socket(mock_socket, mock_conf) -> None:
-    pub = UdpPublisher(mock_conf)
-    pub.start()
-
-    # constructor was called
-    mock_socket.assert_called_with(socket.AF_INET, socket.SOCK_DGRAM)
-    pub.stop()
-
-
-def test_closes_socket(mock_socket, mock_conf) -> None:
-    pub = UdpPublisher(mock_conf)
-    pub.start()
-    pub.stop()
-
-    # instace was closed
-    mock_socket.return_value.close.assert_called()
+@pytest.fixture()
+def udp_sink(udp_config):
+    """Fixture providing a UDP sink instance."""
+    sink = UdpSink(udp_config)
+    yield sink
+    sink.stop()
 
 
-def test_packs_and_sends_message(mock_socket, mock_conf) -> None:
-    pub = UdpPublisher(mock_conf)
+@pytest.mark.asyncio()
+class TestUdpSink:
+    """Test suite for UdpSink class."""
 
-    # explicitly define packer to be json.dumps
-    assert pub.pack == json.dumps
+    async def test_init(self, udp_sink, udp_config):
+        """Test initialization of UdpSink."""
+        assert udp_sink.config == udp_config
+        assert not udp_sink.is_connected
+        assert callable(udp_sink.pack)
 
-    pub.send({"key": "val", "intkey": 1, "floatkey": 1.0}, "test")
+    @patch("asyncio.get_running_loop")
+    async def test_ensure_connection(self, mock_get_loop, udp_sink, mock_transport):
+        """Test connection establishment."""
+        mock_loop = AsyncMock()
+        mock_loop.create_datagram_endpoint.return_value = (mock_transport, None)
+        mock_get_loop.return_value = mock_loop
 
-    mock_socket.return_value.sendto.assert_called_with(
-        b'{"key": "val", "intkey": 1, "floatkey": 1.0, "topic": "test"}',
-        (str(mock_conf.host), mock_conf.port),
-    )
-    pub.stop()
+        await udp_sink._ensure_connection()
+
+        mock_loop.create_datagram_endpoint.assert_called_once()
+        assert udp_sink.is_connected
+        assert udp_sink._transport == mock_transport
+
+    @patch("asyncio.get_running_loop")
+    async def test_ensure_connection_already_connected(self, mock_get_loop, udp_sink, mock_transport):
+        """Test that _ensure_connection doesn't reconnect if already connected."""
+        mock_loop = AsyncMock()
+        mock_get_loop.return_value = mock_loop
+        udp_sink.is_connected = True
+        udp_sink._transport = mock_transport
+
+        await udp_sink._ensure_connection()
+
+        mock_loop.create_datagram_endpoint.assert_not_called()
+
+    async def test_stop(self, udp_sink, mock_transport):
+        """Test stopping the UDP sink."""
+        udp_sink.is_connected = True
+        udp_sink._transport = mock_transport
+
+        udp_sink.stop()
+
+        mock_transport.close.assert_called_once()
+        assert not udp_sink.is_connected
+
+    async def test_stop_not_connected(self, udp_sink: UdpSink) -> None:
+        """Test stopping when not connected."""
+        udp_sink.stop()
+        assert not udp_sink.is_connected
+
+    @patch("asyncio.get_running_loop")
+    async def test_send(self, mock_get_loop, udp_sink, mock_transport):
+        """Test sending data through UDP sink."""
+        mock_loop = AsyncMock()
+        mock_loop.create_datagram_endpoint.return_value = (mock_transport, None)
+        mock_get_loop.return_value = mock_loop
+
+        test_data = {"test": "data"}
+        await udp_sink.send(test_data)
+
+        expected_payload = json.dumps(test_data).encode()
+        mock_transport.sendto.assert_called_once_with(expected_payload)
+
+    @patch("asyncio.get_running_loop")
+    async def test_send_custom_packer(self, mock_get_loop, udp_config, mock_transport):
+        """Test sending data with custom packer."""
+
+        def custom_packer(data: dict) -> bytes:
+            return b"custom_packed_data"
+
+        sink = UdpSink(udp_config, packer=custom_packer)
+        mock_loop = AsyncMock()
+        mock_loop.create_datagram_endpoint.return_value = (mock_transport, None)
+        mock_get_loop.return_value = mock_loop
+
+        test_data = {"test": "data"}
+        await sink.send(test_data)
+
+        mock_transport.sendto.assert_called_once_with(b"custom_packed_data")
+        sink.stop()
 
 
-def test_subscriber_receives_message_from_queue(mock_conf) -> None:
-    sub = UdpSubscriber(mock_conf)
+class TestUdpProtocol:
+    """Test suite for UdpProtocol class."""
 
-    test_topic, test_data = ("test", {"key": "val", "intkey": 1, "floatkey": 1.0})
+    def test_init(self):
+        """Test initialization of UdpProtocol."""
+        protocol = UdpProtocol(is_connected=True)
+        assert protocol.is_connected
 
-    sub._queue.put((test_topic, test_data))
+    def test_connection_lost(self):
+        """Test connection lost handler."""
+        protocol = UdpProtocol(is_connected=True)
+        protocol.connection_lost(None)
+        assert not protocol.is_connected
 
-    topic, data = sub.receive()
-    assert test_topic == topic
-    assert test_data == data
-    sub.stop()
-
-
-@pytest.fixture
-def udp_sub(mock_conf):
-    sub = UdpSubscriber(mock_conf)
-    sub.config.port = 12346  # explicitly set port to avoid conflicts
-    sub.start()
-    yield sub
-    sub.stop()
-
-
-def test_sends_message_between_pub_and_sub(udp_sub, mock_conf):
-    pub = UdpPublisher(mock_conf)
-    test_data = {"key": "val", "intkey": 1, "floatkey": 1.0}
-    test_topic = "test_topic"
-
-    # Need to copy the dict, because the publisher will mutate it
-    pub.send(test_data.copy(), test_topic)
-    topic, data = udp_sub.receive()
-    assert test_topic == topic
-    assert test_data == data
+    def test_connection_lost_with_exception(self):
+        """Test connection lost handler with exception."""
+        protocol = UdpProtocol(is_connected=True)
+        test_exception = Exception("Test exception")
+        protocol.connection_lost(test_exception)
+        assert not protocol.is_connected

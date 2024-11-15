@@ -63,21 +63,17 @@ class JSONUnpacker(Unpacker[dict[str, Any]]):
     """Deserializes JSON-formatted bytes into dictionaries.
 
     Args:
-    ----
         payload: JSON-formatted bytes to deserialize.
 
     Returns:
-    -------
         tuple[dict[str, Any], dict[str, Any]]: A tuple containing:
             - The deserialized JSON data as a dictionary
             - An empty dictionary for metadata (not used in JSON unpacking)
 
     Raises:
-    ------
         UnpackerError: If the payload cannot be decoded as valid JSON.
 
     Example:
-    -------
         >>> unpacker = JSONUnpacker()
         >>> data, metadata = unpacker(b'{"hotglue": "very_nais"}')
         >>> print(data)
@@ -86,6 +82,7 @@ class JSONUnpacker(Unpacker[dict[str, Any]]):
     """
 
     def __call__(self, payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Unpack the payload."""
         try:
             return json.loads(payload.decode()), {}
         except (json.JSONDecodeError, UnicodeDecodeError) as e:

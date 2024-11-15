@@ -19,7 +19,7 @@ class SerialSource(AsyncSource[T]):
     This class implements the AsyncSource interface for reading data from a serial port.
     It uses a thread pool executor to perform blocking I/O operations asynchronously.
 
-    Attributes
+    Attributes:
     ----------
         config: Configuration for the serial port.
         unpacker: Function to unpack received data.
@@ -41,11 +41,11 @@ class SerialSource(AsyncSource[T]):
         This method reads a line from the serial port, unpacks it, and returns the data.
         If the serial port is not connected, it will attempt to connect first.
 
-        Returns
+        Returns:
         -------
             tuple[T, dict[str, Any]]: A tuple containing the unpacked data and any extra information.
 
-        Raises
+        Raises:
         ------
             UnpackError: If the data could not be unpacked with the provided unpacker.
 

@@ -13,7 +13,6 @@ class UdpProtocol(asyncio.DatagramProtocol):
     """Protocol for udp connection.
 
     Arguments:
-    ---------
         queue: The asyncioQueue to put messages into.
 
     """
@@ -28,7 +27,7 @@ class UdpProtocol(asyncio.DatagramProtocol):
 
     def connection_made(self, transport: asyncio.DatagramTransport) -> None:  # type: ignore[override]
         """Log successful connection."""
-        logger.info("Connection made")
+        logger.info("UdpSource: Connection made")
 
 
 class UdpSource(AsyncSource[T]):
@@ -38,44 +37,47 @@ class UdpSource(AsyncSource[T]):
         self.config = config
         self.EOF = self.config.delimiter.encode(self.config.encoding)
         self.unpacker = unpacker
-        self.queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=self.config.max_queue_size)
-        self.task: asyncio.Task[None] | None = None
-        self.is_connected = False
+        self._queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=self.config.max_queue_size)
+        self._task: asyncio.Task[None] | None = None
+        self._is_connected = False
+        self._transport: asyncio.DatagramTransport | None = None
+        self._protocol: asyncio.DatagramProtocol | None = None
 
     async def start(self) -> None:
         """Start udp connection."""
         loop = asyncio.get_event_loop()
-        self.transport, self.protocol = await loop.create_datagram_endpoint(
-            lambda: UdpProtocol(self.queue),
+        self._transport, self._protocol = await loop.create_datagram_endpoint(
+            lambda: UdpProtocol(self._queue),
             local_addr=(self.config.host, self.config.port),
         )
-        self.is_connected = True
+        self._is_connected = True
         logger.info("Udp connection established.")
 
     def stop(self) -> None:
         """Stop the udp connection."""
-        self.transport.close()
+        if self._transport is not None:
+            self._transport.close()
+            self._transport = None
+        self._is_connected = False
 
     async def receive(self) -> tuple[T, dict[str, Any]]:
         """Get the next message from the udp connection.
 
-        Returns
-        -------
+        Returns:
             tuple[T, dict[str, Any]]
                 - The data as returned by the unpacker.
                 - A dictionary containing extra information.
 
-        Raises
-        ------
+        Raises:
             UnpackError: If the received message could not be unpacked.
 
         """
-        if not self.is_connected:
+        if not self._is_connected:
             await self.start()
 
         while True:
             data = None
-            data = await self.queue.get()
+            data = await self._queue.get()
             payload, extra = self.unpacker(data)
             return (payload, extra)
 

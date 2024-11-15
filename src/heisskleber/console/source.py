@@ -1,46 +1,46 @@
 import asyncio
-import json
 import sys
-from typing import Any, Callable
+from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSource
+from heisskleber.core import AsyncSource, Unpacker, json_unpacker
 
-
-def string_to_json(payload: str) -> tuple[dict[str, Any], str | None]:
-    return json.loads(payload), None
+T = TypeVar("T")
 
 
-class AsyncConsoleSource(AsyncSource[dict[str, Any]]):
+class ConsoleSource(AsyncSource[T]):
+    """Read stdin from console and create data of type T."""
+
     def __init__(
         self,
-        topic: str = "console",
-        unpacker: Callable[[str], tuple[dict[str, Any], str | None]] = string_to_json,
+        unpacker: Unpacker[T] = json_unpacker,
     ) -> None:
-        self.topic = topic
-        self.queue: asyncio.Queue[tuple[dict[str, Any], str | None]] = asyncio.Queue(maxsize=10)
+        self.queue: asyncio.Queue[tuple[T, dict[str, Any]]] = asyncio.Queue(maxsize=10)
         self.unpack = unpacker
         self.task: asyncio.Task[None] | None = None
 
-    async def listener_task(self) -> None:
+    async def _listener_task(self) -> None:
         while True:
-            payload = sys.stdin.readline()
-            data, topic = self.unpack(payload)
-            await self.queue.put((data, topic))
+            payload = sys.stdin.readline().encode()  # I know this is stupid, but I adhere to the interface for now
+            data, extra = self.unpack(payload)
+            await self.queue.put((data, extra))
 
-    async def receive(self) -> tuple[dict[str, Any], dict[str, Any]]:
+    async def receive(self) -> tuple[T, dict[str, Any]]:
+        """Receive the next message from the console input."""
         if not self.task:
-            self.task = asyncio.create_task(self.listener_task())
+            self.task = asyncio.create_task(self._listener_task())
 
-        data, topic = await self.queue.get()
-        topic = topic or self.topic
-        return data, {"topic": topic}
+        data, extra = await self.queue.get()
+        return data, extra
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(topic={self.topic})"
+        """Return string representation of ConsoleSource."""
+        return f"{self.__class__.__name__}"
 
     async def start(self) -> None:
-        self.task = asyncio.create_task(self.listener_task())
+        """Start ConsoleSource."""
+        self.task = asyncio.create_task(self._listener_task())
 
     def stop(self) -> None:
+        """Stop ConsoleSource."""
         if self.task:
             self.task.cancel()

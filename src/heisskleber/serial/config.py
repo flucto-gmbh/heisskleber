@@ -7,8 +7,7 @@ from heisskleber.core.config import BaseConf
 class SerialConf(BaseConf):
     """Serial Config class.
 
-    Attributes
-    ----------
+    Attributes:
       port: The port to connect to. Defaults to /dev/serial0.
       baudrate: The baudrate of the serial connection. Defaults to 9600.
       bytesize: The bytesize of the messages. Defaults to 8.

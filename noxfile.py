@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import shutil
 from pathlib import Path
 
 import nox
@@ -15,28 +14,21 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 @nox.session
 def lint(session: nox.Session) -> None:
-    """
-    Run the linter.
-    """
+    """Run the linter."""
     session.install("pre-commit")
     session.run("pre-commit", "run", "--all-files", "--show-diff-on-failure", *session.posargs)
 
 
 @nox.session
 def tests(session: nox.Session) -> None:
-    """
-    Run the unit and regular tests.
-    """
+    """Run the unit and regular tests."""
     session.install(".[test]")
     session.run("pytest", *session.posargs)
 
 
 @nox.session(reuse_venv=True)
 def docs(session: nox.Session) -> None:
-    """
-    Build the docs. Pass --non-interactive to avoid serving. First positional argument is the target directory.
-    """
-
+    """Build the docs. Pass --non-interactive to avoid serving. First positional argument is the target directory."""
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", dest="builder", default="html", help="Build target (default: html)")
     parser.add_argument("output", nargs="?", help="Output directory")

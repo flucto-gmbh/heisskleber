@@ -16,7 +16,7 @@ class AsyncSink(ABC, Generic[T]):
     asynchronously. It supports context manager usage and ensures proper
     resource management.
 
-    Attributes
+    Attributes:
     ----------
         packer: Component responsible for serializing type T data before sending.
 
@@ -54,11 +54,11 @@ class AsyncSink(ABC, Generic[T]):
     async def __aenter__(self) -> "AsyncSink[T]":
         """Initialize the sink for use in an async context manager.
 
-        Returns
+        Returns:
         -------
             AsyncSink[T]: The initialized sink instance.
 
-        Raises
+        Raises:
         ------
             Any exceptions that might occur during start().
 

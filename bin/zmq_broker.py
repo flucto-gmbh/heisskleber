@@ -10,7 +10,6 @@ import logging
 import sys
 
 import zmq
-
 from heisskleber.zmq import ZmqConf
 
 logger = logging.getLogger(__name__)
@@ -19,6 +18,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - ZmqBroker - %(leve
 
 
 def main() -> None:
+    """Run ZMQ broker."""
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", type=str, required=True, help="ZMQ configuration file (yaml or json)")
 

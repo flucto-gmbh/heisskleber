@@ -22,7 +22,7 @@ def retry(
             while max_retries is None or retries < max_retries:
                 try:
                     return await func(*args, **kwargs)
-                except exception_type as e:
+                except exception_type as e:  # noqa: PERF203
                     if logger_fn:
                         logger_fn(
                             "Error occurred: %(err). Retrying in %(seconds) seconds",

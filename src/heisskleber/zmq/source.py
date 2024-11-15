@@ -16,12 +16,12 @@ T = TypeVar("T")
 class ZmqSource(AsyncSource[T]):
     """Async source that subscribes to one or many topics from a zmq broker and receives messages via the receive() function.
 
-    Attributes
+    Attributes:
     ----------
     unpack : Callable
         The unpacker function to use for deserializing the data.
 
-    Methods
+    Methods:
     -------
     receive() -> tuple[str, dict]:
         Send the data with the given topic.
@@ -45,11 +45,11 @@ class ZmqSource(AsyncSource[T]):
     async def receive(self) -> tuple[T, dict[str, Any]]:
         """Read a message from the zmq bus and return it.
 
-        Returns
+        Returns:
         -------
             tuple(topic: str, message: dict): the message received
 
-        Raises
+        Raises:
         ------
             UnpackError: If payload could not be unpacked with provided unpacker.
 

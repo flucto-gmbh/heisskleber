@@ -36,13 +36,13 @@ class AsyncSource(ABC, Generic[T_co]):
     async def receive(self) -> tuple[T_co, dict[str, Any]]:
         """Receive data from the implemented input stream.
 
-        Returns
+        Returns:
         -------
             tuple[T_co, dict[str, Any]]: A tuple containing:
                 - The received and unpacked data of type T_co
                 - A dictionary of metadata associated with the received data
 
-        Raises
+        Raises:
         ------
             Any implementation-specific exceptions that might occur during receiving.
 
@@ -63,12 +63,12 @@ class AsyncSource(ABC, Generic[T_co]):
     async def __aiter__(self) -> AsyncGenerator[tuple[T_co, dict[str, Any]], None]:
         """Implement async iteration over the source's data stream.
 
-        Yields
+        Yields:
         ------
             tuple[T_co, dict[str, Any]]: Each data item and its associated metadata
                 as returned by receive().
 
-        Raises
+        Raises:
         ------
             Any exceptions that might occur during receive().
 
@@ -80,11 +80,11 @@ class AsyncSource(ABC, Generic[T_co]):
     async def __aenter__(self) -> "AsyncSource[T_co]":
         """Initialize the source for use in an async context manager.
 
-        Returns
+        Returns:
         -------
             AsyncSource[T_co]: The initialized source instance.
 
-        Raises
+        Raises:
         ------
             Any exceptions that might occur during start().
 

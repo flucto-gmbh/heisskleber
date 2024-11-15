@@ -1,71 +1,22 @@
-import time
-from multiprocessing import Process
-from pathlib import Path
-from unittest.mock import patch
+import json
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
-from heisskleber import get_sink, get_source
-from heisskleber.broker.zmq_broker import zmq_broker
-from heisskleber.config import load_config
-from heisskleber.zmq.config import ZmqConf
-from heisskleber.zmq.publisher import ZmqPublisher
-from heisskleber.zmq.subscriber import ZmqSubscriber
+from heisskleber.zmq import ZmqConf, ZmqSink
 
 
-@pytest.fixture
-def start_broker():
-    # setup broker
-    with patch("heisskleber.config.parse.get_config_filepath", return_value=Path("tests/resources/zmq.yaml")):
-        broker_config = load_config(ZmqConf(), "zmq", read_commandline=False)
-        broker_process = Process(
-            target=zmq_broker,
-            args=(broker_config,),
-        )
-        # start broker
-        broker_process.start()
+@pytest.mark.asyncio()
+async def test_zmq_sink_send() -> None:
+    mock_socket = AsyncMock()
+    mock_context = Mock()
+    mock_context.socket.return_value = mock_socket
 
-        yield broker_process
+    test_dict = {"message": "test"}
+    test_topic = "test"
 
-        broker_process.terminate()
+    with patch("zmq.asyncio.Context.instance", return_value=mock_context):
+        zmq_sink = ZmqSink(ZmqConf(publisher_port=5555))
+        await zmq_sink.send(test_dict, topic=test_topic)
 
-
-def test_config_parses_correctly():
-    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
-    assert conf.protocol == "tcp"
-    assert conf.host == "localhost"
-    assert conf.publisher_port == 5555
-    assert conf.subscriber_port == 5556
-
-    assert conf.publisher_address == "tcp://localhost:5555"
-    assert conf.subscriber_address == "tcp://localhost:5556"
-
-
-def test_instantiate_subscriber():
-    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
-    sub = ZmqSubscriber(conf, "test")
-    assert sub.config == conf
-
-
-def test_instantiate_publisher():
-    conf = ZmqConf(protocol="tcp", host="localhost", publisher_port=5555, subscriber_port=5556)
-    pub = ZmqPublisher(conf)
-    assert pub.config == conf
-
-
-def test_send_receive(start_broker):
-    print("test_send_receive")
-    topic = "test"
-    source = get_source("zmq", topic)
-    source.start()
-    sink = get_sink("zmq")
-    sink.start()
-    time.sleep(1)  # this is crucial, otherwise the source might hang
-    for i in range(10):
-        message = {"m": i}
-        sink.send(message, topic)
-        print(f"sent {topic} {message}")
-        t, m = source.receive()
-        print(f"received {t} {m}")
-        assert t == topic
-        assert m == {"m": i}
+        mock_socket.connect.assert_called_once_with(zmq_sink.config.publisher_address)
+        mock_socket.send_multipart.assert_called_once_with([test_topic.encode(), json.dumps(test_dict).encode()])

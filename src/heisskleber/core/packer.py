@@ -13,7 +13,7 @@ class Packer(Protocol[T_contra]):
     This class defines a protocol for packing data.
     It takes data and converts it into a bytes payload.
 
-    Attributes
+    Attributes:
     ----------
         None
 
@@ -62,4 +62,5 @@ class JSONPacker(Packer[dict[str, Any]]):
     """
 
     def __call__(self, data: dict[str, Any]) -> bytes:
+        """Pack the data."""
         return json.dumps(data).encode()

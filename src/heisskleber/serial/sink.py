@@ -19,7 +19,7 @@ class SerialSink(AsyncSink[T]):
     This class implements the AsyncSink interface for writing data to a serial port.
     It uses a thread pool executor to perform blocking I/O operations asynchronously.
 
-    Attributes
+    Attributes:
     ----------
         config: Configuration for the serial port.
         packer: Function to pack data for sending.

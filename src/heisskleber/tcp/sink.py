@@ -11,8 +11,7 @@ T = TypeVar("T")
 class TcpSink(AsyncSink[T]):
     """Async TCP Sink.
 
-    Attributes
-    ----------
+    Attributes:
         config: The TcpConf configuration object.
         packer: The packer protocol to serialize data before sending.
 
@@ -26,7 +25,6 @@ class TcpSink(AsyncSink[T]):
         """Send data via tcp connection.
 
         Arguments:
-        ---------
             data: The data to be sent.
             kwargs: Not implemented.
 

@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
 
-import pytest
-
 from heisskleber.core import Unpacker, json_unpacker
 
 

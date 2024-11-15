@@ -125,6 +125,7 @@ class BaseConf:
 
     @classmethod
     def from_file(cls: type[ConfigType], file_path: str | Path) -> ConfigType:
+        """Create a config instance from a file - accepts yaml or json."""
         path = Path(file_path)
         if not path.exists():
             logger.exception("Config file not found: %(path)s", {"path": path})

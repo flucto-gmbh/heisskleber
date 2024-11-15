@@ -16,8 +16,7 @@ T = TypeVar("T")
 class ZmqSink(AsyncSink[T]):
     """Async publisher that sends messages to a ZMQ PUB socket.
 
-    Attributes
-    ----------
+    Attributes:
         config: The ZmqConf configuration object for the connection.
         packer : The packer strategy to use for serializing the data.
             Defaults to json packer with utf-8 encoding.
