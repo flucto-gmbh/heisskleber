@@ -83,8 +83,9 @@ class SerialSink(AsyncSink[T]):
             stopbits=serial.STOPBITS_ONE,
         )
 
-    def stop(self) -> None:
-        """Not implemented."""
+    async def stop(self) -> None:
+        """Close serial connection."""
+        self._ser.close()
 
     def __repr__(self) -> str:
         """Return string representation of SerialSink."""

@@ -25,9 +25,7 @@ def mock_transport():
 @pytest.fixture
 def udp_sink(udp_config):
     """Fixture providing a UDP sink instance."""
-    sink = UdpSink(udp_config)
-    yield sink
-    sink.stop()
+    return UdpSink(udp_config)
 
 
 @pytest.mark.asyncio
@@ -70,14 +68,14 @@ class TestUdpSink:
         udp_sink.is_connected = True
         udp_sink._transport = mock_transport
 
-        udp_sink.stop()
+        await udp_sink.stop()
 
         mock_transport.close.assert_called_once()
         assert not udp_sink.is_connected
 
     async def test_stop_not_connected(self, udp_sink: UdpSink) -> None:
         """Test stopping when not connected."""
-        udp_sink.stop()
+        await udp_sink.stop()
         assert not udp_sink.is_connected
 
     @patch("asyncio.get_running_loop")
@@ -109,7 +107,7 @@ class TestUdpSink:
         await sink.send(test_data)
 
         mock_transport.sendto.assert_called_once_with(b"custom_packed_data")
-        sink.stop()
+        await sink.stop()
 
 
 class TestUdpProtocol:

@@ -60,30 +60,10 @@ class TcpSource(AsyncSource[T]):
         """Start TcpSource."""
         await self._connect()
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop TcpSource."""
-
-        async def shielded_disconnect() -> None:
-            if self._start_task:
-                self._start_task.cancel()
-                await self._start_task
-                self._start_task = None
-
-            if self.writer:
-                self.writer.close()
-                await self.writer.wait_closed()
-                self.writer = None
-                self.reader = None
-
-            self.is_connected = False
-            logger.info("%(self)s stopped successfully", {"self": self})
-
-        async def disconnect() -> None:
-            await asyncio.shield(shielded_disconnect())
-
         if self.is_connected:
             logger.info("%(self)s stopping", {"self": self})
-            self._shutdown_task = asyncio.create_task(disconnect())
 
     async def _ensure_connected(self) -> None:
         if self.is_connected:

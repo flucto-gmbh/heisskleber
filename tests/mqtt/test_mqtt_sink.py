@@ -26,3 +26,5 @@ async def test_send_work_successful_publish() -> None:
         await asyncio.sleep(0.1)
 
         mock_client.publish.assert_awaited_once_with(topic=test_topic, payload=mock_packer.return_value)
+
+        await sink.stop()

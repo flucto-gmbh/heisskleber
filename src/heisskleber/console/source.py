@@ -40,7 +40,7 @@ class ConsoleSource(AsyncSource[T]):
         """Start ConsoleSource."""
         self.task = asyncio.create_task(self._listener_task())
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop ConsoleSource."""
         if self.task:
             self.task.cancel()

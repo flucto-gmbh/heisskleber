@@ -37,5 +37,5 @@ class TcpSink(AsyncSink[T]):
     async def start(self) -> None:
         """Start TcpSink."""
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop TcpSink."""

@@ -88,8 +88,10 @@ class SerialSource(AsyncSource[T]):
             stopbits=serial.STOPBITS_ONE,
         )
 
-    def stop(self) -> None:
-        """Not implemented."""
+    async def stop(self) -> None:
+        """Close serial connection."""
+        await self._cancel_read()
+        self._ser.close()
 
     def __repr__(self) -> str:
         """Return string representation of Serial Source."""

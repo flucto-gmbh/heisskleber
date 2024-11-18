@@ -31,5 +31,5 @@ class ConsoleSink(AsyncSink[T]):
     async def start(self) -> None:
         """Not implemented."""
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Not implemented."""

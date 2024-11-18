@@ -58,7 +58,7 @@ class ZmqSource(AsyncSource[T]):
             self.is_connected = True
         self.subscribe(self.topic)
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Close the zmq socket."""
         self.socket.close()
         self.is_connected = False

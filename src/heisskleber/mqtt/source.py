@@ -1,10 +1,12 @@
+import asyncio
 import logging
-from asyncio import Queue, Task, create_task, sleep
+from asyncio import Queue, Task, create_task
 from typing import Any, TypeVar
 
 from aiomqtt import Client, Message, MqttError
 
 from heisskleber.core import AsyncSource, Unpacker, json_unpacker
+from heisskleber.core.utils import retry
 from heisskleber.mqtt import MqttConf
 
 T = TypeVar("T")
@@ -45,14 +47,7 @@ class MqttSource(AsyncSource[T]):
 
         """
         self.config = config
-        # TODO: Move to start method
-        self._client = Client(
-            hostname=self.config.host,
-            port=self.config.port,
-            username=self.config.user,
-            password=self.config.password,
-        )
-        self.topics = topic
+        self.topics = topic if isinstance(topic, list) else [topic]
         self.unpacker = unpacker
         self._message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
         self._listener_task: Task[None] | None = None
@@ -90,10 +85,20 @@ class MqttSource(AsyncSource[T]):
         """Start the MQTT listener task."""
         self._listener_task = create_task(self._run())
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop the MQTT listener task."""
-        if self._listener_task:
-            self._listener_task.cancel()
+        if not self._listener_task:
+            return
+
+        self._listener_task.cancel()
+        try:
+            await self._listener_task
+        except asyncio.CancelledError:
+            # Raise if the stop task was cancelled
+            # kudos:https://superfastpython.com/asyncio-cancel-task-and-wait/
+            task = asyncio.current_task()
+            if task and task.cancelled():
+                raise
         self._listener_task = None
 
     async def subscribe(self, topic: str, qos: int | None = None) -> None:
@@ -105,28 +110,21 @@ class MqttSource(AsyncSource[T]):
 
         """
         qos = qos or self.config.qos
+        self.topics.append(topic)
         await self._client.subscribe(topic, qos)
 
+    @retry(every=1, catch=MqttError, logger_fn=logger.exception)
     async def _run(self) -> None:
-        # TODO: Implement backoff re-connection strategy
-        while True:
-            try:
-                async with self._client:
-                    await self._subscribe_topics()
-                    await self._listen_mqtt_loop()
-            except MqttError:  # noqa: PERF203
-                logger.exception("Connection to MQTT failed. Retrying...")
-                await sleep(1)
+        """Background task for MQTT connection."""
+        async with Client(
+            hostname=self.config.host,
+            port=self.config.port,
+            username=self.config.user,
+            password=self.config.password,
+        ) as client:
+            self._client = client
+            logger.info("subscribing to %(topics)s", {"topics": self.topics})
+            await client.subscribe([(topic, self.config.qos) for topic in self.topics])
 
-    async def _listen_mqtt_loop(self) -> None:
-        """Listen to incoming messages asynchronously and put them into a queue."""
-        async for message in self._client.messages:
-            await self._message_queue.put(message)
-
-    async def _subscribe_topics(self) -> None:
-        """Subscribe to one or multiple topics."""
-        logger.info("subscribing to %(topics)s", {"topics": self.topics})
-        if isinstance(self.topics, list):
-            await self._client.subscribe([(topic, self.config.qos) for topic in self.topics])
-        else:
-            await self._client.subscribe(self.topics, self.config.qos)
+            async for message in client.messages:
+                await self._message_queue.put(message)

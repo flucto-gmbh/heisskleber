@@ -1,37 +1,43 @@
 import asyncio
-from collections.abc import Awaitable
+from collections.abc import Coroutine
 from functools import wraps
 from typing import Any, Callable, ParamSpec, TypeVar
 
 P = ParamSpec("P")
-R = TypeVar("R")
+T = TypeVar("T")
 
 
 def retry(
-    retry_interval: float = 5.0,
-    max_retries: int | None = None,
-    exception_type: type[Exception] | tuple[type[Exception], ...] = Exception,
+    every: int = 5,
+    strategy: str = "always",
+    catch: type[Exception] | tuple[type[Exception], ...] = Exception,
     logger_fn: Callable[[str, dict[str, Any]], None] | None = None,
-) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]:
+) -> Callable[[Callable[P, Coroutine[Any, Any, T]]], Callable[P, Coroutine[Any, Any, T]]]:
     """Retry a coroutine."""
 
-    def decorator(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
+    def decorator(func: Callable[P, Coroutine[Any, Any, T]]) -> Callable[P, Coroutine[Any, Any, T]]:
         @wraps(func)
-        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             retries = 0
-            while max_retries is None or retries < max_retries:
+            while True:
                 try:
-                    return await func(*args, **kwargs)
-                except exception_type as e:  # noqa: PERF203
+                    result = await func(*args, **kwargs)
+                    break
+                except catch as e:
                     if logger_fn:
                         logger_fn(
                             "Error occurred: %(err). Retrying in %(seconds) seconds",
-                            {"err": e, "seconds": retry_interval},
+                            {"err": e, "seconds": every},
                         )
                     retries += 1
-                    await asyncio.sleep(retry_interval)
-            msg = f"Max retries ({max_retries}) exceeded"
-            raise RuntimeError(msg)
+                    await asyncio.sleep(every)
+                except asyncio.CancelledError:
+                    raise
+
+                if strategy != "always":
+                    raise NotImplementedError
+
+            return result
 
         return wrapper
 

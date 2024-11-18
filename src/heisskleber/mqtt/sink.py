@@ -1,12 +1,14 @@
 """Async mqtt sink implementation."""
 
+import asyncio
 import logging
-from asyncio import Queue, Task, create_task, sleep
+from asyncio import CancelledError, create_task
 from typing import Any, TypeVar
 
 import aiomqtt
 
 from heisskleber.core import AsyncSink, Packer, json_packer
+from heisskleber.core.utils import retry
 
 from .config import MqttConf
 
@@ -30,8 +32,8 @@ class MqttSink(AsyncSink[T]):
     def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
         self.config = config
         self.packer = packer
-        self._send_queue: Queue[tuple[T, str]] = Queue()
-        self._sender_task: Task[None] | None = None
+        self._send_queue: asyncio.Queue[tuple[T, str]] = asyncio.Queue()
+        self._sender_task: asyncio.Task[None] | None = None
 
     async def send(self, data: T, topic: str = "mqtt", qos: int = 0, retain: bool = False, **kwargs: Any) -> None:
         """Queue data for asynchronous publication to the mqtt broker.
@@ -49,25 +51,25 @@ class MqttSink(AsyncSink[T]):
 
         await self._send_queue.put((data, topic))
 
+    @retry(every=5, catch=aiomqtt.MqttError, logger_fn=logger.exception)
     async def _send_work(self) -> None:
-        # TODO: Clean shutdown
-        # TODO: backoff style retry
-        while True:
+        async with aiomqtt.Client(
+            hostname=self.config.host,
+            port=self.config.port,
+            username=self.config.user,
+            password=self.config.password,
+            timeout=float(self.config.timeout_s),
+        ) as client:
             try:
-                async with aiomqtt.Client(
-                    hostname=self.config.host,
-                    port=self.config.port,
-                    username=self.config.user,
-                    password=self.config.password,
-                    timeout=float(self.config.timeout_s),
-                ) as client:
-                    while True:
-                        data, topic = await self._send_queue.get()
-                        payload = self.packer(data)
-                        await client.publish(topic=topic, payload=payload)
-            except aiomqtt.MqttError:  # noqa: PERF203
-                logger.exception("Connection to MQTT broker failed. Retrying in 5 seconds")
-                await sleep(5)
+                while True:
+                    data, topic = await self._send_queue.get()
+                    payload = self.packer(data)
+                    await client.publish(topic=topic, payload=payload)
+            except CancelledError:
+                logger.info("MqttSink background loop cancelled. Emptying queue...")
+                while not self._send_queue.empty():
+                    _ = self._send_queue.get_nowait()
+                raise
 
     def __repr__(self) -> str:
         """Return string representation of the MQTT sink object."""
@@ -80,8 +82,16 @@ class MqttSink(AsyncSink[T]):
         """
         self._sender_task = create_task(self._send_work())
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop the background task."""
-        if self._sender_task:
-            self._sender_task.cancel()
-            self._sender_task = None
+        if not self._sender_task:
+            return
+        self._sender_task.cancel()
+        try:
+            await self._sender_task
+        except asyncio.CancelledError:
+            # If the stop task was cancelled, we raise.
+            task = asyncio.current_task()
+            if task and task.cancelled():
+                raise
+        self._sender_task = None

@@ -38,7 +38,7 @@ class AsyncSink(ABC, Generic[T]):
         """Initialize and start the sink's background processes and tasks."""
 
     @abstractmethod
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop and cleanup the sink's background processes and tasks.
 
         This method should be called when the sink is no longer needed.
@@ -76,4 +76,4 @@ class AsyncSink(ABC, Generic[T]):
             traceback: The traceback of the exception that was raised, if any.
 
         """
-        self.stop()
+        await self.stop()

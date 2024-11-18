@@ -370,7 +370,7 @@ wheels = [
 
 [[package]]
 name = "heisskleber"
-version = "1.0.0.dev0+g33f4ef3.d20241115"
+version = "1.0.0.dev6+g6b5270f.d20241118"
 source = { editable = "." }
 dependencies = [
     { name = "aiomqtt" },
@@ -408,6 +408,7 @@ dev = [
     { name = "mypy" },
     { name = "nox" },
     { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "ruff" },
     { name = "xdoctest" },
@@ -442,6 +443,7 @@ dev = [
     { name = "mypy", specifier = ">=1.11.2" },
     { name = "nox", specifier = ">=2024.4.15" },
     { name = "pytest", specifier = ">=8.3.3" },
+    { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov", specifier = ">=5.0.0" },
     { name = "ruff", specifier = ">=0.6.8" },
     { name = "xdoctest", specifier = ">=1.2.0" },

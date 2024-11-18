@@ -30,4 +30,4 @@ async def test_mqtt_source_receive_message() -> None:
         assert "topic" in extra
         assert extra["topic"] == test_topic
 
-        mqtt_source.stop()
+        await mqtt_source.stop()

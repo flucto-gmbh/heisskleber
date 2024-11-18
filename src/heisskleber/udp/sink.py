@@ -48,7 +48,7 @@ class UdpSink(AsyncSink[T]):
         """Connect the UdpSink."""
         await self._ensure_connection()
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Disconnect the UdpSink connection."""
         if self._transport is not None:
             self._transport.close()

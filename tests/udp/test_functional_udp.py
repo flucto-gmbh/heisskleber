@@ -33,7 +33,7 @@ class UdpReceiver:
             local_addr=(host, port),
         )
 
-    def stop(self):
+    async def stop(self):
         """Stop the UDP receiver."""
         if hasattr(self, "transport"):
             self.transport.close()
@@ -60,7 +60,7 @@ class UdpSender:
             remote_addr=(host, port),
         )
 
-    def stop(self):
+    async def stop(self):
         """Stop the UDP receiver."""
         if hasattr(self, "transport"):
             self.transport.close()
@@ -83,9 +83,9 @@ async def test_udp_source() -> None:
             data, extra = await receiver.receive()
             assert data == {"message": "hi there!"}
         finally:
-            sender.stop()
+            await sender.stop()
     finally:
-        receiver.stop()
+        await receiver.stop()
 
 
 @pytest.mark.asyncio
@@ -113,7 +113,7 @@ async def test_actual_udp_transport():
             assert b'"message": "Hello, UDP!"' in received_bytes
 
         finally:
-            sink.stop()
+            await sink.stop()
 
     finally:
-        receiver.stop()
+        await receiver.stop()

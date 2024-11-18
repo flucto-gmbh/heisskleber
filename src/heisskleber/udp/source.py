@@ -53,7 +53,7 @@ class UdpSource(AsyncSource[T]):
         self._is_connected = True
         logger.info("Udp connection established.")
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop the udp connection."""
         if self._transport is not None:
             self._transport.close()

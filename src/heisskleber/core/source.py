@@ -49,7 +49,7 @@ class AsyncSource(ABC, Generic[T_co]):
         """Initialize and start any background processes and tasks of the source."""
 
     @abstractmethod
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop any background processes and tasks."""
 
     @abstractmethod
@@ -98,4 +98,4 @@ class AsyncSource(ABC, Generic[T_co]):
             traceback: The traceback of the exception that was raised, if any.
 
         """
-        self.stop()
+        await self.stop()
