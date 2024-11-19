@@ -121,6 +121,9 @@ class MqttSource(AsyncSource[T]):
             port=self.config.port,
             username=self.config.user,
             password=self.config.password,
+            timeout=self.config.timeout,
+            keepalive=self.config.keep_alive,
+            will=self.config.will,
         ) as client:
             self._client = client
             logger.info("subscribing to %(topics)s", {"topics": self.topics})

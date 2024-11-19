@@ -58,7 +58,9 @@ class MqttSink(AsyncSink[T]):
             port=self.config.port,
             username=self.config.user,
             password=self.config.password,
-            timeout=float(self.config.timeout_s),
+            timeout=float(self.config.timeout),
+            keepalive=self.config.keep_alive,
+            will=self.config.will,
         ) as client:
             try:
                 while True:
