@@ -48,7 +48,7 @@ class Packer(Protocol[T_contra]):
             bytes: The packed payload.
 
         Raises:
-            TypeError: The data dictionary could not be packed.
+            PackerError: The data dictionary could not be packed.
 
         """
 
@@ -63,7 +63,7 @@ class JSONPacker(Packer[dict[str, Any]]):
         bytes: The JSON-encoded data as a bytes object.
 
     Raises:
-        TypeError: If the data cannot be serialized to JSON.
+        PackerError: If the data cannot be serialized to JSON.
 
     Example:
         >>> packer = JSONPacker()
@@ -74,4 +74,7 @@ class JSONPacker(Packer[dict[str, Any]]):
 
     def __call__(self, data: dict[str, Any]) -> bytes:
         """Pack the data."""
-        return json.dumps(data).encode()
+        try:
+            return json.dumps(data).encode()
+        except (UnicodeEncodeError, TypeError) as err:
+            raise PackerError(data) from err

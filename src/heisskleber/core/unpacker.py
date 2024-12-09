@@ -79,6 +79,6 @@ class JSONUnpacker(Unpacker[dict[str, Any]]):
     def __call__(self, payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
         """Unpack the payload."""
         try:
-            return json.loads(payload.decode()), {}
-        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            return json.loads(payload), {}
+        except json.JSONDecodeError as e:
             raise UnpackError(payload) from e
