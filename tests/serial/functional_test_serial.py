@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 import serial
 
-from heisskleber.serial import SerialConf, SerialSink, SerialSource
+from heisskleber.serial import SerialConf, SerialReceiver, SerialSender
 
 
 def serial_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -24,7 +24,7 @@ async def test_serial_with_ser() -> None:
         port=reader_port,
         baudrate=9600,
     )
-    source = SerialSource(conf, unpack=serial_unpacker)
+    source = SerialReceiver(conf, unpack=serial_unpacker)
 
     await asyncio.sleep(0.1)
 
@@ -32,7 +32,7 @@ async def test_serial_with_ser() -> None:
     writer.write(b'{"data": "test"}\n')
     writer.flush()
 
-    sink = SerialSink(SerialConf(port=writer_port, baudrate=9600), pack=serial_packer)
+    sink = SerialSender(SerialConf(port=writer_port, baudrate=9600), pack=serial_packer)
     await sink.send({"data": "test"})
 
     data, extra = await source.receive()

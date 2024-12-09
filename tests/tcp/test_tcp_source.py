@@ -8,7 +8,7 @@ import pytest
 import pytest_asyncio
 
 from heisskleber.tcp.config import TcpConf
-from heisskleber.tcp.source import TcpSource
+from heisskleber.tcp.source import TcpReceiver
 
 
 def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -67,7 +67,7 @@ async def test_01_connect_refused(mock_conf, caplog) -> None:
     logger = logging.getLogger(tcp_logger_name)
     logger.setLevel(logging.WARNING)
 
-    source = TcpSource(mock_conf)
+    source = TcpReceiver(mock_conf)
     with contextlib.suppress(ConnectionRefusedError):
         await source.start()
 
@@ -85,7 +85,7 @@ async def test_02_connect_timedout(mock_conf, caplog) -> None:
     logger.setLevel(logging.WARNING)
 
     mock_conf.timeout = 1
-    source = TcpSource(mock_conf)
+    source = TcpReceiver(mock_conf)
     # Linux "ConnectionRefusedError", Windows says "TimeoutError"
     with contextlib.suppress(TimeoutError, ConnectionRefusedError):
         await source.start()
@@ -107,7 +107,7 @@ async def test_03_connect_retry(mock_conf, caplog, sender) -> None:
 
     mock_conf.timeout = 1
     mock_conf.restart_behavior = "always"
-    source = TcpSource(mock_conf)
+    source = TcpReceiver(mock_conf)
     start_task = asyncio.create_task(source.start())
 
     async def delayed_start():
@@ -131,7 +131,7 @@ async def test_04_connects_to_socket(mock_conf, caplog, sender) -> None:
 
     await sender.start(mock_conf.port)
 
-    source = TcpSource(mock_conf)
+    source = TcpReceiver(mock_conf)
     await source.start()
     assert len(caplog.record_tuples) == 2
     logger_name, level, message = caplog.record_tuples[0]
@@ -166,7 +166,7 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
 
     await sender.start(mock_conf.port)
 
-    source = TcpSource(mock_conf, unpacker=bytes_csv_unpacker)
+    source = TcpReceiver(mock_conf, unpacker=bytes_csv_unpacker)
     data = await source.receive()
     _check_data(data, "OK after second connect")
     await source.stop()
@@ -176,7 +176,7 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
 async def test_06_data_received(mock_conf, sender) -> None:
     await sender.start(mock_conf.port)
 
-    source = TcpSource(mock_conf, unpacker=bytes_csv_unpacker)
+    source = TcpReceiver(mock_conf, unpacker=bytes_csv_unpacker)
     data = await source.receive()
     _check_data(data, "OK")
     await source.stop()

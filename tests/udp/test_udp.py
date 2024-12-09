@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from heisskleber.udp.config import UdpConf
-from heisskleber.udp.sink import UdpProtocol, UdpSink
+from heisskleber.udp.sink import UdpProtocol, UdpSender
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def mock_transport():
 @pytest.fixture
 def udp_sink(udp_config):
     """Fixture providing a UDP sink instance."""
-    return UdpSink(udp_config)
+    return UdpSender(udp_config)
 
 
 @pytest.mark.asyncio
@@ -73,7 +73,7 @@ class TestUdpSink:
         mock_transport.close.assert_called_once()
         assert not udp_sink.is_connected
 
-    async def test_stop_not_connected(self, udp_sink: UdpSink) -> None:
+    async def test_stop_not_connected(self, udp_sink: UdpSender) -> None:
         """Test stopping when not connected."""
         await udp_sink.stop()
         assert not udp_sink.is_connected
@@ -98,7 +98,7 @@ class TestUdpSink:
         def custom_packer(data: dict) -> bytes:
             return b"custom_packed_data"
 
-        sink = UdpSink(udp_config, packer=custom_packer)
+        sink = UdpSender(udp_config, packer=custom_packer)
         mock_loop = AsyncMock()
         mock_loop.create_datagram_endpoint.return_value = (mock_transport, None)
         mock_get_loop.return_value = mock_loop

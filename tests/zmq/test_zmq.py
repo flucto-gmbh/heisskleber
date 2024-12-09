@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from heisskleber.zmq import ZmqConf, ZmqSink
+from heisskleber.zmq import ZmqConf, ZmqSender
 
 
 @pytest.mark.asyncio
@@ -16,7 +16,7 @@ async def test_zmq_sink_send() -> None:
     test_topic = "test"
 
     with patch("zmq.asyncio.Context.instance", return_value=mock_context):
-        zmq_sink = ZmqSink(ZmqConf(publisher_port=5555))
+        zmq_sink = ZmqSender(ZmqConf(publisher_port=5555))
         await zmq_sink.send(test_dict, topic=test_topic)
 
         mock_socket.connect.assert_called_once_with(zmq_sink.config.publisher_address)

@@ -1,11 +1,11 @@
 import pytest
 
-from heisskleber.console import ConsoleSink
+from heisskleber.console import ConsoleSender
 
 
 @pytest.mark.asyncio
 async def test_console_sink(capsys) -> None:
-    sink = ConsoleSink()
+    sink = ConsoleSender()
     await sink.send({"key": 3}, "test")
 
     captured = capsys.readouterr()

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from heisskleber.mqtt import MqttConf, MqttSink
+from heisskleber.mqtt import MqttConf, MqttSender
 
 
 @pytest.mark.asyncio
@@ -11,7 +11,7 @@ async def test_send_work_successful_publish() -> None:
     """Test successful message publishing"""
     mqtt_config = MqttConf()
     mock_packer = Mock(return_value=b'{"test": "data"}')
-    sink = MqttSink(config=mqtt_config, packer=mock_packer)
+    sink = MqttSender(config=mqtt_config, packer=mock_packer)
 
     # Mock MQTT client
     mock_client = AsyncMock()

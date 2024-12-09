@@ -4,7 +4,7 @@ import aiomqtt
 import pytest
 
 from heisskleber.core.unpacker import JSONUnpacker
-from heisskleber.mqtt import MqttConf, MqttSource
+from heisskleber.mqtt import MqttConf, MqttReceiver
 
 
 @pytest.mark.asyncio
@@ -17,7 +17,7 @@ async def test_mqtt_source_receive_message() -> None:
     mock_client.__aexit__ = AsyncMock()
 
     with patch("aiomqtt.Client", return_value=mock_client):
-        mqtt_source = MqttSource(config=MqttConf(), topic="test", unpacker=JSONUnpacker())
+        mqtt_source = MqttReceiver(config=MqttConf(), topic="test", unpacker=JSONUnpacker())
 
         test_payload = b'{"test":"data"}'
         test_topic = "test/topic"

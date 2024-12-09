@@ -3,10 +3,10 @@ import json
 
 import pytest
 
-from heisskleber.udp import UdpConf, UdpSink, UdpSource
+from heisskleber.udp import UdpConf, UdpReceiver, UdpSender
 
 
-class UdpReceiver:
+class UdpSource:
     """Helper class to receive UDP messages for testing."""
 
     transport: asyncio.DatagramTransport
@@ -39,7 +39,7 @@ class UdpReceiver:
             self.transport.close()
 
 
-class UdpSender:
+class UdpSink:
     """Helper class to send UDP messages for testing."""
 
     transport: asyncio.DatagramTransport
@@ -70,20 +70,20 @@ class UdpSender:
 async def test_udp_source() -> None:
     receiver_host = "127.0.0.1"
     receiver_port = 35699
-    receiver = UdpSource(UdpConf(host=receiver_host, port=receiver_port))
+    receiver = UdpReceiver(UdpConf(host=receiver_host, port=receiver_port))
 
     try:
         await receiver.start()
 
-        sender = UdpSender()
+        sink = UdpSink()
         try:
-            await sender.start(receiver_host, receiver_port)
-            sender.transport.sendto(data=json.dumps({"message": "hi there!"}).encode())
+            await sink.start(receiver_host, receiver_port)
+            sink.transport.sendto(data=json.dumps({"message": "hi there!"}).encode())
 
             data, extra = await receiver.receive()
             assert data == {"message": "hi there!"}
         finally:
-            await sender.stop()
+            await sink.stop()
     finally:
         await receiver.stop()
 
@@ -99,7 +99,7 @@ async def test_actual_udp_transport():
         await receiver.start(receiver_host, receiver_port)
 
         config = UdpConf(host=receiver_host, port=receiver_port)
-        sink = UdpSink(config)
+        sink = UdpSender(config)
 
         try:
             await sink.start()
