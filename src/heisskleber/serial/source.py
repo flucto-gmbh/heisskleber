@@ -84,8 +84,8 @@ class SerialSource(AsyncSource[T]):
             port=self.config.port,
             baudrate=self.config.baudrate,
             bytesize=self.config.bytesize,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
+            parity=self.config.parity,
+            stopbits=self.config.stopbits,
         )
 
     async def stop(self) -> None:

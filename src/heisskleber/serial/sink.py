@@ -22,7 +22,6 @@ class SerialSink(AsyncSink[T]):
     Attributes:
         config: Configuration for the serial port.
         packer: Function to pack data for sending.
-
     """
 
     def __init__(self, config: SerialConf, pack: Packer[T]) -> None:
@@ -79,8 +78,8 @@ class SerialSink(AsyncSink[T]):
             port=self.config.port,
             baudrate=self.config.baudrate,
             bytesize=self.config.bytesize,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
+            parity=self.config.parity,
+            stopbits=self.config.stopbits,
         )
 
     async def stop(self) -> None:
