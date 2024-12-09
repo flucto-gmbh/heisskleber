@@ -156,8 +156,8 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
         writer = yield
         writer.write(b"OK after second connect\n")
 
-    connection_handler = test_steps()
-    next(connection_handler)
+    connection_handler = test_steps()  # construct the generator
+    next(connection_handler)  # prime the generator
 
     def handle_incoming_connection(writer):
         connection_handler.send(writer)
