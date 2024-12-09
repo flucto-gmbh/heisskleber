@@ -14,7 +14,7 @@ from .config import MqttConf
 
 T = TypeVar("T")
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("heisskleber.mqtt")
 
 
 class MqttSink(AsyncSink[T]):
