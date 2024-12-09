@@ -16,8 +16,6 @@ ConfigType = TypeVar(
 
 
 def _parse_yaml(file: TextIO) -> dict[str, Any]:
-    logging.exception("Could not import pyyaml. Install with 'pip install pyyaml'.")
-
     try:
         return dict(yaml.safe_load(file))
     except yaml.YAMLError as e:
