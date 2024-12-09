@@ -20,9 +20,9 @@ class ConsoleSink(AsyncSink[T]):
 
     async def send(self, data: T, topic: str | None = None, **kwargs: dict[str, Any]) -> None:
         """Serialize data and write to console output."""
-        verbose_topic = topic + ":\t" if topic else ""
         serialized = self.packer(data)
-        print(verbose_topic + serialized.decode())  # noqa: T201
+        output = f"{topic}:\t{serialized.decode()}" if topic else serialized.decode()
+        print(output)  # noqa: T201
 
     def __repr__(self) -> str:
         """Return string reprensentation of ConsoleSink."""
