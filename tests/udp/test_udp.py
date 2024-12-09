@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from heisskleber.udp.config import UdpConf
-from heisskleber.udp.sink import UdpProtocol, UdpSender
+from heisskleber.udp.sender import UdpProtocol, UdpSender
 
 
 @pytest.fixture

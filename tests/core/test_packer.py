@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 
 from heisskleber.core import Packer, json_packer
+from heisskleber.core.packer import PackerError
 
 
 @pytest.fixture
@@ -52,7 +53,7 @@ def test_non_serializable_values(packer: Packer[dict[str, Any]]) -> None:
         x: int
 
     test_data = {"key": NonSerializable(42)}
-    with pytest.raises(TypeError):
+    with pytest.raises(PackerError):
         packer(test_data)
 
 

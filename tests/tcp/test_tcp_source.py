@@ -7,8 +7,7 @@ from typing import Any
 import pytest
 import pytest_asyncio
 
-from heisskleber.tcp.config import TcpConf
-from heisskleber.tcp.source import TcpReceiver
+from heisskleber.tcp import TcpConf, TcpReceiver
 
 
 def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -75,7 +74,7 @@ async def test_01_connect_refused(mock_conf, caplog) -> None:
     logger_name, level, message = caplog.record_tuples[0]
     assert logger_name == "heisskleber.tcp"
     assert level == 40
-    assert message == f"TcpSource(host=127.0.0.1, port={port}): ConnectionRefusedError"
+    assert message == f"TcpReceiver(host=127.0.0.1, port={port}): ConnectionRefusedError"
     await source.stop()
 
 
@@ -94,8 +93,8 @@ async def test_02_connect_timedout(mock_conf, caplog) -> None:
     assert logger_name == tcp_logger_name
     assert level == 40
     assert message in (
-        f"TcpSource(host=127.0.0.1, port={port}): ConnectionRefusedError",
-        f"TcpSource(host=127.0.0.1, port={port}): TimeoutError",
+        f"TcpReceiver(host=127.0.0.1, port={port}): ConnectionRefusedError",
+        f"TcpReceiver(host=127.0.0.1, port={port}): TimeoutError",
     )
     await source.stop()
 
@@ -120,7 +119,7 @@ async def test_03_connect_retry(mock_conf, caplog, sender) -> None:
     logger_name, level, message = caplog.record_tuples[-1]
     assert logger_name == tcp_logger_name
     assert level == 20
-    assert message == f"TcpSource(host=127.0.0.1, port={port}) connected successfully!"
+    assert message == f"TcpReceiver(host=127.0.0.1, port={port}) connected successfully!"
     await source.stop()
 
 
@@ -137,11 +136,11 @@ async def test_04_connects_to_socket(mock_conf, caplog, sender) -> None:
     logger_name, level, message = caplog.record_tuples[0]
     assert logger_name == tcp_logger_name
     assert level == 20
-    assert message == f"TcpSource(host=127.0.0.1, port={port}) waiting for connection."
+    assert message == f"TcpReceiver(host=127.0.0.1, port={port}) waiting for connection."
     logger_name, level, message = caplog.record_tuples[1]
     assert logger_name == tcp_logger_name
     assert level == 20
-    assert message == f"TcpSource(host=127.0.0.1, port={port}) connected successfully!"
+    assert message == f"TcpReceiver(host=127.0.0.1, port={port}) connected successfully!"
     await source.stop()
 
 
