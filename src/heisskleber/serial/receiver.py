@@ -5,7 +5,7 @@ from typing import Any, TypeVar
 
 import serial  # type: ignore[import-untyped]
 
-from heisskleber.core import AsyncSource, Unpacker
+from heisskleber.core import Receiver, Unpacker
 
 from .config import SerialConf
 
@@ -13,7 +13,7 @@ T = TypeVar("T")
 logger = logging.getLogger("heisskleber.serial")
 
 
-class SerialSource(AsyncSource[T]):
+class SerialReceiver(Receiver[T]):
     """An asynchronous source for reading data from a serial port.
 
     This class implements the AsyncSource interface for reading data from a serial port.

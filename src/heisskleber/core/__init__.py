@@ -1,10 +1,10 @@
 """Core classes of the heisskleber library."""
 
 from .config import BaseConf, ConfigType
-from .packer import JSONPacker, Packer, PackerError, T_contra
-from .sink import AsyncSink, T
-from .source import AsyncSource
-from .unpacker import JSONUnpacker, T_co, Unpacker, UnpackError
+from .packer import JSONPacker, Packer, PackerError
+from .receiver import Receiver
+from .sender import Sender
+from .unpacker import JSONUnpacker, Unpacker, UnpackError
 
 json_packer = JSONPacker()
 json_unpacker = JSONUnpacker()
@@ -12,15 +12,12 @@ json_unpacker = JSONUnpacker()
 __all__ = [
     "Packer",
     "Unpacker",
-    "AsyncSink",
-    "AsyncSource",
+    "Sender",
+    "Receiver",
     "json_packer",
     "json_unpacker",
     "BaseConf",
     "ConfigType",
-    "T",
-    "T_co",
-    "T_contra",
     "PackerError",
     "UnpackError",
 ]

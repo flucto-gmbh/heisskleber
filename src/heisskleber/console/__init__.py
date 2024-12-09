@@ -1,4 +1,4 @@
-from heisskleber.console.sink import ConsoleSink
-from heisskleber.console.source import ConsoleSource
+from heisskleber.console.receiver import ConsoleReceiver
+from heisskleber.console.sender import ConsoleSender
 
-__all__ = ["ConsoleSource", "ConsoleSink"]
+__all__ = ["ConsoleReceiver", "ConsoleSender"]

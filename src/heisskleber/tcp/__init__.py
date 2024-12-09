@@ -1,5 +1,5 @@
 from .config import TcpConf
-from .sink import TcpSink
-from .source import TcpSource
+from .receiver import TcpReceiver
+from .sender import TcpSender
 
-__all__ = ["TcpSource", "TcpSink", "TcpConf"]
+__all__ = ["TcpReceiver", "TcpSender", "TcpConf"]

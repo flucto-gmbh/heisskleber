@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 import zmq
 import zmq.asyncio
 
-from heisskleber.core import AsyncSink, Packer, json_packer
+from heisskleber.core import Packer, Sender, json_packer
 
 from .config import ZmqConf
 
@@ -13,7 +13,7 @@ logger = logging.getLogger("heisskleber.zmq")
 T = TypeVar("T")
 
 
-class ZmqSink(AsyncSink[T]):
+class ZmqSender(Sender[T]):
     """Async publisher that sends messages to a ZMQ PUB socket.
 
     Attributes:

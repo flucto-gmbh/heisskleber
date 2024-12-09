@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 import zmq
 import zmq.asyncio
 
-from heisskleber.core import AsyncSource, Unpacker, json_unpacker
+from heisskleber.core import Receiver, Unpacker, json_unpacker
 from heisskleber.zmq.config import ZmqConf
 
 logger = logging.getLogger("heisskleber.zmq")
@@ -13,7 +13,7 @@ logger = logging.getLogger("heisskleber.zmq")
 T = TypeVar("T")
 
 
-class ZmqSource(AsyncSource[T]):
+class ZmqReceiver(Receiver[T]):
     """Async source that subscribes to one or many topics from a zmq broker and receives messages via the receive() function.
 
     Attributes:

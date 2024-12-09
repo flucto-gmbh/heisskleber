@@ -1,11 +1,11 @@
 from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSink, Packer, json_packer
+from heisskleber.core import Packer, Sender, json_packer
 
 T = TypeVar("T")
 
 
-class ConsoleSink(AsyncSink[T]):
+class ConsoleSender(Sender[T]):
     """Send data to console out."""
 
     def __init__(

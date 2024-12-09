@@ -2,12 +2,12 @@ import asyncio
 import sys
 from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSource, Unpacker, json_unpacker
+from heisskleber.core import Receiver, Unpacker, json_unpacker
 
 T = TypeVar("T")
 
 
-class ConsoleSource(AsyncSource[T]):
+class ConsoleReceiver(Receiver[T]):
     """Read stdin from console and create data of type T."""
 
     def __init__(

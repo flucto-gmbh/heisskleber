@@ -1,7 +1,7 @@
 """Asyncronous implementations to read and write to a serial interface."""
 
 from .config import SerialConf
-from .sink import SerialSink
-from .source import SerialSource
+from .receiver import SerialReceiver
+from .sender import SerialSender
 
-__all__ = ["SerialConf", "SerialSink", "SerialSource"]
+__all__ = ["SerialConf", "SerialSender", "SerialReceiver"]

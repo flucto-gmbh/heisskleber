@@ -1,6 +1,6 @@
 from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSink
+from heisskleber.core import Sender
 from heisskleber.core.packer import Packer
 
 from .config import TcpConf
@@ -8,7 +8,7 @@ from .config import TcpConf
 T = TypeVar("T")
 
 
-class TcpSink(AsyncSink[T]):
+class TcpSender(Sender[T]):
     """Async TCP Sink.
 
     Attributes:

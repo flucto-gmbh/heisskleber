@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSource, Unpacker, json_unpacker
+from heisskleber.core import Receiver, Unpacker, json_unpacker
 from heisskleber.udp.config import UdpConf
 
 logger = logging.getLogger("heisskleber.udp")
@@ -30,7 +30,7 @@ class UdpProtocol(asyncio.DatagramProtocol):
         logger.info("UdpSource: Connection made")
 
 
-class UdpSource(AsyncSource[T]):
+class UdpReceiver(Receiver[T]):
     """An asynchronous UDP subscriber based on asyncio.protocols.DatagramProtocol."""
 
     def __init__(self, config: UdpConf, unpacker: Unpacker[T] = json_unpacker) -> None:  # type: ignore[assignment]

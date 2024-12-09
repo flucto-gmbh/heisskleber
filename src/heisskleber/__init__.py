@@ -1,38 +1,38 @@
 """Heisskleber."""
 
-from heisskleber.console import ConsoleSink, ConsoleSource
-from heisskleber.core import AsyncSink, AsyncSource
-from heisskleber.mqtt import MqttConf, MqttSink, MqttSource
-from heisskleber.serial import SerialConf, SerialSink, SerialSource
-from heisskleber.tcp import TcpConf, TcpSink, TcpSource
-from heisskleber.udp import UdpConf, UdpSink, UdpSource
-from heisskleber.zmq import ZmqConf, ZmqSink, ZmqSource
+from heisskleber.console import ConsoleReceiver, ConsoleSender
+from heisskleber.core import Receiver, Sender
+from heisskleber.mqtt import MqttConf, MqttReceiver, MqttSender
+from heisskleber.serial import SerialConf, SerialReceiver, SerialSender
+from heisskleber.tcp import TcpConf, TcpReceiver, TcpSender
+from heisskleber.udp import UdpConf, UdpReceiver, UdpSender
+from heisskleber.zmq import ZmqConf, ZmqReceiver, ZmqSender
 
 __all__ = [
-    "AsyncSink",
-    "AsyncSource",
+    "Sender",
+    "Receiver",
     # mqtt
     "MqttConf",
-    "MqttSink",
-    "MqttSource",
+    "MqttSender",
+    "MqttReceiver",
     # zmq
     "ZmqConf",
-    "ZmqSink",
-    "ZmqSource",
+    "ZmqSender",
+    "ZmqReceiver",
     # udp
     "UdpConf",
-    "UdpSink",
-    "UdpSource",
+    "UdpSender",
+    "UdpReceiver",
     # tcp
     "TcpConf",
-    "TcpSink",
-    "TcpSource",
+    "TcpSender",
+    "TcpReceiver",
     # serial
     "SerialConf",
-    "SerialSink",
-    "SerialSource",
+    "SerialSender",
+    "SerialReceiver",
     # console
-    "ConsoleSink",
-    "ConsoleSource",
+    "ConsoleSender",
+    "ConsoleReceiver",
 ]
 __version__ = "1.0.0"

@@ -6,14 +6,14 @@ from typing import Any, TypeVar
 
 import serial  # type: ignore[import-untyped]
 
-from heisskleber.core import AsyncSink, Packer
+from heisskleber.core import Packer, Sender
 
 from .config import SerialConf
 
 T = TypeVar("T")
 
 
-class SerialSink(AsyncSink[T]):
+class SerialSender(Sender[T]):
     """An asynchronous sink for writing data to a serial port.
 
     This class implements the AsyncSink interface for writing data to a serial port.

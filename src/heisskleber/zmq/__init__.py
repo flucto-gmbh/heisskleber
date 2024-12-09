@@ -1,5 +1,5 @@
 from .config import ZmqConf
-from .sink import ZmqSink
-from .source import ZmqSource
+from .receiver import ZmqReceiver
+from .sender import ZmqSender
 
-__all__ = ["ZmqConf", "ZmqSink", "ZmqSource"]
+__all__ = ["ZmqConf", "ZmqSender", "ZmqReceiver"]

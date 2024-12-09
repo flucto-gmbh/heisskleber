@@ -8,7 +8,7 @@ from typing import Any, Generic
 from .unpacker import T_co, Unpacker
 
 
-class AsyncSource(ABC, Generic[T_co]):
+class Receiver(ABC, Generic[T_co]):
     """Abstract interface for asynchronous data sources.
 
     This class defines a protocol for receiving data from various input streams
@@ -71,7 +71,7 @@ class AsyncSource(ABC, Generic[T_co]):
             data, meta = await self.receive()
             yield data, meta
 
-    async def __aenter__(self) -> "AsyncSource[T_co]":
+    async def __aenter__(self) -> "Receiver[T_co]":
         """Initialize the source for use in an async context manager.
 
         Returns:

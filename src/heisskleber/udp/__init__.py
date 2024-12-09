@@ -1,5 +1,5 @@
 from .config import UdpConf
-from .sink import UdpSink
-from .source import UdpSource
+from .receiver import UdpReceiver
+from .sender import UdpSender
 
-__all__ = ["UdpSource", "UdpSink", "UdpConf"]
+__all__ = ["UdpReceiver", "UdpSender", "UdpConf"]

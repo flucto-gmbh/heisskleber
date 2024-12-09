@@ -9,7 +9,7 @@ from .packer import Packer
 T = TypeVar("T")
 
 
-class AsyncSink(ABC, Generic[T]):
+class Sender(ABC, Generic[T]):
     """Abstract interface for asynchronous data sinks.
 
     This class defines a protocol for sending data to various output streams
@@ -49,7 +49,7 @@ class AsyncSink(ABC, Generic[T]):
     def __repr__(self) -> str:
         """A string representation of the sink."""
 
-    async def __aenter__(self) -> "AsyncSink[T]":
+    async def __aenter__(self) -> "Sender[T]":
         """Initialize the sink for use in an async context manager.
 
         Returns:

@@ -7,7 +7,7 @@ MQTT implementation is achieved via the `aiomqtt`_ package, which is an async wr
 """
 
 from .config import MqttConf
-from .sink import MqttSink
-from .source import MqttSource
+from .receiver import MqttReceiver
+from .sender import MqttSender
 
-__all__ = ["MqttConf", "MqttSource", "MqttSink"]
+__all__ = ["MqttConf", "MqttReceiver", "MqttSender"]

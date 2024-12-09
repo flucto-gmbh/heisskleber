@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Any, TypeVar
 
-from heisskleber.core import AsyncSink, Packer, json_packer
+from heisskleber.core import Packer, Sender, json_packer
 from heisskleber.udp.config import UdpConf
 
 logger = logging.getLogger("heisskleber.udp")
@@ -28,7 +28,7 @@ class UdpProtocol(asyncio.DatagramProtocol):
         self.is_connected = False
 
 
-class UdpSink(AsyncSink[T]):
+class UdpSender(Sender[T]):
     """UDP sink for sending data via UDP protocol.
 
     Arguments:

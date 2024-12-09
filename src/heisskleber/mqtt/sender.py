@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 
 import aiomqtt
 
-from heisskleber.core import AsyncSink, Packer, json_packer
+from heisskleber.core import Packer, Sender, json_packer
 from heisskleber.core.utils import retry
 
 from .config import MqttConf
@@ -17,7 +17,7 @@ T = TypeVar("T")
 logger = logging.getLogger("heisskleber.mqtt")
 
 
-class MqttSink(AsyncSink[T]):
+class MqttSender(Sender[T]):
     """MQTT publisher with queued message handling.
 
     This sink implementation provides asynchronous MQTT publishing capabilities with automatic connection management and message queueing.

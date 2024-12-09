@@ -5,7 +5,7 @@ from typing import Any, TypeVar
 
 from aiomqtt import Client, Message, MqttError
 
-from heisskleber.core import AsyncSource, Unpacker, json_unpacker
+from heisskleber.core import Receiver, Unpacker, json_unpacker
 from heisskleber.core.utils import retry
 from heisskleber.mqtt import MqttConf
 
@@ -13,7 +13,7 @@ T = TypeVar("T")
 logger = logging.getLogger("heisskleber.mqtt")
 
 
-class MqttSource(AsyncSource[T]):
+class MqttReceiver(Receiver[T]):
     """Asynchronous MQTT subscriber based on aiomqtt.
 
     This class implements an asynchronous MQTT subscriber that handles connection, subscription, and message reception from an MQTT broker. It uses aiomqtt as the underlying MQTT client implementation.
