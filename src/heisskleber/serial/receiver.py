@@ -44,7 +44,7 @@ class SerialReceiver(Receiver[T]):
             tuple[T, dict[str, Any]]: A tuple containing the unpacked data and any extra information.
 
         Raises:
-            UnpackError: If the data could not be unpacked with the provided unpacker.
+            UnpackerError: If the data could not be unpacked with the provided unpacker.
 
         """
         if not self._is_connected:

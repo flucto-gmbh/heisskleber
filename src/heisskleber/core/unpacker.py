@@ -7,7 +7,7 @@ from typing import Any, Protocol, TypeVar
 T_co = TypeVar("T_co", covariant=True)
 
 
-class UnpackError(Exception):
+class UnpackerError(Exception):
     """Raised when unpacking operations fail.
 
     This exception wraps underlying errors that may occur during unpacking,
@@ -49,7 +49,7 @@ class Unpacker(Protocol[T_co]):
                 - dict[str, Any]: The meta data associated with the unpack operation, such as topic, timestamp or errors
 
         Raises:
-            UnpackError: The payload could not be unpacked.
+            UnpackerError: The payload could not be unpacked.
 
         """
 
@@ -66,7 +66,7 @@ class JSONUnpacker(Unpacker[dict[str, Any]]):
             - An empty dictionary for metadata (not used in JSON unpacking)
 
     Raises:
-        UnpackError: If the payload cannot be decoded as valid JSON.
+        UnpackerError: If the payload cannot be decoded as valid JSON.
 
     Example:
         >>> unpacker = JSONUnpacker()
@@ -81,4 +81,4 @@ class JSONUnpacker(Unpacker[dict[str, Any]]):
         try:
             return json.loads(payload), {}
         except json.JSONDecodeError as e:
-            raise UnpackError(payload) from e
+            raise UnpackerError(payload) from e

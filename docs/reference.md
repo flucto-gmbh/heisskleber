@@ -27,7 +27,7 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 ### Errors
 
 ```{eval-rst}
-.. autoclass:: heisskleber.core::UnpackError
+.. autoclass:: heisskleber.core::UnpackerError
 
 .. autoclass:: heisskleber.core::PackerError
 ```
