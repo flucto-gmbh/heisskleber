@@ -69,7 +69,7 @@ class UdpReceiver(Receiver[T]):
                 - A dictionary containing extra information.
 
         Raises:
-            UnpackError: If the received message could not be unpacked.
+            UnpackerError: If the received message could not be unpacked.
 
         """
         if not self._is_connected:

@@ -38,7 +38,7 @@ class ZmqReceiver(Receiver[T]):
             tuple(topic: str, message: dict): the message received
 
         Raises:
-            UnpackError: If payload could not be unpacked with provided unpacker.
+            UnpackerError: If payload could not be unpacked with provided unpacker.
 
         """
         if not self.is_connected:

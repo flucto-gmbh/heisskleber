@@ -62,7 +62,7 @@ class MqttReceiver(Receiver[T]):
 
         Raises:
             TypeError: If the message payload is not of type bytes.
-            UnpackError: If the message could not be unpacked with the unpacker protocol.
+            UnpackerError: If the message could not be unpacked with the unpacker protocol.
 
         """
         if not self._listener_task:
