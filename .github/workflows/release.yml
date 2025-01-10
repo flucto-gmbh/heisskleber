@@ -21,8 +21,6 @@ jobs:
 
       - name: Set up python
         uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
 
       - name: Build dist
         run: uv build
