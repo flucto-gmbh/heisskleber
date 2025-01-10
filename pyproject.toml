@@ -59,6 +59,7 @@ dev-dependencies = [
     "pytest-cov>=5.0.0",
     "coverage[toml]>=7.6.1",
     "pytest-asyncio>=0.24.0",
+    "pre-commit>=4.0.1",
 ]
 package = true
 
@@ -125,6 +126,7 @@ convention = "google"
 [tool.hatch]
 version.source = "vcs"
 version.path = "src/heisskleber/__init__.py"
+version.raw-options = { local_scheme = "no-local-version" }
 
 [tool.hatch.envs.default]
 features = ["test"]
