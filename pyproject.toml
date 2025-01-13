@@ -13,6 +13,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies= [
+    "aiofiles>=24.1.0",
     "aiomqtt>=2.3.0",
     "pyserial>=3.5",
     "pyyaml>=6.0.2",
@@ -60,6 +61,7 @@ dev-dependencies = [
     "coverage[toml]>=7.6.1",
     "pytest-asyncio>=0.24.0",
     "pre-commit>=4.0.1",
+    "types-aiofiles>=24.1.0.20241221",
 ]
 package = true
 
