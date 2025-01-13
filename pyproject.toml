@@ -13,7 +13,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies= [
-    "aiofiles>=24.1.0",
     "aiomqtt>=2.3.0",
     "pyserial>=3.5",
     "pyyaml>=6.0.2",
@@ -112,7 +111,9 @@ ignore = [
   "COM812",
   "ISC001",
   "ARG001",
-  "INP001"
+  "INP001",
+  "TRY003", # Avoid specifying long messages in Exceptions
+  "EM101",  # Exceptions must not use string literal
 ]
 
 [tool.ruff.lint.pydocstyle]
