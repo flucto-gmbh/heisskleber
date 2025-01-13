@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import ssl
 from asyncio import CancelledError, create_task
 from typing import Any, TypeVar
 
@@ -13,6 +14,7 @@ from heisskleber.core.utils import retry
 from .config import MqttConf
 
 T = TypeVar("T")
+
 
 logger = logging.getLogger("heisskleber.mqtt")
 
@@ -53,6 +55,19 @@ class MqttSender(Sender[T]):
 
     @retry(every=5, catch=aiomqtt.MqttError, logger_fn=logger.exception)
     async def _send_work(self) -> None:
+        tls_params = (
+            aiomqtt.TLSParameters(
+                ca_certs=None,
+                certfile=None,
+                keyfile=None,
+                cert_reqs=ssl.CERT_REQUIRED,
+                tls_version=ssl.PROTOCOL_TLS,
+                ciphers=None,
+            )
+            if self.config.ssl or self.config.port == 8883  # noqa: PLR2004
+            else None
+        )
+
         async with aiomqtt.Client(
             hostname=self.config.host,
             port=self.config.port,
@@ -61,6 +76,7 @@ class MqttSender(Sender[T]):
             timeout=float(self.config.timeout),
             keepalive=self.config.keep_alive,
             will=self.config.will,
+            tls_params=tls_params,
         ) as client:
             try:
                 while True:

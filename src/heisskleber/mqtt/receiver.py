@@ -1,8 +1,10 @@
 import asyncio
 import logging
+import ssl
 from asyncio import Queue, Task, create_task
 from typing import Any, TypeVar
 
+import aiomqtt
 from aiomqtt import Client, Message, MqttError
 
 from heisskleber.core import Receiver, Unpacker, json_unpacker
@@ -116,6 +118,19 @@ class MqttReceiver(Receiver[T]):
     @retry(every=1, catch=MqttError, logger_fn=logger.exception)
     async def _run(self) -> None:
         """Background task for MQTT connection."""
+        tls_params = (
+            aiomqtt.TLSParameters(
+                ca_certs=None,
+                certfile=None,
+                keyfile=None,
+                cert_reqs=ssl.CERT_REQUIRED,
+                tls_version=ssl.PROTOCOL_TLS,
+                ciphers=None,
+            )
+            if self.config.ssl or self.config.port == 8883  # noqa: PLR2004
+            else None
+        )
+
         async with Client(
             hostname=self.config.host,
             port=self.config.port,
@@ -124,6 +139,7 @@ class MqttReceiver(Receiver[T]):
             timeout=self.config.timeout,
             keepalive=self.config.keep_alive,
             will=self.config.will,
+            tls_params=tls_params,
         ) as client:
             self._client = client
             logger.info("subscribing to %(topics)s", {"topics": self.topics})
