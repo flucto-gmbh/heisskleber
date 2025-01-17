@@ -34,7 +34,7 @@ class MqttSender(Sender[T]):
     def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
         self.config = config
         self.packer = packer
-        self._send_queue: asyncio.Queue[tuple[T, str]] = asyncio.Queue()
+        self._send_queue: asyncio.Queue[tuple[bytes, str]] = asyncio.Queue()
         self._sender_task: asyncio.Task[None] | None = None
 
     async def send(self, data: T, topic: str = "mqtt", qos: int = 0, retain: bool = False, **kwargs: Any) -> None:
@@ -47,11 +47,15 @@ class MqttSender(Sender[T]):
             retain: Whether to set the MQTT retain flag. Defaults to False.
             **kwargs: Not implemented.
 
+        Raises:
+            PackerError: The data could not be serialized with the provided Packer.
+
         """
         if not self._sender_task:
             await self.start()
 
-        await self._send_queue.put((data, topic))
+        payload = self.packer(data)
+        await self._send_queue.put((payload, topic))
 
     @retry(every=5, catch=aiomqtt.MqttError, logger_fn=logger.exception)
     async def _send_work(self) -> None:
@@ -80,8 +84,7 @@ class MqttSender(Sender[T]):
         ) as client:
             try:
                 while True:
-                    data, topic = await self._send_queue.get()
-                    payload = self.packer(data)
+                    payload, topic = await self._send_queue.get()
                     await client.publish(topic=topic, payload=payload)
             except CancelledError:
                 logger.info("MqttSink background loop cancelled. Emptying queue...")
