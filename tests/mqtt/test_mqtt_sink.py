@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
+from heisskleber.core import PackerError
 from heisskleber.mqtt import MqttConf, MqttSender
 
 
@@ -26,5 +27,27 @@ async def test_send_work_successful_publish() -> None:
         await asyncio.sleep(0.1)
 
         mock_client.publish.assert_awaited_once_with(topic=test_topic, payload=mock_packer.return_value)
+
+        await sink.stop()
+
+
+@pytest.mark.asyncio
+async def test_mqtt_send_raises_error() -> None:
+    class ErrorPacker:
+        def __call__(self, data: str) -> bytes:
+            raise PackerError(data)
+
+    mqtt_config = MqttConf()
+    sink = MqttSender(config=mqtt_config, packer=ErrorPacker())
+    test_data = "test"
+    test_topic = "test/topic"
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock()
+
+    with patch("aiomqtt.Client", return_value=mock_client):
+        with pytest.raises(PackerError):
+            await sink.send(test_data, test_topic)
 
         await sink.stop()
