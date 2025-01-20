@@ -12,6 +12,8 @@ from heisskleber.file.config import FileConf
 
 T = TypeVar("T")
 
+logger = logging.getLogger("heisskleber.file")
+
 
 class FileWriter(Sender[T]):
     """Asynchronous file writer implementation of the Sender interface.
@@ -38,35 +40,26 @@ class FileWriter(Sender[T]):
         self._current_file: BufferedWriter | None = None
         self._rollover_task: asyncio.Task | None = None
         self._last_rollover: float = 0
-
-    def _get_filename(self) -> Path:
-        """Generate filename based on current timestamp."""
-        return self.base_path / datetime.now().strftime(self.config.name_fmt)
+        self.filename: Path = Path()
 
     async def _open_file(self, filename: Path) -> BufferedWriter:
         """Open file asynchronously."""
-        return await self._loop.run_in_executor(self._executor, lambda: filename.open(mode="ba", buffering=1))
+        return await self._loop.run_in_executor(self._executor, lambda: filename.open(mode="ab"))
 
     async def _close_file(self) -> None:
         if self._current_file is not None:
             await self._loop.run_in_executor(self._executor, self._current_file.close)
-
-    async def _write_to_file(self, data: str) -> None:
-        """Write to file asynchronously via executor."""
-        if not self._current_file:
-            raise RuntimeError("No open file!")
-        await self._loop.run_in_executor(self._executor, lambda: self._current_file.write(data))
 
     async def _rollover(self) -> None:
         """Close current file and open a new one."""
         if self._current_file is not None:
             await self._close_file()
 
-        filename = self._get_filename()
-        filename.parent.mkdir(parents=True, exist_ok=True)
-        self._current_file = await self._open_file(filename)
+        self.filename = self.base_path / datetime.now(self.config.tz).strftime(self.config.name_fmt)
+        self.filename.parent.mkdir(parents=True, exist_ok=True)
+        self._current_file = await self._open_file(self.filename)
         self._last_rollover = self._loop.time()
-        logging.info("Rolled over to new file: %s", filename)
+        logger.info("Rolled over to new file: %s", self.filename)
 
     async def _rollover_loop(self) -> None:
         """Background task that handles periodic file rollover."""
@@ -74,7 +67,7 @@ class FileWriter(Sender[T]):
             now = self._loop.time()
             if now - self._last_rollover >= self.config.rollover:
                 await self._rollover()
-            await asyncio.sleep(1)  # Check every second
+            await asyncio.sleep(1)
 
     async def send(self, data: T, **kwargs: Any) -> None:
         """Write data to the current file.
