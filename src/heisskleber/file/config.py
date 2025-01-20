@@ -13,6 +13,7 @@ class FileConf(BaseConf):
     rollover: int = 3600
     name_fmt: str = "%Y%m%d_%h%M%s.txt"
     directory: str = "./"
+    watchfile: str = ""
     tz: tzinfo = timezone.utc
 
     @classmethod

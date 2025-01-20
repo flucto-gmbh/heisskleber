@@ -391,13 +391,14 @@ wheels = [
 
 [[package]]
 name = "heisskleber"
-version = "1.0.3.dev2"
+version = "1.0.3.dev3"
 source = { editable = "." }
 dependencies = [
     { name = "aiomqtt" },
     { name = "pyserial" },
     { name = "pyyaml" },
     { name = "pyzmq" },
+    { name = "watchfiles" },
 ]
 
 [package.optional-dependencies]
@@ -457,6 +458,7 @@ requires-dist = [
     { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'" },
     { name = "sphinx-copybutton", marker = "extra == 'docs'" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=0.5.1" },
+    { name = "watchfiles", specifier = ">=0.24.0" },
     { name = "xdoctest", marker = "extra == 'test'", specifier = ">=1.2.0" },
 ]
 
