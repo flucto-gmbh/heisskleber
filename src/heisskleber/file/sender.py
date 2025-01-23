@@ -1,18 +1,33 @@
 import asyncio
 import contextlib
+import json
 import logging
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from io import BufferedWriter
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Any, TypeVar
 
-from heisskleber.core import Packer, Sender, json_packer
+from heisskleber.core import Packer, PackerError, Sender
 from heisskleber.file.config import FileConf
 
 T = TypeVar("T")
 
 logger = logging.getLogger("heisskleber.file")
+
+
+def json_packer(data: dict[str, Any]) -> str:
+    """Pack to json string."""
+    try:
+        return json.dumps(data)
+    except json.JSONDecodeError:
+        raise PackerError(data) from None
+
+
+def csv_packer(data: dict[str, Any]) -> str:
+    """Create csv string from data."""
+    return ",".join(map(str, data.values()))
 
 
 class FileWriter(Sender[T]):
@@ -22,33 +37,47 @@ class FileWriter(Sender[T]):
     Files are named according to the configured datetime format.
     """
 
-    def __init__(self, config: FileConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
+    def __init__(
+        self,
+        config: FileConf,
+        packer: Packer[T] = json_packer,  # type: ignore[assignment]
+        header_func: Callable[[T], list[str]] | None = None,
+    ) -> None:
         """Initialize the file writer.
 
         Args:
-            base_path: Directory path where files will be written
             config: Configuration for file rollover and naming
+            header_func: Function to extract header from T
             packer: Optional packer for serializing data
         """
         self.base_path = Path(config.directory)
         self.config = config
+        self.header_func = header_func
         self.packer = packer
 
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._loop = asyncio.get_running_loop()
+        self._header: list[str] | None = None
 
-        self._current_file: BufferedWriter | None = None
-        self._rollover_task: asyncio.Task | None = None
+        self._current_file: TextIOWrapper | None = None
+        self._rollover_task: asyncio.Task[None] | None = None
         self._last_rollover: float = 0
         self.filename: Path = Path()
 
-    async def _open_file(self, filename: Path) -> BufferedWriter:
+    async def _open_file(self, filename: Path) -> TextIOWrapper:
         """Open file asynchronously."""
-        return await self._loop.run_in_executor(self._executor, lambda: filename.open(mode="ab"))
+        return await self._loop.run_in_executor(self._executor, lambda: filename.open(mode="a"))
 
     async def _close_file(self) -> None:
         if self._current_file is not None:
             await self._loop.run_in_executor(self._executor, self._current_file.close)
+
+    async def _write_header(self) -> None:
+        if not self._header or not self._current_file:
+            return
+        for line in self._header:
+            await self._loop.run_in_executor(self._executor, self._current_file.write, line)
+            await self._loop.run_in_executor(self._executor, self._current_file.write, "\n")
 
     async def _rollover(self) -> None:
         """Close current file and open a new one."""
@@ -60,6 +89,7 @@ class FileWriter(Sender[T]):
         self._current_file = await self._open_file(self.filename)
         self._last_rollover = self._loop.time()
         logger.info("Rolled over to new file: %s", self.filename)
+        await self._write_header()
 
     async def _rollover_loop(self) -> None:
         """Background task that handles periodic file rollover."""
@@ -83,10 +113,15 @@ class FileWriter(Sender[T]):
             await self.start()
         if not self._current_file:
             raise RuntimeError("FileWriter not started")
+        if not self._header and self.header_func is not None:
+            self._header = self.header_func(data)
+            await self._write_header()
 
         payload = self.packer(data)
+        if isinstance(payload, bytes | bytearray):
+            payload = payload.decode()
         await self._loop.run_in_executor(self._executor, self._current_file.write, payload)
-        await self._loop.run_in_executor(self._executor, self._current_file.write, b"\n")
+        await self._loop.run_in_executor(self._executor, self._current_file.write, "\n")
 
     async def start(self) -> None:
         """Start the file writer and rollover background task."""

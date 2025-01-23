@@ -6,6 +6,8 @@ from typing import Any, Protocol, TypeVar
 
 T_co = TypeVar("T_co", covariant=True)
 
+Payload = str | bytes | bytearray
+
 
 class UnpackerError(Exception):
     """Raised when unpacking operations fail.
@@ -20,10 +22,11 @@ class UnpackerError(Exception):
 
     PREVIEW_LENGTH = 100
 
-    def __init__(self, payload: bytes) -> None:
+    def __init__(self, payload: Payload) -> None:
         """Initialize the error with the failed payload and cause."""
         self.payload = payload
-        preview = payload[: self.PREVIEW_LENGTH] + b"..." if len(payload) > self.PREVIEW_LENGTH else payload
+        dots = b"..." if isinstance(payload, bytes | bytearray) else "..."
+        preview = payload[: self.PREVIEW_LENGTH] + dots if len(payload) > self.PREVIEW_LENGTH else payload
         message = f"Failed to unpack payload: {preview!r}. "
         super().__init__(message)
 
@@ -37,7 +40,7 @@ class Unpacker(Protocol[T_co]):
     """
 
     @abstractmethod
-    def __call__(self, payload: bytes) -> tuple[T_co, dict[str, Any]]:
+    def __call__(self, payload: Payload) -> tuple[T_co, dict[str, Any]]:
         """Unpacks the payload into a data object and optional meta-data dictionary.
 
         Args:
@@ -76,7 +79,7 @@ class JSONUnpacker(Unpacker[dict[str, Any]]):
 
     """
 
-    def __call__(self, payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
+    def __call__(self, payload: Payload) -> tuple[dict[str, Any], dict[str, Any]]:
         """Unpack the payload."""
         try:
             return json.loads(payload), {}

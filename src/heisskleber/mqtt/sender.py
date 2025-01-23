@@ -8,7 +8,7 @@ from typing import Any, TypeVar
 
 import aiomqtt
 
-from heisskleber.core import Packer, Sender, json_packer
+from heisskleber.core import Packer, Payload, Sender, json_packer
 from heisskleber.core.utils import retry
 
 from .config import MqttConf
@@ -34,7 +34,7 @@ class MqttSender(Sender[T]):
     def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
         self.config = config
         self.packer = packer
-        self._send_queue: asyncio.Queue[tuple[bytes, str]] = asyncio.Queue()
+        self._send_queue: asyncio.Queue[tuple[Payload, str]] = asyncio.Queue()
         self._sender_task: asyncio.Task[None] | None = None
 
     async def send(self, data: T, topic: str = "mqtt", qos: int = 0, retain: bool = False, **kwargs: Any) -> None:
