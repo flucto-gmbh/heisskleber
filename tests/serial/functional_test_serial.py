@@ -24,7 +24,7 @@ async def test_serial_with_ser() -> None:
         port=reader_port,
         baudrate=9600,
     )
-    source = SerialReceiver(conf, unpack=serial_unpacker)
+    source = SerialReceiver(conf, unpacker=serial_unpacker)
 
     await asyncio.sleep(0.1)
 

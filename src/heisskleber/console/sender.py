@@ -2,6 +2,8 @@ from typing import Any, TypeVar
 
 from heisskleber.core import Packer, Sender, json_packer
 
+from .config import ConsoleConf
+
 T = TypeVar("T")
 
 
@@ -10,12 +12,11 @@ class ConsoleSender(Sender[T]):
 
     def __init__(
         self,
-        pretty: bool = False,
-        verbose: bool = False,
+        config: ConsoleConf,
         packer: Packer[T] = json_packer,  # type: ignore[assignment]
     ) -> None:
-        self.verbose = verbose
-        self.pretty = pretty
+        self.verbose = config.verbose
+        self.pretty = config.pretty
         self.packer = packer
 
     async def send(self, data: T, topic: str | None = None, **kwargs: dict[str, Any]) -> None:
