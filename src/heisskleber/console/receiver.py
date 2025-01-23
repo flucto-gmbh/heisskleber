@@ -4,6 +4,8 @@ from typing import Any, TypeVar
 
 from heisskleber.core import Receiver, Unpacker, json_unpacker
 
+from .config import ConsoleConf
+
 T = TypeVar("T")
 
 
@@ -12,16 +14,18 @@ class ConsoleReceiver(Receiver[T]):
 
     def __init__(
         self,
+        config: ConsoleConf,
         unpacker: Unpacker[T] = json_unpacker,  # type: ignore[assignment]
     ) -> None:
         self.queue: asyncio.Queue[tuple[T, dict[str, Any]]] = asyncio.Queue(maxsize=10)
-        self.unpack = unpacker
+        self.unpacker = unpacker
+        self.config = config
         self.task: asyncio.Task[None] | None = None
 
     async def _listener_task(self) -> None:
         while True:
             payload = sys.stdin.readline().encode()  # I know this is stupid, but I adhere to the interface for now
-            data, extra = self.unpack(payload)
+            data, extra = self.unpacker(payload)
             await self.queue.put((data, extra))
 
     async def receive(self) -> tuple[T, dict[str, Any]]:
