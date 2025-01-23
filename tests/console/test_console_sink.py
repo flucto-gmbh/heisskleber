@@ -1,6 +1,6 @@
 import pytest
 
-from heisskleber.console import ConsoleSender, ConsoleConf
+from heisskleber.console import ConsoleConf, ConsoleSender
 
 
 @pytest.mark.asyncio
