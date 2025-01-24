@@ -81,10 +81,7 @@ async def test_file_writer_csv_automatic_generation(tmp_path) -> None:
     with file.open("r") as f:
         result = f.readlines()
 
-    assert result[0].strip() == "sep=,"
-    assert result[1].strip() == "#encoding=UTF-8"
-    assert result[2].strip() == "#datatype:int,float,str"
-    assert result[3].strip() == "epoch,value,key"
-    assert result[4].strip() == "1,0.0,weather"
-    assert result[5].strip() == "2,0.5,weather"
-    assert result[6].strip() == "3,,weather"
+    assert result[0].strip() == "epoch,value,key"
+    assert result[1].strip() == "1,0.0,weather"
+    assert result[2].strip() == "2,0.5,weather"
+    assert result[3].strip() == "3,,weather"
