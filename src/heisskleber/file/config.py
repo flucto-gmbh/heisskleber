@@ -9,6 +9,25 @@ from heisskleber.core import BaseConf
 from heisskleber.core.packer import PackerError
 
 
+def flatten_dict(dict_in: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+    """Return a flattened dict from a nested dict.
+
+    Example:
+      >>> dict_in = {"pos": {"x": 1, "y": 2}}
+      >>> flatten_dict(dict_in, sep=".")
+      {'pos.x': 1, 'pos.y': 2}
+
+    """
+    dict_out = {}
+    for key, value in dict_in.items():
+        new_key = f"{parent_key}{sep}{key}" if parent_key else key
+        if isinstance(value, dict):
+            dict_out.update(flatten_dict(value, new_key, sep=sep))
+        else:
+            dict_out[new_key] = value
+    return dict_out
+
+
 class CSVPacker:
     """Helper class to write csv files."""
 
@@ -17,15 +36,14 @@ class CSVPacker:
 
     def packer(self, data: dict[str, Any]) -> str:
         """Create a string of ordered fields from dictionary values."""
-        return ",".join([str(data.get(field, "")) for field in self.fields])
+        flat_dict = flatten_dict(data)
+        return ",".join([str(flat_dict.get(field, "")) for field in self.fields])
 
     def header(self, data: dict[str, Any]) -> list[str]:
         """Create header for csv field."""
-        self.fields = list(data.keys())
+        flat_dict = flatten_dict(data)
+        self.fields = list(flat_dict.keys())
         return [
-            "sep=,",
-            "#encoding=UTF-8",
-            "#datatype:" + ",".join(type(v).__name__ for v in data.values()),
             ",".join(self.fields),
         ]
 

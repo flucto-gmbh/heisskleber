@@ -54,6 +54,7 @@ class FileWriter(Sender[T]):
         self.config = config
         self.packer = packer or config.packer  # type: ignore [assignment]
         self.header_func = header_func or config.header
+        self.newline = "\r\n" if config.format == "csv" else "\n"
 
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._loop = asyncio.get_running_loop()
@@ -77,7 +78,7 @@ class FileWriter(Sender[T]):
             return
         for line in self._header:
             await self._loop.run_in_executor(self._executor, self._current_file.write, line)
-            await self._loop.run_in_executor(self._executor, self._current_file.write, "\n")
+            await self._loop.run_in_executor(self._executor, self._current_file.write, self.newline)
 
     async def _rollover(self) -> None:
         """Close current file and open a new one."""
@@ -121,7 +122,7 @@ class FileWriter(Sender[T]):
         if isinstance(payload, bytes | bytearray):
             payload = payload.decode()
         await self._loop.run_in_executor(self._executor, self._current_file.write, payload)
-        await self._loop.run_in_executor(self._executor, self._current_file.write, "\n")
+        await self._loop.run_in_executor(self._executor, self._current_file.write, self.newline)
 
     async def start(self) -> None:
         """Start the file writer and rollover background task."""
