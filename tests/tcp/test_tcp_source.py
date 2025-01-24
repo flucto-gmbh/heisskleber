@@ -14,7 +14,7 @@ def bytes_csv_unpacker(payload: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
     """Unpack string containing comma separated values to dictionary."""
     vals = payload.decode().rstrip().split(",")
     keys = [f"key{i}" for i in range(len(vals))]
-    return (dict(zip(keys, vals)), {"topic": "tcp"})
+    return (dict(zip(keys, vals, strict=False)), {"topic": "tcp"})
 
 
 port = 23456

@@ -71,7 +71,7 @@ class ZmqReceiver(Receiver[T]):
             topic: The topic or list of topics to subscribe to.
 
         """
-        if isinstance(topic, (list, tuple)):
+        if isinstance(topic, list | tuple):
             for t in topic:
                 self._subscribe_single_topic(t)
         else:

@@ -1,7 +1,7 @@
 import asyncio
-from collections.abc import Coroutine
+from collections.abc import Callable, Coroutine
 from functools import wraps
-from typing import Any, Callable, ParamSpec, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -26,7 +26,7 @@ def retry(
                 except catch as e:
                     if logger_fn:
                         logger_fn(
-                            "Error occurred: %(err). Retrying in %(seconds) seconds",
+                            "Error occurred: %(err)s. Retrying in %(seconds)s seconds",
                             {"err": e, "seconds": every},
                         )
                     retries += 1

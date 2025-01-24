@@ -2,9 +2,11 @@
 
 import json
 from abc import abstractmethod
-from typing import Any, Protocol, TypeVar
+from typing import Any, Protocol, TypeAlias, TypeVar
 
 T_contra = TypeVar("T_contra", contravariant=True)
+
+Payload: TypeAlias = str | bytes | bytearray
 
 
 class PackerError(Exception):
@@ -38,7 +40,7 @@ class Packer(Protocol[T_contra]):
     """
 
     @abstractmethod
-    def __call__(self, data: T_contra) -> bytes:
+    def __call__(self, data: T_contra) -> Payload:
         """Packs the data dictionary into a bytes payload.
 
         Arguments:

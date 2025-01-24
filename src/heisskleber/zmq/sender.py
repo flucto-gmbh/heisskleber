@@ -35,6 +35,7 @@ class ZmqSender(Sender[T]):
         if not self.is_connected:
             await self.start()
         payload = self.packer(data)
+        payload = payload.encode() if isinstance(payload, str) else payload
         logger.debug("sending payload %(payload)b to topic %(topic)s", {"payload": payload, "topic": topic})
         await self.socket.send_multipart([topic.encode(), payload])
 

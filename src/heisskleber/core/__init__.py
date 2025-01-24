@@ -3,7 +3,7 @@
 from typing import Any
 
 from .config import BaseConf, ConfigType
-from .packer import JSONPacker, Packer, PackerError
+from .packer import JSONPacker, Packer, PackerError, Payload
 from .receiver import Receiver
 from .sender import Sender
 from .unpacker import JSONUnpacker, Unpacker, UnpackerError
@@ -29,6 +29,7 @@ __all__ = [
     "ConfigType",
     "Packer",
     "PackerError",
+    "Payload",
     "Receiver",
     "Sender",
     "Unpacker",
