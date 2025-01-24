@@ -72,17 +72,19 @@ async def test_file_writer_csv_automatic_generation(tmp_path) -> None:
     await writer.start()
     file = writer.filename
 
-    await writer.send({"epoch": 1, "value": 0.0})
-    await writer.send({"value": 0.5, "epoch": 2})
+    await writer.send({"epoch": 1, "value": 0.0, "key": "weather"})
+    await writer.send({"value": 0.5, "epoch": 2, "key": "weather"})
+    await writer.send({"epoch": 3, "key": "weather"})
 
     await writer.stop()
 
     with file.open("r") as f:
         result = f.readlines()
 
-    assert result[0] == "sep=,\n"
-    assert result[1] == "#encoding=UTF-8\n"
-    assert result[2] == "#datatype:int,float\n"
-    assert result[3] == "epoch,value\n"
-    assert result[4] == "1,0.0\n"
-    assert result[5] == "2,0.5\n"
+    assert result[0].strip() == "sep=,"
+    assert result[1].strip() == "#encoding=UTF-8"
+    assert result[2].strip() == "#datatype:int,float,str"
+    assert result[3].strip() == "epoch,value,key"
+    assert result[4].strip() == "1,0.0,weather"
+    assert result[5].strip() == "2,0.5,weather"
+    assert result[6].strip() == "3,,weather"
