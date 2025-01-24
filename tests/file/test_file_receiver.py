@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from heisskleber.file import FileConf, FileReceiver
+from heisskleber.file import FileConf, FileReader
 
 
 def str_unpacker(payload: bytes) -> tuple[str, dict[str, Any]]:
@@ -22,7 +22,7 @@ async def test_file_receiver(tmp_path: Path) -> None:
     file = tmp_path / "testfile"
 
     config = FileConf(watchfile=str(file))
-    receiver = FileReceiver(config, unpacker=str_unpacker)
+    receiver = FileReader(config, unpacker=str_unpacker)
 
     with file.open("bw") as f:
         f.write(b"First line\n")

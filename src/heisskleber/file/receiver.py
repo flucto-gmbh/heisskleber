@@ -15,7 +15,7 @@ T = TypeVar("T")
 logger = logging.getLogger("heisskleber.mqtt")
 
 
-class FileReceiver(Receiver[T]):
+class FileReader(Receiver[T]):
     """Asynchronous File Reader.
 
     Currently only reads bytes.
