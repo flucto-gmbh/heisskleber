@@ -1,6 +1,9 @@
+import json
 from typing import Any, TypeVar
 
-from heisskleber.core import Packer, Sender, json_packer
+from heisskleber.core import Packer, Sender
+
+from .config import ConsoleConf
 
 T = TypeVar("T")
 
@@ -10,18 +13,18 @@ class ConsoleSender(Sender[T]):
 
     def __init__(
         self,
-        pretty: bool = False,
-        verbose: bool = False,
-        packer: Packer[T] = json_packer,  # type: ignore[assignment]
+        config: ConsoleConf,
+        packer: Packer[T] = lambda x: json.dumps(x),  # type: ignore[assignment]
     ) -> None:
-        self.verbose = verbose
-        self.pretty = pretty
+        self.verbose = config.verbose
+        self.pretty = config.pretty
         self.packer = packer
 
     async def send(self, data: T, topic: str | None = None, **kwargs: dict[str, Any]) -> None:
         """Serialize data and write to console output."""
         serialized = self.packer(data)
-        output = f"{topic}:\t{serialized.decode()}" if topic else serialized.decode()
+        serialized = serialized.decode() if isinstance(serialized, bytes | bytearray) else serialized
+        output = f"{topic}:\t{serialized}" if topic else serialized
         print(output)  # noqa: T201
 
     def __repr__(self) -> str:

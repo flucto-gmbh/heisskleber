@@ -6,8 +6,12 @@ MQTT implementation is achieved via the `aiomqtt`_ package, which is an async wr
 .. _paho-mqtt: https://github.com/eclipse/paho.mqtt.python
 """
 
+from heisskleber.core import register
+
 from .config import MqttConf
 from .receiver import MqttReceiver
 from .sender import MqttSender
+
+register("mqtt", MqttSender, MqttReceiver, MqttConf)
 
 __all__ = ["MqttConf", "MqttReceiver", "MqttSender"]

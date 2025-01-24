@@ -54,6 +54,7 @@ class SerialSender(Sender[T]):
             await self.start()
 
         payload = self.packer(data)
+        payload = payload.encode() if isinstance(payload, str) else payload
         try:
             await asyncio.get_running_loop().run_in_executor(self._executor, self._ser.write, payload)
             await asyncio.get_running_loop().run_in_executor(self._executor, self._ser.flush)

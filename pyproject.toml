@@ -17,6 +17,7 @@ dependencies= [
     "pyserial>=3.5",
     "pyyaml>=6.0.2",
     "pyzmq>=26.2.0",
+    "watchfiles>=0.24.0",
 ]
 
 [project.urls]
@@ -33,6 +34,7 @@ test = [
     "coverage[toml]>=7.6.1",
     "xdoctest>=1.2.0",
     "pytest-asyncio>=0.24.0",
+    "freezegun>=1.5.1",
 ]
 docs = [
     "furo>=2024.8.6",
@@ -60,6 +62,8 @@ dev-dependencies = [
     "coverage[toml]>=7.6.1",
     "pytest-asyncio>=0.24.0",
     "pre-commit>=4.0.1",
+    "types-aiofiles>=24.1.0.20241221",
+    "freezegun>=1.5.1",
 ]
 package = true
 
@@ -85,7 +89,7 @@ show_error_context = true
 exclude = ["tests/*", "^test_*\\.py"]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 120
 fix = true
 
@@ -110,7 +114,9 @@ ignore = [
   "COM812",
   "ISC001",
   "ARG001",
-  "INP001"
+  "INP001",
+  "TRY003", # Avoid specifying long messages in Exceptions
+  "EM101",  # Exceptions must not use string literal
 ]
 
 [tool.ruff.lint.pydocstyle]

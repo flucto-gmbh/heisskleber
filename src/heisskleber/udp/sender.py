@@ -81,6 +81,7 @@ class UdpSender(Sender[T]):
         """
         await self._ensure_connection()  # we know that self._transport is intialized
         payload = self.pack(data)
+        payload = payload.encode() if isinstance(payload, str) else payload
         self._transport.sendto(payload)  # type: ignore [union-attr]
 
     def __repr__(self) -> str:

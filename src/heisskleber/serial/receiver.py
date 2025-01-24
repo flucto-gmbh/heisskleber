@@ -25,9 +25,9 @@ class SerialReceiver(Receiver[T]):
 
     """
 
-    def __init__(self, config: SerialConf, unpack: Unpacker[T]) -> None:
+    def __init__(self, config: SerialConf, unpacker: Unpacker[T]) -> None:
         self.config = config
-        self.unpacker = unpack
+        self.unpacker = unpacker
         self._loop = asyncio.get_running_loop()
         self._executor = ThreadPoolExecutor(max_workers=2)
         self._lock = asyncio.Lock()
