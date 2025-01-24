@@ -391,7 +391,6 @@ wheels = [
 
 [[package]]
 name = "heisskleber"
-version = "1.0.3.dev3"
 source = { editable = "." }
 dependencies = [
     { name = "aiomqtt" },
@@ -417,6 +416,7 @@ filter = [
 ]
 test = [
     { name = "coverage", extra = ["toml"] },
+    { name = "freezegun" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -443,6 +443,7 @@ dev = [
 requires-dist = [
     { name = "aiomqtt", specifier = ">=2.3.0" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = ">=7.6.1" },
+    { name = "freezegun", marker = "extra == 'test'", specifier = ">=1.5.1" },
     { name = "furo", marker = "extra == 'docs'", specifier = ">=2024.8.6" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4.0.0" },
     { name = "numpy", marker = "extra == 'filter'", specifier = ">=2.1.1" },

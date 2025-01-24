@@ -40,7 +40,7 @@ class FileWriter(Sender[T]):
     def __init__(
         self,
         config: FileConf,
-        packer: Packer[T] = json_packer,  # type: ignore[assignment]
+        packer: Packer[T] | None = None,
         header_func: Callable[[T], list[str]] | None = None,
     ) -> None:
         """Initialize the file writer.
@@ -52,8 +52,8 @@ class FileWriter(Sender[T]):
         """
         self.base_path = Path(config.directory)
         self.config = config
-        self.header_func = header_func
-        self.packer = packer
+        self.packer = packer or config.packer  # type: ignore [assignment]
+        self.header_func = header_func or config.header
 
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._loop = asyncio.get_running_loop()
