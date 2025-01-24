@@ -26,7 +26,7 @@ def retry(
                 except catch as e:
                     if logger_fn:
                         logger_fn(
-                            "Error occurred: %(err). Retrying in %(seconds) seconds",
+                            "Error occurred: %(err)s. Retrying in %(seconds)s seconds",
                             {"err": e, "seconds": every},
                         )
                     retries += 1
