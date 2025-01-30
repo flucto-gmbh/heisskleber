@@ -73,7 +73,9 @@ async def test_file_writer_rollover(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_file_writer_rollover_natural(tmp_path: Path) -> None:
     """Test file rollover functionality."""
-    config = FileConf(rollover=2, name_fmt="%Y%m%d_%H%M%s.txt", directory=str(tmp_path))  # 2 second rollover
+    config = FileConf(
+        rollover=2, name_fmt="%Y%m%d_%H%M%s.txt", directory=str(tmp_path), batch_interval=1
+    )  # 2 second rollover
     writer: FileWriter[dict[str, Any]] = FileWriter(config)
 
     await writer.start()

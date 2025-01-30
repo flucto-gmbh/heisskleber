@@ -67,8 +67,7 @@ class FileWriter(Sender[T]):
         self._background_task: asyncio.Task[None] | None = None
         self._last_rollover = 0.0
         self._file_lock = asyncio.Lock()
-        self._batch_size = 100
-        self._batch_interval = 1
+        self._batch_interval = self.config.batch_interval
 
     async def _open_file(self, filename: Path) -> TextIOWrapper:
         """Open file asynchronously."""
