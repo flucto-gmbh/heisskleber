@@ -29,6 +29,9 @@ autodoc_type_aliases = {
     "T_contra": "heisskleber.core.T_contra",
 }
 
+intersphinx_mapping = {"aiomqtt": ("https://aiomqtt.bo3hm.com/", None), "python": ("https://docs.python.org/3", None)}
+
+
 # If you're using typing.TypeVar in your code:
 nitpicky = True
 nitpick_ignore = [
