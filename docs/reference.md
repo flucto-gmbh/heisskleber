@@ -3,10 +3,10 @@
 ## Baseclasses
 
 ```{eval-rst}
-.. autoclass:: heisskleber.core.AsyncSink
+.. autoclass:: heisskleber.Sender
    :members:
 
-.. autoclass:: heisskleber.core.AsyncSource
+.. autoclass:: heisskleber.Receiver
    :members:
 ```
 
@@ -18,10 +18,6 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 .. autoclass:: heisskleber.core::Packer
 
 .. autoclass:: heisskleber.core::Unpacker
-
-.. autoclass:: heisskleber.core.unpacker::JSONUnpacker
-
-.. autoclass:: heisskleber.core.packer::JSONPacker
 ```
 
 ### Errors
@@ -40,10 +36,10 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 .. automodule:: heisskleber.mqtt
     :no-members:
 
-.. autoclass:: heisskleber.mqtt.MqttSink
+.. autoclass:: heisskleber.mqtt.MqttSender
     :members: send
 
-.. autoclass:: heisskleber.mqtt.MqttSource
+.. autoclass:: heisskleber.mqtt.MqttReceiver
     :members: receive, subscribe
 
 .. autoclass:: heisskleber.mqtt.MqttConf
@@ -57,12 +53,12 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.zmq::ZmqSink
+.. autoclass:: heisskleber.zmq::ZmqSender
    :members: send
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.zmq::ZmqSource
+.. autoclass:: heisskleber.zmq::ZmqReceiver
    :members: receive
 ```
 
@@ -73,12 +69,12 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.serial::SerialSink
+.. autoclass:: heisskleber.serial::SerialSender
    :members: send
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.serial::SerialSource
+.. autoclass:: heisskleber.serial::SerialReceiver
    :members: receive
 ```
 
@@ -89,12 +85,12 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.tcp::TcpSink
+.. autoclass:: heisskleber.tcp::TcpSender
    :members: send
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.tcp::TcpSource
+.. autoclass:: heisskleber.tcp::TcpReceiver
    :members: receive
 ```
 
@@ -105,11 +101,27 @@ See <project:serialization.md> for a tutorial on how to implement custom packer 
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.udp::UdpSink
+.. autoclass:: heisskleber.udp::UdpSender
    :members: send
 ```
 
 ```{eval-rst}
-.. autoclass:: heisskleber.udp::UdpSource
+.. autoclass:: heisskleber.udp::UdpReceiver
+   :members: receive
+```
+
+### File
+
+```{eval-rst}
+.. autoclass:: heisskleber.file::FileConf
+```
+
+```{eval-rst}
+.. autoclass:: heisskleber.file::FileWriter
+   :members: send
+```
+
+```{eval-rst}
+.. autoclass:: heisskleber.file::FileReader
    :members: receive
 ```
