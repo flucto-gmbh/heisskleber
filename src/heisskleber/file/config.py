@@ -62,6 +62,7 @@ class FileConf(BaseConf):
 
     rollover: int = 3600
     name_fmt: str = "%Y%m%d_%h%M%s.txt"
+    batch_interval: int = 5
     directory: str = "./"
     watchfile: str = ""
     format: str = "json"

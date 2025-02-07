@@ -2,6 +2,7 @@
 
 from heisskleber.console import ConsoleReceiver, ConsoleSender
 from heisskleber.core import Receiver, Sender
+from heisskleber.file import FileConf, FileReader, FileWriter
 from heisskleber.mqtt import MqttConf, MqttReceiver, MqttSender
 from heisskleber.serial import SerialConf, SerialReceiver, SerialSender
 from heisskleber.tcp import TcpConf, TcpReceiver, TcpSender
@@ -12,6 +13,10 @@ __all__ = [
     "ConsoleReceiver",
     # console
     "ConsoleSender",
+    # file
+    "FileConf",
+    "FileReader",
+    "FileWriter",
     # mqtt
     "MqttConf",
     "MqttReceiver",
