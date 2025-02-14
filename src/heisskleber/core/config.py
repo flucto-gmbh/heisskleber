@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, TextIO, TypeVar, Union
+from typing import Any, Literal, TextIO, TypeVar, Union, get_args, get_origin
 
 import yaml  # type: ignore[import-untyped]
 
@@ -48,6 +48,16 @@ def _parser(path: Path) -> dict[str, Any]:
         raise ValueError
 
 
+def _check_type(value: Any, expected_type: Any) -> bool:
+    origin = get_origin(expected_type)
+    if origin is Literal:  # Explicitly check literal
+        if value not in get_args(expected_type):
+            logger.exception("%s is not part of %s", value, get_args(expected_type))
+            raise TypeError
+        return True
+    return isinstance(value, expected_type)
+
+
 @dataclass
 class BaseConf:
     """Default configuration class for generic configuration info."""
@@ -58,13 +68,11 @@ class BaseConf:
             value = getattr(self, field.name)
             if value is None:  # Allow optional fields
                 continue
-            if not isinstance(value, field.type):  # Failed field comparison
-                raise TypeError
-            if (  # Failed Union comparison
-                hasattr(field.type, "__origin__")
-                and field.type.__origin__ is Union
-                and not any(isinstance(value, t) for t in field.type.__args__)
-            ):
+            if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
+                if not any(_check_type(value, t) for t in field.type.__args__):
+                    raise TypeError
+                continue
+            if not _check_type(value, field.type):  # Failed field comparison
                 raise TypeError
 
     @classmethod
