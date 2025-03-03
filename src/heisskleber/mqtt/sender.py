@@ -4,6 +4,7 @@ import asyncio
 import logging
 import ssl
 from asyncio import CancelledError, create_task
+from collections import deque
 from typing import Any, TypeVar
 
 import aiomqtt
@@ -17,6 +18,8 @@ T = TypeVar("T")
 
 
 logger = logging.getLogger("heisskleber.mqtt")
+
+MQTT_TLS_PORT = 8883
 
 
 class MqttSender(Sender[T]):
@@ -34,7 +37,7 @@ class MqttSender(Sender[T]):
     def __init__(self, config: MqttConf, packer: Packer[T] = json_packer) -> None:  # type: ignore[assignment]
         self.config = config
         self.packer = packer
-        self._send_queue: asyncio.Queue[tuple[Payload, str]] = asyncio.Queue()
+        self._send_queue: deque[tuple[Payload, str, int, bool]] = deque(maxlen=config.max_saved_messages)
         self._sender_task: asyncio.Task[None] | None = None
 
     async def send(self, data: T, topic: str = "mqtt", qos: int = 0, retain: bool = False, **kwargs: Any) -> None:
@@ -55,7 +58,7 @@ class MqttSender(Sender[T]):
             await self.start()
 
         payload = self.packer(data)
-        await self._send_queue.put((payload, topic))
+        self._send_queue.append((payload, topic, qos, retain))
 
     @retry(every=5, catch=aiomqtt.MqttError, logger_fn=logger.exception)
     async def _send_work(self) -> None:
@@ -68,7 +71,7 @@ class MqttSender(Sender[T]):
                 tls_version=ssl.PROTOCOL_TLS,
                 ciphers=None,
             )
-            if self.config.ssl or self.config.port == 8883  # noqa: PLR2004
+            if self.config.ssl or self.config.port == MQTT_TLS_PORT
             else None
         )
 
@@ -84,12 +87,12 @@ class MqttSender(Sender[T]):
         ) as client:
             try:
                 while True:
-                    payload, topic = await self._send_queue.get()
-                    await client.publish(topic=topic, payload=payload)
+                    payload, topic, qos, retain = self._send_queue.pop()
+                    await client.publish(topic=topic, payload=payload, qos=qos, retain=retain)
             except CancelledError:
                 logger.info("MqttSink background loop cancelled. Emptying queue...")
-                while not self._send_queue.empty():
-                    _ = self._send_queue.get_nowait()
+                while len(self._send_queue):
+                    _ = self._send_queue.pop()
                 raise
 
     def __repr__(self) -> str:
