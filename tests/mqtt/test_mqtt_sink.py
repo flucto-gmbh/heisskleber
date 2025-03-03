@@ -66,12 +66,12 @@ async def test_mqtt_max_queue_size() -> None:
     for v in ["first", "second", "third"]:
         await sink.send({"value": v}, topic="test")
 
-    assert len(sink._send_queue) == 2
+    assert sink._send_queue.qsize() == 2
 
-    third_value, _, _, _ = sink._send_queue.pop()
-    second_value, _, _, _ = sink._send_queue.pop()
+    second_value, _, _, _ = sink._send_queue.get_nowait()
+    third_value, _, _, _ = sink._send_queue.get_nowait()
 
     assert json.loads(third_value)["value"] == "third"
     assert json.loads(second_value)["value"] == "second"
 
-    assert len(sink._send_queue) == 0
+    assert sink._send_queue.empty()
