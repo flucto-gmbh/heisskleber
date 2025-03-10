@@ -83,6 +83,8 @@ class SerialSender(Sender[T]):
             stopbits=self.config.stopbits,
         )
 
+        self._is_connected = True
+
     async def stop(self) -> None:
         """Close serial connection."""
         self._ser.close()
