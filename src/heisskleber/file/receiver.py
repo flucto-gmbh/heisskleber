@@ -72,7 +72,7 @@ class FileReader(Receiver[T]):
         if self._current_file is not None:
             await self._loop.run_in_executor(self._executor, self._current_file.close)
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T, dict[str, Any]]:
         """Get the next data and extra tuple from the watched file."""
         return await anext(self._iter)
 

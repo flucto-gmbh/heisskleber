@@ -54,7 +54,7 @@ class MqttReceiver(Receiver[T]):
         self._message_queue: Queue[Message] = Queue(self.config.max_saved_messages)
         self._listener_task: Task[None] | None = None
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T, dict[str, Any]]:
         """Receive and process the next message from the queue.
 
         Returns:

@@ -28,7 +28,7 @@ class ConsoleReceiver(Receiver[T]):
             data, extra = self.unpacker(payload)
             await self.queue.put((data, extra))
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T, dict[str, Any]]:
         """Receive the next message from the console input."""
         if not self.task:
             self.task = asyncio.create_task(self._listener_task())

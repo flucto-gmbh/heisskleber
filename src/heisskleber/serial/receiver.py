@@ -34,11 +34,15 @@ class SerialReceiver(Receiver[T]):
         self._is_connected = False
         self._cancel_read_timeout = 1
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, eof_char: bytes = b"\n", read_bytes: int = -1, **kwargs: Any) -> tuple[T, dict[str, Any]]:  # noqa: D417
         """Receive data from the serial port.
 
         This method reads a line from the serial port, unpacks it, and returns the data.
         If the serial port is not connected, it will attempt to connect first.
+
+        Arguments:
+            eof_char: Line termination character that signals the message end.
+            read_bytes: Number of bytes to read. Defaults to -1, i.e. infinite.
 
         Returns:
             tuple[T, dict[str, Any]]: A tuple containing the unpacked data and any extra information.
@@ -51,7 +55,9 @@ class SerialReceiver(Receiver[T]):
             await self.start()
 
         try:
-            payload = await asyncio.get_running_loop().run_in_executor(self._executor, self._ser.readline, -1)
+            payload = await asyncio.get_running_loop().run_in_executor(
+                self._executor, self._ser.read_until, eof_char, read_bytes
+            )
         except asyncio.CancelledError:
             await asyncio.shield(self._cancel_read())
             raise

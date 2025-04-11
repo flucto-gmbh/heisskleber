@@ -31,7 +31,7 @@ class ZmqReceiver(Receiver[T]):
         self.unpack = unpacker
         self.is_connected = False
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T, dict[str, Any]]:
         """Read a message from the zmq bus and return it.
 
         Returns:

@@ -31,7 +31,7 @@ class Receiver(ABC, Generic[T_co]):
     unpacker: Unpacker[T_co]
 
     @abstractmethod
-    async def receive(self) -> tuple[T_co, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T_co, dict[str, Any]]:
         """Receive data from the implemented input stream.
 
         Returns:
