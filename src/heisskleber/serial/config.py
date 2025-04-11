@@ -25,5 +25,5 @@ class SerialConf(BaseConf):
     baudrate: int = 9600
     bytesize: int = 8
     encoding: str = "ascii"
-    parity: str = "N"  # definitions from serial.PARTITY_'N'ONE / 'O'DD / 'E'VEN
-    stopbits: int = 1  # 1.5 not yet implemented
+    parity: Literal["N", "O", "E"] = "N"  # definitions from serial.PARTITY_'N'ONE / 'O'DD / 'E'VEN
+    stopbits: Literal[1, 2] = 1 # 1.5 not yet implemented
