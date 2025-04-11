@@ -26,4 +26,4 @@ class SerialConf(BaseConf):
     bytesize: int = 8
     encoding: str = "ascii"
     parity: Literal["N", "O", "E"] = "N"  # definitions from serial.PARTITY_'N'ONE / 'O'DD / 'E'VEN
-    stopbits: Literal[1, 2] = 1 # 1.5 not yet implemented
+    stopbits: Literal[1, 2] = 1  # 1.5 not yet implemented
