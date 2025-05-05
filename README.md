@@ -23,9 +23,8 @@ Heisskleber is a versatile library designed to seamlessly "glue" together variou
 
 ## Features
 
-- Multiple Protocol Support: Easy integration with zmq, mqtt, udp, serial, influxdb, and cmdline. Future plans include REST API and file operations.
-- Custom Data Handling: Customizable "unpack" and "pack" functions allow for the translation of any data format (e.g., ascii encoded, comma-separated messages from a serial bus) into dictionaries for easy manipulation and transmission.
-- Synchronous & Asynchronous Versions: Cater to different programming needs and scenarios with both sync and async interfaces.
+- Multiple Protocol Support: Easy integration with zmq, mqtt, udp, serial, and cmdline. Future plans include REST API and file operations.
+- Custom Data Handling: Customizable "unpacker" and "packer" functions allow for the translation of any data format (e.g., ascii encoded, comma-separated messages from a serial bus) into dictionaries for easy manipulation and transmission.
 - Extensible: Designed for easy extension with additional protocols and data handling functions.
 
 ## Installation
@@ -36,55 +35,34 @@ You can install _Heisskleber_ via [pip] from [PyPI]:
 $ pip install heisskleber
 ```
 
-Configuration files for zmq, mqtt and other heisskleber related settings should be placed in the user's config directory, usually `$HOME/.config`. Config file templates can be found in the `config`
-directory of the package.
-
 ## Quick Start
 
 Here's a simple example to demonstrate how Heisskleber can be used to connect a zmq source to an mqtt sink:
 
 ```python
 """
-A simple forwarder that takes messages from
+A simple forwarder that takes messages from a serial device and publishes them via MQTT.
 """
+import asyncio
 
 from heisskleber.serial import SerialSubscriber, SerialConf
 from heisskleber.mqtt import MqttPublisher, MqttConf
 
-source = SerialSubscriber(config=SerialConf(port="/dev/ACM0"))
-sink = MqttPublisher(config=MqttConf(host="127.0.0.1", port=1883, user="", password=""))
 
-while True:
-    topic, data = source.receive()
-    sink.send(data, topic="/hostname/" + topic)
+async def main():
+  source = SerialSubscriber(config=SerialConf(port="/dev/ACM0", baudrate=9600))
+  sink = MqttPublisher(config=MqttConf(host="mqtt.example.com", port=1883, user="", password=""))
+
+  while True:
+      data, metadata = await source.receive()
+      await sink.send(data, topic="/hotglue/" + metadata.get("topic", "serial"))
+
+asyncio.run(main())
 ```
 
-All sources and sinks come with customizable "unpack" and "pack" functions, making it simple to work with various data formats.
-
-It is also possible to do configuration via yaml files, placed at `$HOME/.config/heisskleber` and named according to the protocol in question.
+All sources and sinks come with customizable "unpacker" and "packer" functions, making it simple to work with various data formats.
 
 See the [documentation][read the docs] for detailed usage.
-
-## Development
-
-1. Install poetry
-
-```
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-2. clone repository
-
-```
-git clone https://github.com/flucto-gmbh/heisskleber.git
-cd heisskleber
-```
-
-3. setup
-
-```
-make install
-```
 
 ## License
 
