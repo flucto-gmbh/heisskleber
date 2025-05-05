@@ -36,7 +36,7 @@ class MqttConf(BaseConf):
     password: str = ""
     qos: int = 0
     retain: bool = False
-    max_saved_messages: int = 100
+    max_saved_messages: int = 1000
     timeout: int = 60
     keep_alive: int = 60
     will: Will | None = None

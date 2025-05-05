@@ -1,18 +1,12 @@
-[build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
-
 [project]
 name = "heisskleber"
 description = "Heisskleber"
-authors = [
-  { name = "Felix Weiler-Detjen", email = "felix@flucto.tech" },
-]
-license = {file = "LICENSE"}
+authors = [{ name = "Felix Weiler-Detjen", email = "felix@flucto.tech" }]
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 dynamic = ["version"]
-dependencies= [
+dependencies = [
     "aiomqtt>=2.3.0",
     "pyserial>=3.5",
     "pyyaml>=6.0.2",
@@ -24,7 +18,6 @@ dependencies= [
 Homepage = "https://github.com/flucto-gmbh/heisskleber"
 Repository = "https://github.com/flucto-gmbh/heisskleber"
 Documentation = "https://heisskleber.readthedocs.io"
-
 
 
 [project.optional-dependencies]
@@ -45,10 +38,6 @@ docs = [
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
 ]
-filter = [
-    "numpy>=2.1.1",
-    "scipy>=1.14.1",
-]
 
 [tool.uv]
 dev-dependencies = [
@@ -64,6 +53,7 @@ dev-dependencies = [
     "pre-commit>=4.0.1",
     "types-aiofiles>=24.1.0.20241221",
     "freezegun>=1.5.1",
+    "types-pyyaml>=6.0.12.20250402",
 ]
 package = true
 
@@ -94,29 +84,56 @@ line-length = 120
 fix = true
 
 [tool.ruff.lint]
-select = ["ALL"]
+select = [
+    "I",     # isort
+    "B",     # bugbear
+    "A",     # builtins
+    "ASYNC", # async
+    "ANN",   # annotations
+    "S",     # bandit
+    "BLE",   # blind-exception
+    "COM",   # commas
+    "C4",    # comprehensions
+    "INT",   # gettext
+    "G",     # logging-format
+    "T20",   # print
+    "PYI",   # pyi
+    "PT",    # pytest-style
+    "Q",     # quotes
+    "SIM",   # simplify
+    "TC",    # type-checking
+    "ARG",   # unsued-arguments
+    "PTH",   # use-pathlib
+    "C90",   # complexity
+    "N",     # pep8-naming
+    "PERF",  # perf-lint
+    "E",     # pycodestyle - error
+    "W",     # pycodestyle - warning
+    "D",     # pydocstyle
+    "F",     # pyflakes
+    "UP",    # pyupgrade
+    "RUF",   # ruff
+    "FURB",  # refurb
+    "TRY",   # tryceratops
+    "PLR",   # refactor
+
+]
 ignore = [
-  "E501",   # LineTooLong
-  "E731",   # DoNotAssignLambda
-  "A001",   #
-  "D100",   # Missing module docstring
-  "D104",   # Missing package docstring
-  "D107",   # Missing __init__ docstring
-  "ANN101", # Deprecated and stupid self annotation
-  "ANN401", # Dynamically typed annotation
-  "FA102",  # Missing from __future__ import annotations
-  "FBT001", # boolean style argument in function definition
-  "FBT002", # boolean style argument in function definition
-  "ARG002", # Unused kwargs
-  "TD002",
-  "TD003",
-  "FIX002",
-  "COM812",
-  "ISC001",
-  "ARG001",
-  "INP001",
-  "TRY003", # Avoid specifying long messages in Exceptions
-  "EM101",  # Exceptions must not use string literal
+    "E501",   # LineTooLong
+    "E731",   # DoNotAssignLambda
+    "A001",   #
+    "D100",   # Missing module docstring
+    "D104",   # Missing package docstring
+    "D107",   # Missing __init__ docstring
+    "ANN401", # Dynamically typed annotation
+    "FA102",  # Missing from __future__ import annotations
+    "FBT001", # boolean style argument in function definition
+    "ARG002", # Unused kwargs
+    "COM812",
+    "ARG001",
+    "INP001",
+    "TRY003", # Avoid specifying long messages in Exceptions
+    "EM101",  # Exceptions must not use string literal
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -124,15 +141,20 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "D", "T201", "PLR2", "SLF001", "ANN"]
-"bin/*" = [
-    "ERA001", # Found commented-out code
-]
 
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "session"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [tool.hatch]
 version.source = "vcs"
 version.path = "src/heisskleber/__init__.py"
-version.raw-options = { local_scheme = "no-local-version" }
+
+[tool.hatch.version.raw_options]
+local_scheme = "no-local-version"
 
 [tool.hatch.envs.default]
 features = ["test"]
