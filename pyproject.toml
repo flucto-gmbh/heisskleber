@@ -53,6 +53,7 @@ dev-dependencies = [
     "pre-commit>=4.0.1",
     "types-aiofiles>=24.1.0.20241221",
     "freezegun>=1.5.1",
+    "types-pyyaml>=6.0.12.20250402",
 ]
 package = true
 
