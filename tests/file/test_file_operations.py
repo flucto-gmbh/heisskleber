@@ -10,10 +10,11 @@ from heisskleber.file import FileConf, FileWriter
 
 
 @pytest.fixture
-def config() -> FileConf:
+def config(tmp_path: Path) -> FileConf:
     return FileConf(
         rollover=3600,  # 1 hour rollover
         name_fmt="%Y%m%d_%H.txt",
+        directory=str(tmp_path),
     )
 
 
