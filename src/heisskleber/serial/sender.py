@@ -24,10 +24,10 @@ class SerialSender(Sender[T]):
         packer: Function to pack data for sending.
     """
 
-    def __init__(self, config: SerialConf, pack: Packer[T]) -> None:
+    def __init__(self, config: SerialConf, packer: Packer[T]) -> None:
         """SerialSink constructor."""
         self.config = config
-        self.packer = pack
+        self.packer = packer
         self._loop = asyncio.get_running_loop()
         self._executor = ThreadPoolExecutor(max_workers=2)
         self._lock = asyncio.Lock()
@@ -82,6 +82,8 @@ class SerialSender(Sender[T]):
             parity=self.config.parity,
             stopbits=self.config.stopbits,
         )
+
+        self._is_connected = True
 
     async def stop(self) -> None:
         """Close serial connection."""

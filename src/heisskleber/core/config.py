@@ -3,9 +3,9 @@
 import logging
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, Literal, TextIO, TypeVar, Union, get_args, get_origin
+from typing import Any, Literal, Self, TextIO, TypeVar, Union, get_args, get_origin
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 logger = logging.getLogger("heisskleber")
 
@@ -76,7 +76,7 @@ class BaseConf:
                 raise TypeError
 
     @classmethod
-    def from_dict(cls: type[ConfigType], config_dict: dict[str, Any]) -> ConfigType:
+    def from_dict(cls, config_dict: dict[str, Any]) -> Self:
         """Create a config instance from a dictionary, including only fields defined in the dataclass.
 
         Arguments:
@@ -125,7 +125,7 @@ class BaseConf:
         return cls(**filtered_dict)
 
     @classmethod
-    def from_file(cls: type[ConfigType], file_path: str | Path) -> ConfigType:
+    def from_file(cls, file_path: str | Path) -> Self:
         """Create a config instance from a file - accepts yaml or json."""
         path = Path(file_path)
         if not path.exists():

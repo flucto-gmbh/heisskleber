@@ -32,7 +32,7 @@ class TcpTestSender:
 
     async def stop(self):
         self.server.close()
-        await self.server.wait_closed()
+        # TODO: Fix this here: await self.server.wait_closed()
 
     def handle_connection(self, _reader, writer):
         self.on_connected(writer)

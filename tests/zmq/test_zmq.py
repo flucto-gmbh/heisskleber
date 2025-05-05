@@ -9,6 +9,7 @@ from heisskleber.zmq import ZmqConf, ZmqSender
 @pytest.mark.asyncio
 async def test_zmq_sink_send() -> None:
     mock_socket = AsyncMock()
+    mock_socket.connect = Mock(return_value=None)
     mock_context = Mock()
     mock_context.socket.return_value = mock_socket
 
