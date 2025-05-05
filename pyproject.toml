@@ -38,7 +38,6 @@ docs = [
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
 ]
-filter = ["numpy>=2.1.1", "scipy>=1.14.1"]
 
 [tool.uv]
 dev-dependencies = [
