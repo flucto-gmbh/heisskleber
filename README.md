@@ -37,7 +37,7 @@ $ pip install heisskleber
 
 ## Quick Start
 
-Here's a simple example to demonstrate how Heisskleber can be used to connect a zmq source to an mqtt sink:
+Here's a simple example to demonstrate how Heisskleber can be used to connect a serial input to an mqtt output:
 
 ```python
 """
@@ -45,8 +45,8 @@ A simple forwarder that takes messages from a serial device and publishes them v
 """
 import asyncio
 
-from heisskleber.serial import SerialSubscriber, SerialConf
-from heisskleber.mqtt import MqttPublisher, MqttConf
+from heisskleber.serial import SerialReceiver, SerialConf
+from heisskleber.mqtt import MqttSender, MqttConf
 
 
 async def main():
