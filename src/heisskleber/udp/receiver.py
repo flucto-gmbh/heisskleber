@@ -60,7 +60,7 @@ class UdpReceiver(Receiver[T]):
             self._transport = None
         self._is_connected = False
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T, dict[str, Any]]:
         """Get the next message from the udp connection.
 
         Returns:

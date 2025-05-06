@@ -24,7 +24,7 @@ class TcpReceiver(Receiver[T]):
         self.reader: asyncio.StreamReader | None = None
         self.writer: asyncio.StreamWriter | None = None
 
-    async def receive(self) -> tuple[T, dict[str, Any]]:
+    async def receive(self, **kwargs: Any) -> tuple[T, dict[str, Any]]:
         """Receive data from a connection.
 
         Attempt to read data from the connection and handle the process of re-establishing the connection if necessary.
