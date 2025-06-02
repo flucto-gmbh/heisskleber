@@ -11,9 +11,9 @@ from heisskleber.zmq import ZmqConf, ZmqReceiver, ZmqSender
 
 __all__ = [
     # console
+    "ConsoleConf",
     "ConsoleReceiver",
     "ConsoleSender",
-    "ConsoleConf",
     # file
     "FileConf",
     "FileReader",
