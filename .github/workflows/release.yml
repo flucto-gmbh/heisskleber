@@ -20,7 +20,7 @@ jobs:
           version: "0.5.10"
 
       - name: Set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
 
       - name: Build dist
         run: uv build
