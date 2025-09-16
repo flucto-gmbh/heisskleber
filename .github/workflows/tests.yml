@@ -28,10 +28,6 @@ jobs:
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --hook-stage manual --all-files
-      - name: Run Ruff
-        run: |
-          pip install ruff
-          ruff check .
 
   tests:
     name: Python ${{ matrix.python-version }} on ${{ matrix.runs-on }}
