@@ -1,8 +1,8 @@
 # Heisskleber
 
 [![PyPI](https://img.shields.io/pypi/v/heisskleber.svg)][pypi status]
-[![Python Version](https://img.shields.io/pypi/pyversions/heisskleber)][pypi status]
-[![License](https://img.shields.io/pypi/l/heisskleber)][license]
+[![Python Version](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fflucto-gmbh%2Fheisskleber%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)][pypi status]
+[![License](https://img.shields.io/github/license/flucto-gmbh/heisskleber)][license]
 
 [![Read the documentation at https://heisskleber.readthedocs.io/](https://img.shields.io/readthedocs/heisskleber/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/flucto-gmbh/heisskleber/workflows/Tests/badge.svg)][tests]
@@ -19,20 +19,26 @@
 
 🇩🇪Heißkleber _m_: "hot glue".
 
-Heisskleber is a versatile library designed to seamlessly "glue" together various data producers and consumers across a multitude of protocols including zmq, mqtt, udp, serial, influxdb, and cmdline. With the ambition to extend into REST API interactions and file operations, Heisskleber offers both synchronous and asynchronous interfaces to cater to a wide range of IoT connectivity needs.
+Heisskleber is a versatile library designed to seamlessly "glue" together various
+data producers and consumers across a multitude of protocols
+including **zmq**, **mqtt**, **udp**, **serial**, **files** and **cmdline**.
+Heisskleber offers asynchronous interfaces for a wide range of IoT connectivity needs.
 
 ## Features
 
-- Multiple Protocol Support: Easy integration with zmq, mqtt, udp, serial, and cmdline. Future plans include REST API and file operations.
-- Custom Data Handling: Customizable "unpacker" and "packer" functions allow for the translation of any data format (e.g., ascii encoded, comma-separated messages from a serial bus) into dictionaries for easy manipulation and transmission.
+- Multiple Protocol Support: Easy integration with zmq, mqtt, udp, serial, and cmdline.
+- Custom Data Handling: Customizable `unpacker` and `packer` functions allow for the translation of any data format
+(e.g., ascii encoded, comma-separated messages from a serial bus) into user defined objects (dataclasses, pydantic classes... default: dictionaries)
+for easy manipulation and transmission.
 - Extensible: Designed for easy extension with additional protocols and data handling functions.
+- Modern type hints
 
 ## Installation
 
 You can install _Heisskleber_ via [pip] from [PyPI]:
 
 ```console
-$ pip install heisskleber
+pip install heisskleber
 ```
 
 ## Quick Start
@@ -55,7 +61,7 @@ async def main():
 
   while True:
       data, metadata = await source.receive()
-      await sink.send(data, topic="/hotglue/" + metadata.get("topic", "serial"))
+      await sink.send(data, topic=f"hotglue/{metadata.get("topic", "serial")}")
 
 asyncio.run(main())
 ```
@@ -77,9 +83,6 @@ please [file an issue] along with a detailed description.
 [pip]: https://pip.pypa.io/
 [file an issue]: https://github.com/flucto-gmbh/heisskleber/issues
 [pypi]: https://pypi.org/
-
 <!-- github-only -->
 
 [license]: https://github.com/flucto-gmbh/heisskleber/blob/main/LICENSE
-[contributor guide]: https://github.com/flucto-gmbh/heisskleber/blob/main/CONTRIBUTING.md
-[command-line reference]: https://heisskleber.readthedocs.io/en/latest/usage.html
