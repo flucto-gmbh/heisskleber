@@ -32,7 +32,8 @@ class TcpTestSender:
 
     async def stop(self):
         self.server.close()
-        # TODO: Fix this here: await self.server.wait_closed()
+        self.server.close_clients()
+        await self.server.wait_closed()
 
     def handle_connection(self, _reader, writer):
         self.on_connected(writer)
@@ -145,7 +146,8 @@ async def test_04_connects_to_socket(mock_conf, caplog, sender) -> None:
 
 
 @pytest.mark.asyncio
-async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
+async def test_05_connection_to_server_lost(mock_conf) -> None:
+    sender = TcpTestSender() # fixture creates errors during the test for some reason
     def test_steps():
         # First connection: close it
         writer = yield
@@ -169,6 +171,7 @@ async def test_05_connection_to_server_lost(mock_conf, sender) -> None:
     data = await source.receive()
     _check_data(data, "OK after second connect")
     await source.stop()
+    await sender.stop()
 
 
 @pytest.mark.asyncio

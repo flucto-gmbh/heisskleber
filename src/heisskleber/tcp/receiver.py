@@ -64,6 +64,10 @@ class TcpReceiver(Receiver[T]):
         """Stop TcpSource."""
         if self.is_connected:
             logger.info("%(self)s stopping", {"self": self})
+            self.writer.close()
+            await self.writer.wait_closed()
+            self.is_connected = False
+
 
     async def _ensure_connected(self) -> None:
         if self.is_connected:
