@@ -1,7 +1,6 @@
 #  a sink interface that POSTs data
 import asyncio
 import logging
-import sys
 from typing import Any, TypeVar
 
 import aiohttp
@@ -10,7 +9,6 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
 from heisskleber.core import Packer, Sender
-from heisskleber.core.packer import JSONPacker
 from heisskleber.http.config import HTTPConf
 
 __all__ = ["GETSender", "POSTSender"]
@@ -110,56 +108,3 @@ class GETSender(Sender[T]):
                 pass
             finally:
                 self._queue.shutdown(immediate=True)  # type: ignore[attr-defined]
-
-
-async def _try_out_post_sender() -> None:
-    config = HTTPConf(host="localhost", port=8080)
-    sender = POSTSender(config=config, packer=JSONPacker())
-    async with sender:
-        await sender.send(data={"a": "b"})
-
-
-# python -m aiohttp.web -H localhost -P 8080 "heisskleber.http.sender:_debug_app"
-def _debug_server(_: Any) -> web.Application:
-    async def _handler(request: web.Request) -> web.Response:
-        print(request)  # noqa: T201
-        print(await request.read())  # noqa: T201
-        return web.Response()
-
-    app = web.Application()
-    app.router.add_route("*", "/", _handler)
-    return app
-
-
-async def _try_out_get_sender() -> None:
-    config = HTTPConf(host="localhost", port=8080)
-    sender = GETSender(config=config, packer=JSONPacker())
-    async with sender:
-        await sender.send({"a": "b"})
-        await sender._queue.join()
-
-
-# curl --header "Content-Type: application/json" \
-#   --request GET \
-#   http://localhost:8080/?a=b
-
-
-def _main() -> int:
-    print("Select mode:")  # noqa: T201
-    print("(1) PostSender")  # noqa: T201
-    print("(2) GetSender")  # noqa: T201
-    answer = input()
-    match answer:
-        case "1":
-            run = _try_out_post_sender
-        case "2":
-            run = _try_out_get_sender
-        case _:
-            return 1
-
-    asyncio.run(run())
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(_main())

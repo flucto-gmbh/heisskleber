@@ -66,7 +66,10 @@ tests = ["tests", "*/tests"]
 [tool.coverage.run]
 branch = true
 source = ["src/heisskleber"]
-omit = ["tests/*"]
+omit = [
+    "tests/*",
+    "*/_debug.py",
+]
 
 [tool.coverage.report]
 show_missing = true

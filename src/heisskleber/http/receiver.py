@@ -1,7 +1,6 @@
 # a source that returns POSTed data
 import asyncio
 import logging
-import sys
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
@@ -11,7 +10,6 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
 from heisskleber.core import Receiver, Unpacker
-from heisskleber.core.unpacker import JSONUnpacker
 from heisskleber.http.config import HTTPConf
 
 __all__ = ["GETReader", "POSTReader"]
@@ -113,56 +111,3 @@ class GETReader(Receiver[T]):
         """Close the session."""
         if self._session is not None:
             await self._session.close()
-
-
-async def _try_out_post_reader() -> None:
-    config = HTTPConf(host="localhost", port=8080)
-    reader = POSTReader(config=config, unpacker=JSONUnpacker())
-    async with reader:
-        print(await reader.receive())  # noqa: T201
-
-
-# curl --header "Content-Type: application/json" \
-#   --request POST \
-#   --data '{"username":"xyz","password":"xyz"}' \
-#   http://localhost:8080/
-
-
-async def _try_out_get_reader() -> None:
-    config = HTTPConf(host="localhost", port=8080)
-    reader = GETReader(config=config, unpacker=JSONUnpacker())
-    async with reader:
-        print(await reader.receive(params={"a": "b"}))  # noqa: T201
-
-
-# python -m aiohttp.web -H localhost -P 8080 "heisskleber.http.receiver:_debug_app"
-def _debug_server(_: Any) -> web.Application:
-    async def _handler(request: web.Request) -> web.Response:
-        print(request)  # noqa: T201
-        print(await request.read())  # noqa: T201
-        return web.json_response({"Hello": "World"}, status=200)
-
-    app = web.Application()
-    app.router.add_route("*", "/", _handler)
-    return app
-
-
-def _main() -> int:
-    print("Select mode:")  # noqa: T201
-    print("(1) PostReader")  # noqa: T201
-    print("(2) GetReader")  # noqa: T201
-    answer = input()
-    match answer:
-        case "1":
-            run = _try_out_post_reader
-        case "2":
-            run = _try_out_get_reader
-        case _:
-            return 1
-
-    asyncio.run(run())
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(_main())
