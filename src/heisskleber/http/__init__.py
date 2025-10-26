@@ -1,5 +1,5 @@
 from .config import HTTPConf
-from .receiver import POSTReader
-from .sender import POSTSender
+from .receiver import GETReader, POSTReader
+from .sender import GETSender, POSTSender
 
-__all__ = ["HTTPConf", "POSTReader", "POSTSender"]
+__all__ = ["GETReader", "GETSender", "HTTPConf", "POSTReader", "POSTSender"]
