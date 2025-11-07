@@ -11,6 +11,7 @@ from aiohttp.web_response import Response
 
 from heisskleber.core import Receiver, Unpacker
 from heisskleber.http.config import HTTPConf
+from heisskleber.http.util import QueueShutDown, _shutdown_queue
 
 __all__ = ["GETReader", "POSTReader"]
 
@@ -44,7 +45,7 @@ class POSTReader(Receiver[T]):
             self._queue.put_nowait(data)
         except asyncio.queues.QueueFull:
             return web.Response(text="Queue is full. Try again later.", status=507)
-        except asyncio.queues.QueueShutDown:  # type: ignore[attr-defined]
+        except QueueShutDown:
             return web.Response(text="Receiver not ready or already stopped.", status=500)
 
         return web.Response(text="Received data.", status=200)
@@ -74,7 +75,7 @@ class POSTReader(Receiver[T]):
             except asyncio.TimeoutError:
                 pass
             finally:
-                self._queue.shutdown(immediate=True)  # type: ignore[attr-defined]
+                _shutdown_queue(self._queue, immediate=True)
 
 
 class GETReader(Receiver[T]):

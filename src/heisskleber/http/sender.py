@@ -10,6 +10,7 @@ from aiohttp.web_response import Response
 
 from heisskleber.core import Packer, Sender
 from heisskleber.http.config import HTTPConf
+from heisskleber.http.util import QueueShutDown, _shutdown_queue
 
 __all__ = ["GETSender", "POSTSender"]
 
@@ -75,7 +76,7 @@ class GETSender(Sender[T]):
             self._queue.task_done()
         except asyncio.queues.QueueEmpty:
             return web.Response(text="No data available.", status=500)
-        except asyncio.queues.QueueShutDown:  # type: ignore[attr-defined]
+        except QueueShutDown:
             return web.Response(text="Sender not ready or already stopped.", status=500)
 
         if isinstance(data, str):
@@ -107,4 +108,4 @@ class GETSender(Sender[T]):
             except asyncio.TimeoutError:
                 pass
             finally:
-                self._queue.shutdown(immediate=True)  # type: ignore[attr-defined]
+                _shutdown_queue(self._queue, immediate=True)
