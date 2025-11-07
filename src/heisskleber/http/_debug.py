@@ -50,18 +50,24 @@ async def debug_post_sender() -> None:
         await sender.send(data={"a": "b"})
 
 
+_GET_SENDER_CURL = 'curl --header "Content-Type: application/json" --request GET  "http://localhost:8080/"'
+
+
 async def debug_get_sender() -> None:
     """Query with e.g. curl:
 
     curl --header "Content-Type: application/json" \
     --request GET \
-    http://localhost:8080/?a=b
+    http://localhost:8080/
     """
     config = HTTPConf(host="localhost", port=8080)
     sender = GETSender(config=config, packer=JSONPacker())
     async with sender:
         await sender.send({"a": "b"})
         await sender._queue.join()
+
+
+_POST_READER_CURL = """curl --header "Content-Type: application/json" --request POST --data '{"username":"xyz","password":"xyz"}' http://localhost:8080/"""
 
 
 async def debug_post_reader() -> None:
@@ -95,12 +101,10 @@ def main() -> int:
             run = debug_post_sender
         case "3":
             run = debug_get_sender
-            print('curl --header "Content-Type: application/json" --request GET  "http://localhost:8080/?a=b"')
+            print(_GET_SENDER_CURL)
         case "4":
             run = debug_post_reader
-            print(
-                """curl --header "Content-Type: application/json" --request POST --data '{"username":"xyz","password":"xyz"}' http://localhost:8080/"""
-            )
+            print(_POST_READER_CURL)
         case _:
             return 1
 
