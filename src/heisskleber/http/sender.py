@@ -9,8 +9,8 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
 from heisskleber.core import Packer, Sender
+from heisskleber.http._compat import QueueShutDown, shutdown_queue
 from heisskleber.http.config import HTTPConf
-from heisskleber.http.util import QueueShutDown, _shutdown_queue
 
 __all__ = ["GETSender", "POSTSender"]
 
@@ -108,4 +108,4 @@ class GETSender(Sender[T]):
             except asyncio.TimeoutError:
                 pass
             finally:
-                _shutdown_queue(self._queue, immediate=True)
+                shutdown_queue(self._queue, immediate=True)

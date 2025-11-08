@@ -10,8 +10,8 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
 from heisskleber.core import Receiver, Unpacker
+from heisskleber.http._compat import QueueShutDown, shutdown_queue
 from heisskleber.http.config import HTTPConf
-from heisskleber.http.util import QueueShutDown, _shutdown_queue
 
 __all__ = ["GETReader", "POSTReader"]
 
@@ -75,7 +75,7 @@ class POSTReader(Receiver[T]):
             except asyncio.TimeoutError:
                 pass
             finally:
-                _shutdown_queue(self._queue, immediate=True)
+                shutdown_queue(self._queue, immediate=True)
 
 
 class GETReader(Receiver[T]):
