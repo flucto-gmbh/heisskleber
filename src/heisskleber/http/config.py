@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from enum import StrEnum
 
 from heisskleber.core import BaseConf
+from heisskleber.http._compat import StrEnum
 
 __all__ = ["HTTPConf"]
 
