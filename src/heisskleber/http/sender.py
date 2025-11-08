@@ -103,8 +103,7 @@ class GETSender(Sender[T]):
         if self._runner is not None:
             await self._runner.cleanup()
             try:
-                async with asyncio.timeout(5):
-                    await self._queue.join()
+                await asyncio.wait_for(self._queue.join(), 5)
             except asyncio.TimeoutError:
                 pass
             finally:
